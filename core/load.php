@@ -12,8 +12,8 @@
  */
 class Load
 {
-	private $undo = array('my_sql' => 'mysql');
-	private $libs = array();
+	private static $undo = array('my_sql' => 'mysql');
+	private static $libs = array();
 	
 	/**
 	 * Library loader
