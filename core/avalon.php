@@ -37,10 +37,10 @@ class Avalon
 		}
 		
 		// Setup the controller and method info
-		$controller_file = APPPATH . '/controllers/' . (Router::nspace() != null ? '/' : '') . '/' . Router::controller() . '_controller.php';
-		$controller_name = Router::controller() . 'Controller';
-		$controller_method = 'action_' . Router::method();
-		$method_args = Router::args();
+		$controller_file = APPPATH . '/controllers/' . (Router::$namespace != null ? '/' : '') . '/' . Router::$controller . '_controller.php';
+		$controller_name = Router::$controller . 'Controller';
+		$controller_method = 'action_' . Router::$method;
+		$method_args = Router::$args;
 		
 		// Check the controller file
 		if (!file_exists($controller_file)) {

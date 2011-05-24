@@ -12,10 +12,10 @@
  */
 class Router
 {
-	private static $namespace;
-	private static $controller;
-	private static $method;
-	private static $args = array();
+	public static $namespace;
+	public static $controller;
+	public static $method;
+	public static $args = array();
 	private static $routes = array();
 	
 	public static function process($request)
@@ -87,31 +87,11 @@ class Router
 		static::$args = $route['params'];
 	}
 	
-	public static function nspace()
-	{
-		return static::$namespace;
-	}
-	
-	public static function controller()
-	{
-		return static::$controller;
-	}
-	
-	public static function method()
-	{
-		return static::$method;
-	}
-	
-	public static function args()
-	{
-		return static::$args;
-	}
-	
 	private static function compile($uri)
 	{
 		$expression = preg_replace('#[.\\+*?[^\\]${}=!|]#', '\\\\$0', $uri);
 		
-		if (strpos($expression, '(') !== FALSE) {
+		if (strpos($expression, '(') !== false) {
 			// Make optional parts of the URI non-capturing and optional
 			$expression = str_replace(array('(', ')'), array('(?:', ')?'), $expression);
 		}
