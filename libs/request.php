@@ -18,7 +18,7 @@ class Request
 	
 	public static function process()
 	{
-		static::$url = trim(static::_get_url(), '/');
+		static::$url = trim(static::_get_uri(), '/');
 		static::$segments = explode('/', trim(static::$url, '/'));
 		static::$requested_with = @$_SERVER['HTTP_X_REQUESTED_WITH'];
 	}
@@ -43,7 +43,7 @@ class Request
 		return strtolower(static::$requested_with) == 'xmlhttprequest';
 	}
 	
-	private static function _get_url()
+	private static function _get_uri()
 	{
 		// Check if there is a PATH_INFO variable
 		// Note: some servers seem to have trouble with getenv()
@@ -76,5 +76,41 @@ class Request
 		
 		// I dont know what else to try, screw it..
 		return '';
+	}
+	
+	private static function _get_uri_other($prefix_slash = false)
+	{
+	    if (isset($_SERVER['PATH_INFO'])) {
+	        $uri = $_SERVER['PATH_INFO'];
+	    } elseif (isset($_SERVER['REQUEST_URI'])) {
+	        $uri = $_SERVER['REQUEST_URI'];
+	        if (strpos($uri, $_SERVER['SCRIPT_NAME']) === 0) {
+	            $uri = substr($uri, strlen($_SERVER['SCRIPT_NAME']));
+	        } elseif (strpos($uri, dirname($_SERVER['SCRIPT_NAME'])) === 0) {
+	            $uri = substr($uri, strlen(dirname($_SERVER['SCRIPT_NAME'])));
+	        }
+	
+	        // This section ensures that even on servers that require the URI to be in the query string (Nginx) a correct
+	        // URI is found, and also fixes the QUERY_STRING server var and $_GET array.
+	        if (strncmp($uri, '?/', 2) === 0) {
+	            $uri = substr($uri, 2);
+	        }
+	        $parts = preg_split('#\?#i', $uri, 2);
+	        $uri = $parts[0];
+	        if (isset($parts[1])) {
+	            $_SERVER['QUERY_STRING'] = $parts[1];
+	            parse_str($_SERVER['QUERY_STRING'], $_GET);
+	        } else {
+	            $_SERVER['QUERY_STRING'] = '';
+	            $_GET = array();
+	        }
+	        $uri = parse_url($uri, PHP_URL_PATH);
+	    } else {
+	        // Couldn't determine the URI, so just return false
+	        return false;
+	    }
+	    
+	    // Do some final cleaning of the URI and return it
+	    return ($prefix_slash ? '/' : '').str_replace(array('//', '../'), '/', trim($uri, '/'));
 	}
 }
