@@ -19,11 +19,15 @@ class View
 	
 	public static function render($file, array $vars = array())
 	{
-		$content = static::_get_view($file, $vars);
+		// Get the view content
+		$content = self::_get_view($file, $vars);
 		
+		// Check if we need to flush or append
 		if(ob_get_level() > self::$ob_level + 1) {
 			ob_end_flush();
-		} else {
+		}
+		// Append it to the output
+		else {
 			Output::append($content);
 			@ob_end_clean();
 		}
@@ -31,34 +35,36 @@ class View
 	
 	public static function get($file, array $vars = array())
 	{
-		$content = static::_get_view($file, $vars, true);
+		// Get the content and clean the buffer
+		$content = self::_get_view($file, $vars, true);
 		ob_end_clean();
 		return $content;
 	}
 	
 	private static function _get_view($_file, array $vars = array())
 	{
-		$_file = static::_view_file_path($_file);
+		// Get the file name/path
+		$_file = self::_view_file_path($_file);
 		
+		// Make sure the ob_level is set
 		if (self::$ob_level === null) {
 			self::$ob_level = ob_get_level();
 		}
 		
+		// Make the set variables accessible
 		foreach (self::$vars as $_var => $_val) {
 			$$_var = $_val;
 		}
 		
-		// Make the given vars accessible.
+		// Make the vars for this view accessible
 		if (count($vars)) {
 			foreach($vars as $_var => $_val)
 				$$_var = $_val;
 		}
 		
-		
-		
+		// Load up the view and get the contents
 		ob_start();
 		include($_file);
-		
 		$content = ob_get_contents();
 		
 		return $content;
@@ -90,7 +96,13 @@ class View
 	
 	public static function set($var, $val)
 	{
-		self::$vars[$var] = $val;
+		if (is_array($var)) {
+			foreach ($var as $vr => $vl) {
+				self::$vars[$vr] = $vl;
+			}
+		} else {
+			self::$vars[$var] = $val;
+		}
 	}
 	
 	public static function vars()
