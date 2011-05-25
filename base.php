@@ -13,4 +13,5 @@ require_once SYSPATH . '/core/avalon.php';
 
 Load::lib('request');
 Load::lib('router');
+Load::lib('output');
 Load::lib('view');

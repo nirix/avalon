@@ -40,6 +40,7 @@ class Avalon
 		// Setup the controller and method info
 		$controller_file = APPPATH . '/controllers/' . (Router::$namespace != null ? '/' : '') . '/' . Router::$controller . '_controller.php';
 		$controller_name = Router::$controller . 'Controller';
+		$method_view_name = Router::$method;
 		$method_name = 'action_' . Router::$method;
 		$method_args = Router::$args;
 		
@@ -63,7 +64,7 @@ class Avalon
 		static::$app->db = static::$db;
 		
 		// Set the view
-		$view = (isset(Router::$namespace) ? Router::$namespace . '/' . Router::$controller . '/' . $method_name : Router::$controller .'/' . $method_name);
+		$view = (isset(Router::$namespace) ? Router::$namespace . '/' . Router::$controller . '/' . $method_name : Router::$controller .'/' . $method_view_name);
 		if (static::$app->_render['view'] === null) {
 			static::$app->_render['view'] = $view;
 		}
