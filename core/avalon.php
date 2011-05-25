@@ -12,6 +12,7 @@
  */
 class Avalon
 {
+	private static $version = '0.1';
 	private static $app;
 	private static $db;
 	
@@ -39,7 +40,7 @@ class Avalon
 		// Setup the controller and method info
 		$controller_file = APPPATH . '/controllers/' . (Router::$namespace != null ? '/' : '') . '/' . Router::$controller . '_controller.php';
 		$controller_name = Router::$controller . 'Controller';
-		$controller_method = 'action_' . Router::$method;
+		$method_name = 'action_' . Router::$method;
 		$method_args = Router::$args;
 		
 		// Check the controller file
@@ -50,17 +51,25 @@ class Avalon
 		require_once $controller_file;
 		
 		// Check the controller and method
-		if (!class_exists($controller_name) or !method_exists($controller_name, $controller_method)) {
+		if (!class_exists($controller_name) or !method_exists($controller_name, $method_name)) {
 			$controller_file = APPPATH . '/controllers/error_controller.php';
 			$controller_name = 'ErrorController';
-			$controller_method = 'action_404';
+			$method_name = 'action_404';
 			$method_args['request'] = Request::url();
 		}
 		
 		// Start the controller
 		static::$app = new $controller_name();
 		static::$app->db = static::$db;
-		call_user_func_array(array(static::$app, $controller_method), $method_args);
+		
+		// Set the view
+		$view = (isset(Router::$namespace) ? Router::$namespace . '/' . Router::$controller . '/' . $method_name : Router::$controller .'/' . $method_name);
+		if (static::$app->_render['view'] === null) {
+			static::$app->_render['view'] = $view;
+		}
+		
+		// Call the method
+		call_user_func_array(array(static::$app, $method_name), $method_args);
 		
 		// Call the 'destructor', why not just use PHP's?
 		// even after die or exit is called, the __destruct() is still executed.
@@ -77,5 +86,10 @@ class Avalon
 	public static function db()
 	{
 		return static::$db;
+	}
+	
+	public static function version()
+	{
+		return static::$version;
 	}
 }
