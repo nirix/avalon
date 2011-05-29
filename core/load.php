@@ -12,8 +12,9 @@
  */
 class Load
 {
-	private static $undo = array('my_sql' => 'mysql');
+	private static $undo = array('my_sql' => 'mysql', 'java_script' => 'javascript');
 	private static $libs = array();
+	private static $helpers = array();
 	
 	/**
 	 * Library loader
@@ -35,6 +36,7 @@ class Load
 			require_once SYSPATH . '/libs/' . $file_name . '.php';
 		} else {
 			new Error("Loader Error", "Unable to load library '{$class}'", 'HALT');
+			return false;
 		}
 		
 		if ($init) {
@@ -44,6 +46,27 @@ class Load
 		}
 		
 		return static::$libs[$class];
+	}
+	
+	public static function helper($class)
+	{
+		if (in_array($class, static::$helpers)) {
+			return true;
+		}
+		
+		$file_name = static::lowercase($class);
+		
+		if (file_exists(APPPATH . '/helpers/' . $file_name . '.php')) {
+			require_once APPPATH . '/helpers/' . $file_name . '.php';
+		} elseif (file_exists(SYSPATH . '/helpers/' . $file_name . '.php')) {
+			require_once SYSPATH . '/helpers/' . $file_name . '.php';
+		} else {
+			new Error("Loader Error", "Unable to load helper '{$class}'", 'HALT');
+			return false;
+		}
+		
+		static::$helpers[] = $class;
+		return true;
 	}
 	
 	private static function lowercase($string) {
