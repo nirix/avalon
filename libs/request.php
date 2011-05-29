@@ -38,7 +38,7 @@ class Request
 		return @static::$segments[$num];
 	}
 	
-	public function is_ajax()
+	public static function is_ajax()
 	{
 		return strtolower(static::$requested_with) == 'xmlhttprequest';
 	}

@@ -38,7 +38,7 @@ class Avalon
 		}
 		
 		// Setup the controller and method info
-		$controller_file = APPPATH . '/controllers/' . (Router::$namespace != null ? '/' : '') . '/' . Router::$controller . '_controller.php';
+		$controller_file = strtolower(APPPATH . '/controllers/' . (Router::$namespace != null ? '/' : '') . Router::$controller . '_controller.php');
 		$controller_name = Router::$controller . 'Controller';
 		$method_view_name = Router::$method;
 		$method_name = 'action_' . Router::$method;

@@ -33,7 +33,7 @@ class Controller
 		
 		// Render the view, get the content and clear the output
 		View::render($this->_render['view']);
-		$output =  Output::body();
+		$output = Output::body();
 		Output::clear();
 		
 		// Set the X-Powered-By header and render the layout with the content
