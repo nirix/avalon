@@ -45,6 +45,12 @@ class Request
 	
 	private static function _get_uri()
 	{
+		// Check for REQUEST_URI
+		$path = str_replace($_SERVER['SCRIPT_NAME'], '', $_SERVER['REQUEST_URI']);
+		if (trim($path, '/') != '' && $path != "/index.php") {
+			return $path;
+		}
+		
 		// Check if there is a PATH_INFO variable
 		// Note: some servers seem to have trouble with getenv()
 		$path = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : @getenv('PATH_INFO');
