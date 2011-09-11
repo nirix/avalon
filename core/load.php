@@ -35,7 +35,7 @@ class Load
 		} elseif (file_exists(SYSPATH . '/libs/' . $file_name . '.php')) {
 			require_once SYSPATH . '/libs/' . $file_name . '.php';
 		} else {
-			new Error("Loader Error", "Unable to load library '{$class}'", 'HALT');
+			Error::halt("Loader Error", "Unable to load library '{$class}'");
 			return false;
 		}
 		
@@ -48,8 +48,17 @@ class Load
 		return static::$libs[$class];
 	}
 	
-	public static function helper($class)
+	public static function helper()
 	{
+		$class = func_num_args() > 1 ? func_get_args() : func_get_arg(0);
+		
+		if (is_array($class)) {
+			foreach ($class as $helper) {
+				static::helper($helper);
+			}
+			return;
+		}
+		
 		if (in_array($class, static::$helpers)) {
 			return true;
 		}
@@ -61,7 +70,7 @@ class Load
 		} elseif (file_exists(SYSPATH . '/helpers/' . $file_name . '.php')) {
 			require_once SYSPATH . '/helpers/' . $file_name . '.php';
 		} else {
-			new Error("Loader Error", "Unable to load helper '{$class}'", 'HALT');
+			Error::halt("Loader Error", "Unable to load helper '{$class}'");
 			return false;
 		}
 		

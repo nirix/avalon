@@ -15,63 +15,81 @@ class Router
 	public static $namespace;
 	public static $controller;
 	public static $method;
+	public static $params = array();
 	public static $args = array();
 	private static $routes = array();
 	
+	/**
+	 * Matche the request to a route and get the controller, method and arguments.
+	 * @param string $request The request.
+	 * @return boolean
+	 */
 	public static function process($request)
 	{
+		// Prefix a forward slash to the request.
+		$request = '/' . $request;
+		
+		// Fetch the routes
 		require_once APPPATH . '/config/routes.php';
 		
-		foreach (static::$routes as $route) {
-			$regex = static::compile($route['template']);
+		// Are we on the front page?
+		if ($request == '/') {
+			static::set_request(static::$routes['root']);
+			return true;
+		}
+		
+		// Check if we have an exact match
+		if (isset(static::$routes[$request])) {
+			static::set_request(static::$routes[$request]);
+			return true;
+		}
+		
+		// Loop through routes and find a regex match
+		foreach (static::$routes as $route => $args) {
+			$route = '#^' . $route . '$#';
 			
-			// Check if it matches
-			if (preg_match($regex, $request, $matches)) {
-				// Get the params
-				$params = array();
-				foreach ($matches as $key => $value) {
-					if (!is_int($key)) {
-						$params[$key] = $value;
-					}
-				}
-				$route['params'] = array_merge($route['params'], $params);
-				
-				/*if (strpos($route['value'], '$controller') or strpos($route['value'], '$action')) {
-					$route['value'] = str_replace('$controller', $params['controller'], $route['value']);
-					$route['value'] = str_replace('$action', $params['action'], $route['value']);
-				}*/
-				
-				if (strpos($route['value'], '$') !== false) {
-					foreach (explode('::', $route['value']) as $bit) {
-						if (strpos($bit, '$') !== false) {
-							$route['value'] = str_replace($bit, $route['params'][trim($bit, '$')], $route['value']);
-							unset($route['params'][trim($bit, '$')]);
-						}
-					}
-				}
-				
-				static::set_request($route);
+			if (preg_match($route, $request, $params)) {
+				unset($params[0]);
+				$args['params'] = array_merge($args['params'], $params);
+				$args['value'] = preg_replace($route, $args['value'], $request);
+				static::set_request($args);
 				return true;
 			}
 		}
 		
-		static::set_request(array('value' => 'Error::404', 'params' => array('request' => $request)));
+		// No match, error controller, make it so.
+		static::set_request(array('value' => 'Error::404', 'params' => array()));
 		return false;
 	}
-		
+
+	/**
+	 * Add a route.
+	 * @param string $route The route to match to.
+	 * @param string $value The controller and method to route to.
+	 * @param array $params Parameters to be passed to the controller method.
+	 */
 	public static function add($route, $value, $params = array())
 	{
-		static::$routes[] = array(
+		static::$routes[$route] = array(
 			'template' => $route,
 			'value' => $value,
 			'params' => $params
 		);
 	}
 	
+	/**
+	 * Private function to set the routed controller, method, parameters and method arguments.
+	 * @param array $route The route array.
+	 */
 	private static function set_request($route)
 	{
-		$bits = explode('::', $route['value']);
+		// Seperate the method arguments from the route
+		$bits = explode('/', $route['value']);
+		static::$params = $route['params'];
+		static::$args = array_slice($bits, 1);
 		
+		// Check if there's a namespace specified
+		$bits = explode('::', $bits[0]);
 		if (count($bits) == 3) {
 			static::$namespace = $bits[0];
 			static::$controller = $bits[1];
@@ -80,25 +98,5 @@ class Router
 			static::$controller = $bits[0];
 			static::$method = $bits[1];
 		}
-		
-		// Remove the controller and action values from the params array
-		unset($route['params']['controller'], $route['params']['action']);
-		
-		static::$args = $route['params'];
-	}
-	
-	private static function compile($uri)
-	{
-		$expression = preg_replace('#[.\\+*?[^\\]${}=!|]#', '\\\\$0', $uri);
-		
-		if (strpos($expression, '(') !== false) {
-			// Make optional parts of the URI non-capturing and optional
-			$expression = str_replace(array('(', ')'), array('(?:', ')?'), $expression);
-		}
-
-		// Insert default regex for keys
-		$expression = str_replace(array('<', '>'), array('(?P<', '>[^/.,;?\n]++)'), $expression);
-		
-		return '#^'.$expression.'$#uD';
 	}
 }

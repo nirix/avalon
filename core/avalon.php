@@ -14,20 +14,20 @@ class Avalon
 {
 	private static $version = '0.1';
 	private static $app;
-	private static $db;
 	
+	/**
+	 * Initialize the Avalon framework
+	 */
 	public static function init()
 	{
-		// Connect to the database
-		if (file_exists(APPPATH . 'config/database.php')) {
-			
-		}
-		
 		// Route the request
 		Request::process();
 		Router::process(Request::url());
 	}
 	
+	/**
+	 * Execute the routed controller and method
+	 */
 	public static function run()
 	{
 		// Fetch the AppController
@@ -53,15 +53,18 @@ class Avalon
 		
 		// Check the controller and method
 		if (!class_exists($controller_name) or !method_exists($controller_name, $method_name)) {
-			$controller_file = APPPATH . '/controllers/error_controller.php';
+			if (!class_exists('ErrorController')) {
+				require_once APPPATH . '/controllers/error_controller.php';
+			}
+			Router::$namespace = null;
+			Router::$controller = 'Error';
 			$controller_name = 'ErrorController';
+			$method_view_name = '404';
 			$method_name = 'action_404';
-			$method_args['request'] = Request::url();
 		}
 		
 		// Start the controller
 		static::$app = new $controller_name();
-		static::$app->db = static::$db;
 		
 		// Set the view
 		$view = (isset(Router::$namespace) ? Router::$namespace . '/' . Router::$controller . '/' . $method_name : Router::$controller .'/' . $method_view_name);
@@ -79,16 +82,19 @@ class Avalon
 		}
 	}
 	
+	/**
+	 * Returns the application object.
+	 * @return object
+	 */
 	public static function app()
 	{
 		return static::$app;
 	}
 	
-	public static function db()
-	{
-		return static::$db;
-	}
-	
+	/**
+	 * Returns the version of the Avalon framework.
+	 * @return string
+	 */
 	public static function version()
 	{
 		return static::$version;
