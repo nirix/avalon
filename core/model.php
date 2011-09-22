@@ -20,6 +20,7 @@ class Model
 	protected static $_primary_key = 'id';
 	protected static $_has_many;
 	protected static $_belongs_to;
+	protected static $_primary_key_value;
 	private $_columns = array();
 	
 	/**
@@ -39,18 +40,62 @@ class Model
 				$this->_columns[] = $column;
 			}
 		}
+		
+		// Set the primary key value
+		if (isset($data[static::$_primary_key])) {
+			static::$_primary_key_value = $data[static::$_primary_key];
+		}
 	}
 	
 	public function save()
 	{
+		$primary_key = static::$_primary_key;
 		
+		// Save
+		if (isset($this->$primary_key)) {
+			if ($this->is_valid()) {
+				
+			}
+		}
+		// Create
+		else {
+			if ($this->is_valid()) {
+				$data = array();
+				
+				foreach ($this->_columns as $column) {
+					$data[$column] = $this->$column;
+				}
+				unset($data[static::$_primary_key]);
+				
+				Database::link()->insert($data)->into(static::$_name)->exec();
+			}
+		}
 	}
 	
-	public function create()
+	/**
+	 * Sets the value of the column(s) to the value(s).
+	 * @param mixed $col Either the column or an array to update multiple columns.
+	 * @param mixed $val The value of the column if only updating one column.
+	 * @since 0.1
+	 * @example $model->set(array('col1'=>'val1', 'col2'=>'val2'));
+	 *          $model->set('col1', 'val1');
+	 */
+	public function set($col, $val = null)
 	{
-		
+		if (is_array($col)) {
+			foreach ($col as $var => $val) {
+				$this->$var = $val;
+			}
+		} else {
+			$this->$col = $val;
+		}
 	}
 	
+	/**
+	 * Shortcut of the select() function for the database.
+	 * @param mixed $cols The columns to select.
+	 * @since 0.1
+	 */
 	public static function select($cols = '*')
 	{
 		return Database::link()->select($cols)->from(static::$_name)->_model(static::_class_name());
@@ -59,7 +104,7 @@ class Model
 	/**
 	 * Aliases the database's update() method for the current row.
 	 * @author Jack Polgar
-	 * @since 0.2
+	 * @since 0.1
 	 */
 	public function update()
 	{
@@ -103,6 +148,17 @@ class Model
 		return $rows;
 	}
 	
+	public function is_valid()
+	{
+		// Until the validation stuff is done we will return false,
+		// to work around this each model will have to create its own
+		// is_valid method.
+		return false;
+	}
+	
+	/**
+	 * Magical function to load the relationships.
+	 */
 	public function __get($var)
 	{
 		// Has many
@@ -130,6 +186,10 @@ class Model
 		}
 	}
 	
+	/**
+	 * Private function to be used by the model class to get the class name.
+	 * @access private
+	 */
 	private static function _class_name()
 	{
 		return isset(static::$_class_name) ? static::$_class_name : static::$_name;
