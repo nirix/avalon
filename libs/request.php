@@ -16,6 +16,8 @@ class Request
 	private static $segments;
 	private static $requested_with;
 	public static $request;
+	public static $method;
+	public static $post;
 	
 	public static function process()
 	{
@@ -23,6 +25,8 @@ class Request
 		static::$segments = explode('/', trim(static::$url, '/'));
 		static::$requested_with = @$_SERVER['HTTP_X_REQUESTED_WITH'];
 		static::$request = $_REQUEST;
+		static::$method = strtolower($_SERVER['REQUEST_METHOD']);
+		static::$post = $_POST;
 	}
 	
 	public static function base()
