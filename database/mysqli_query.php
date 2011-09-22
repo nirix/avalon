@@ -19,15 +19,18 @@ class MySQLi_Query
 	private $callback;
 	private $model;
 	
-	public function __construct($type, array $cols = array('*'), $after_exec = false)
+	public function __construct($type, array $cols = array('*'))
 	{
-		$this->after_exec = $after_exec;
 		$this->type = $type;
 		$this->cols = $cols;
 		$this->prefix = Avalon_MySQLi::get_instance()->prefix;
 		return $this;
 	}
 	
+	/**
+	 * Enable use of the model object for table rows.
+	 * @param string $model The model class.
+	 */
 	public function _model($model)
 	{
 		$this->model = $model;
