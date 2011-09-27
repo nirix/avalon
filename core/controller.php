@@ -13,7 +13,7 @@
 class Controller
 {
 	public $db;
-	public $_render = array('layout' => 'default', 'view' => null);
+	public $_render = array('action' => true, 'layout' => 'default', 'view' => null);
 	
 	public function __construct()
 	{

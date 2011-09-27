@@ -38,7 +38,7 @@ class Avalon
 		}
 		
 		// Setup the controller and method info
-		$controller_file = strtolower(APPPATH . '/controllers/' . (Router::$namespace != null ? '/' : '') . Router::$controller . '_controller.php');
+		$controller_file = strtolower(APPPATH . '/controllers/' . (Router::$namespace != null ? Router::$namespace . '/' : '') . Router::$controller . '_controller.php');
 		$controller_name = Router::$controller . 'Controller';
 		$method_view_name = Router::$method;
 		$method_name = 'action_' . Router::$method;
@@ -67,13 +67,15 @@ class Avalon
 		static::$app = new $controller_name();
 		
 		// Set the view
-		$view = (isset(Router::$namespace) ? Router::$namespace . '/' . Router::$controller . '/' . $method_name : Router::$controller .'/' . $method_view_name);
+		$view = (isset(Router::$namespace) ? Router::$namespace . '/' . Router::$controller . '/' . $method_view_name : Router::$controller .'/' . $method_view_name);
 		if (static::$app->_render['view'] === null) {
 			static::$app->_render['view'] = $view;
 		}
 		
 		// Call the method
-		call_user_func_array(array(static::$app, $method_name), $method_args);
+		if (static::$app->_render['action']) {
+			call_user_func_array(array(static::$app, $method_name), $method_args);
+		}
 		
 		// Call the 'destructor', why not just use PHP's?
 		// even after die or exit is called, the __destruct() is still executed.
