@@ -11,9 +11,10 @@ require 'mysqli_statement.php';
 
 class Avalon_MySQLi
 {
-	private static $_instance;
+	protected static $_instance;
 	public $prefix;
 	public $last_query;
+	protected $query_count = 0;
 	
 	public function __construct(array $config)
 	{
@@ -42,7 +43,12 @@ class Avalon_MySQLi
 		}
 		return new MySQLi_Query("SELECT", $cols);
 	}
-
+	
+	public function update($table)
+	{
+		return new MySQLi_Query('UPDATE', $table);
+	}
+	
 	public function delete()
 	{
 		return new MySQLi_Query("DELETE", array());
@@ -56,6 +62,7 @@ class Avalon_MySQLi
 	public function query($query)
 	{
 		$this->last_query = (string) $query;
+		$this->query_count++;
 		$result = mysqli_query($this->link, (string) $query) or $this->halt();
 		return new MySQLi_Statement($result);
 	}
@@ -82,6 +89,11 @@ class Avalon_MySQLi
 	public function link()
 	{
 		return $this->link;
+	}
+	
+	public function query_count()
+	{
+		return $this->query_count;
 	}
 	
 	public function halt()

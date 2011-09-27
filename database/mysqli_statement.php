@@ -28,13 +28,19 @@ class MySQLi_Statement
 
 	public function fetchAssoc()
 	{
-		return mysqli_fetch_assoc($this->result);
+		$row = mysqli_fetch_assoc($this->result);
+		if ($this->_model !== null) {
+			$model = $this->_model;
+			return new $model($row);
+		} else {
+			return $row;
+		}
 	}
 
 	public function fetchAll()
 	{
 		$rows = array();
-		while($row = $this->fetchAssoc()) {
+		while($row = mysqli_fetch_assoc($this->result)) {
 			if ($this->_model !== null) {
 				$model = $this->_model;
 				$rows[] = new $model($row);

@@ -16,12 +16,13 @@
 class Model
 {
 	public static $db;
-	protected static $_name;
-	protected static $_primary_key = 'id';
-	protected static $_has_many;
-	protected static $_belongs_to;
-	protected static $_primary_key_value;
-	private $_columns = array();
+	protected static $_name; // Table name
+	protected static $_primary_key = 'id'; // Primary key
+	protected static $_has_many; // Has many relationship array
+	protected static $_belongs_to; // Belongs to relationship array
+	protected static $_class_name; // Class name if different to table name
+	protected $_columns = array(); // Table columns
+	protected $_primary_key_value; // Priamry key value
 	
 	/**
 	 * Used to build to assign the row data to the class as variables.
@@ -43,25 +44,29 @@ class Model
 		
 		// Set the primary key value
 		if (isset($data[static::$_primary_key])) {
-			static::$_primary_key_value = $data[static::$_primary_key];
+			$this->_primary_key_value = $data[static::$_primary_key];
 		}
 	}
 	
 	public function save()
 	{
 		$primary_key = static::$_primary_key;
-		
 		// Save
 		if (isset($this->$primary_key)) {
 			if ($this->is_valid()) {
+				$data = array();
+				foreach ($this->_columns as $column) {
+					$data[$column] = $this->$column;
+				}
+				unset($data[static::$_primary_key]);
 				
+				Database::link()->update(static::$_name)->set($data)->where(static::$_primary_key . " = '?'", $this->_primary_key_value)->exec();
 			}
 		}
 		// Create
 		else {
 			if ($this->is_valid()) {
 				$data = array();
-				
 				foreach ($this->_columns as $column) {
 					$data[$column] = $this->$column;
 				}
@@ -69,6 +74,13 @@ class Model
 				
 				Database::link()->insert($data)->into(static::$_name)->exec();
 			}
+		}
+	}
+	
+	public function delete()
+	{
+		if ($this->_primary_key_value !== null) {
+			return Database::link()->delete()->from('users')->where(static::$_primary_key . " = '?'", $this->_primary_key_value)->exec();
 		}
 	}
 	
@@ -122,14 +134,12 @@ class Model
 	public static function find($find, $value = null)
 	{
 		$select = Database::link()->select()->from(static::$_name);
-		
 		if ($value == null) {
 			$select = $select->where(static::$_primary_key . " = '?'", $find)->limit(1)->exec()->fetchAssoc();
-			return new static($select);
 		} else {
 			$select = $select->where($find . " = '?'", $value)->limit(1)->exec()->fetchAssoc();
-			return new static($select);
 		}
+		return new static($select);
 	}
 	
 	/**
@@ -162,8 +172,30 @@ class Model
 	public function __get($var)
 	{
 		// Has many
+		if (is_array(static::$_has_many) and (in_array($var, static::$_has_many) or isset(static::$_has_many[$var]))) {
+			$has_many = array();
+			if (isset(static::$_has_many[$var])) {
+				$has_many = static::$_has_many[$var];
+			}
+			// Model
+			if (!isset($has_many['model'])) {
+				$has_many['model'] = ucfirst((substr($var, -1) == 's' ? substr($var, 0, -1) : $var));
+			}
+			// Different foreign key?
+			if (!isset($has_many['foreign_key'])) {
+				$has_many['foreign_key'] = substr(static::$_name, 0, -1) . '_id';
+			}
+			// Different column?
+			if (!isset($has_many['column'])) {
+				$has_many['column'] = 'id';
+			}
+			
+			$model = $has_many['model'];
+			$column = $has_many['column'];
+			$this->$var = $model::select()->where($has_many['foreign_key'] . " = '?'", $this->$column);
+		}
 		// Belongs to
-		if (is_array(static::$_belongs_to) and (in_array($var, static::$_belongs_to) or isset(static::$_belongs_to[$var]))) {
+		elseif (is_array(static::$_belongs_to) and (in_array($var, static::$_belongs_to) or isset(static::$_belongs_to[$var]))) {
 			$belongs_to = array();
 			if (isset(static::$_belongs_to[$var])) {
 				$belongs_to = static::$_belongs_to[$var];
@@ -182,8 +214,8 @@ class Model
 			}
 			$model = $belongs_to['model'];
 			$this->$var = $model::find($belongs_to['foreign_key'], $this->$belongs_to['column']);
-			return $this->$var;
 		}
+		return $this->$var;
 	}
 	
 	/**
@@ -192,6 +224,12 @@ class Model
 	 */
 	private static function _class_name()
 	{
-		return isset(static::$_class_name) ? static::$_class_name : static::$_name;
+		if (isset(static::$_class_name)) {
+			return static::$_class_name;
+		} elseif (substr(static::$_name, -1) == 's') {
+			return substr(static::$_name, 0, -1);
+		} else {
+			throw new Exception('Unable to determin class name for the ' . static::$_name . ' model');
+		}
 	}
 }

@@ -18,11 +18,16 @@ class MySQLi_Query
 	private $custom_sql = array();
 	private $callback;
 	private $model;
+	private $set;
 	
-	public function __construct($type, array $cols = array('*'))
+	public function __construct($type, $data = null)
 	{
+		if ($type == 'SELECT') {
+			$this->cols = ($data !== null ? $data : array('*'));
+		} else if ($type == 'UPDATE') {
+			$this->table = $data;
+		}
 		$this->type = $type;
-		$this->cols = $cols;
 		$this->prefix = Avalon_MySQLi::get_instance()->prefix;
 		return $this;
 	}
@@ -52,6 +57,12 @@ class MySQLi_Query
 	public function into($table)
 	{
 		$this->table = $table;
+		return $this;
+	}
+	
+	public function set($data)
+	{
+		$this->set = $data;
 		return $this;
 	}
 	
@@ -85,11 +96,11 @@ class MySQLi_Query
 		return $this;
 	}
 	
-  public function callback($callback)
-  {
-    $this->callback = $callback;
-    return $this;
-  }
+	public function callback($callback)
+	{
+		$this->callback = $callback;
+		return $this;
+	}
   
 	public function exec()
 	{
@@ -110,10 +121,9 @@ class MySQLi_Query
 		$query[] = $this->type;
 		
 		if ($this->type == "SELECT"
-		or $this->type == "SELECT DISTINT"
+		or $this->type == "SELECT DISTINCT"
 		or $this->type == "DELETE")
 		{
-			
 			$cols = array();
 			foreach ($this->cols as $col => $as) {
 				if (!is_numeric($col)) {
@@ -154,21 +164,38 @@ class MySQLi_Query
 			
 			foreach($this->cols as $key => $value)
 			{
-				// Process the value
-				if (!in_array($value, array("NOW"))) {
-					$value = Avalon_MySQLi::get_instance()->real_escape_string($value);
-					$value = "'{$value}'";
-				}
-				
 				$keys[] = "`{$key}`";
-				$values[] = $value;
+				$values[] = $this->_process_value($value);
 			}
 			
 			$query[] = ' (' . implode(', ', $keys) . ')';
 			$query[] = ' VALUES(' . implode(', ', $values) . ')';
+		} else if($this->type == "UPDATE") {
+			$query[] = "`{$this->prefix}{$this->table}`";
+			
+			$query[] = "SET";
+			$set = array();
+			foreach ($this->set as $column => $value) {
+				$value = $this->_process_value($value);
+				$set[] = "`{$column}` = {$value}";
+			}
+			$query[] = implode(', ', $set);
+			
+			if (count($this->where)) {
+				$query[] = "WHERE " . implode(' AND ', $this->where);
+			}
 		}
 		
 		return implode(" ", $query);
+	}
+	
+	private function _process_value($value)
+	{
+		if (!in_array($value, array("NOW()"))) {
+			$value = Avalon_MySQLi::get_instance()->real_escape_string($value);
+			$value = "'{$value}'";
+		}
+		return $value;
 	}
 	
 	public function __toString()
