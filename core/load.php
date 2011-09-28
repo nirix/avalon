@@ -31,9 +31,9 @@ class Load
 		$file_name = static::lowercase($class);
 		
 		if (file_exists(APPPATH . '/libs/' . $file_name . '.php')) {
-			require_once APPPATH . '/libs/' . $file_name . '.php';
+			require APPPATH . '/libs/' . $file_name . '.php';
 		} elseif (file_exists(SYSPATH . '/libs/' . $file_name . '.php')) {
-			require_once SYSPATH . '/libs/' . $file_name . '.php';
+			require SYSPATH . '/libs/' . $file_name . '.php';
 		} else {
 			Error::halt("Loader Error", "Unable to load library '{$class}'");
 			return false;
@@ -66,9 +66,9 @@ class Load
 		$file_name = static::lowercase($class);
 		
 		if (file_exists(APPPATH . '/helpers/' . $file_name . '.php')) {
-			require_once APPPATH . '/helpers/' . $file_name . '.php';
+			require APPPATH . '/helpers/' . $file_name . '.php';
 		} elseif (file_exists(SYSPATH . '/helpers/' . $file_name . '.php')) {
-			require_once SYSPATH . '/helpers/' . $file_name . '.php';
+			require SYSPATH . '/helpers/' . $file_name . '.php';
 		} else {
 			Error::halt("Loader Error", "Unable to load helper '{$class}'");
 			return false;

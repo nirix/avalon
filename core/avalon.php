@@ -32,7 +32,7 @@ class Avalon
 	{
 		// Fetch the AppController
 		if (file_exists(APPPATH . '/controllers/app_controller.php')) {
-			require_once APPPATH . '/controllers/app_controller.php';
+			require APPPATH . '/controllers/app_controller.php';
 		} else {
 			new Error('Avalon::Run Error', 'The app controller could not be loaded.', 'HALT');
 		}
@@ -54,7 +54,7 @@ class Avalon
 		// Check the controller and method
 		if (!class_exists($controller_name) or !method_exists($controller_name, $method_name)) {
 			if (!class_exists('ErrorController')) {
-				require_once APPPATH . '/controllers/error_controller.php';
+				require APPPATH . '/controllers/error_controller.php';
 			}
 			Router::$namespace = null;
 			Router::$controller = 'Error';
@@ -70,6 +70,14 @@ class Avalon
 		$view = (isset(Router::$namespace) ? Router::$namespace . '/' . Router::$controller . '/' . $method_view_name : Router::$controller .'/' . $method_view_name);
 		if (static::$app->_render['view'] === null) {
 			static::$app->_render['view'] = $view;
+		}
+		
+		// Check for a before action and execute if one exists
+		if (isset(static::$app->_before[Router::$method])) {
+			$before = (is_array(static::$app->_before[Router::$method]) ? static::$app->_before[Router::$method] : array(static::$app->_before[Router::$method]) );
+			foreach ($before as $before_action) {
+				static::$app->$before_action();
+			}
 		}
 		
 		// Call the method

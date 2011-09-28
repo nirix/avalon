@@ -22,7 +22,7 @@ class Model
 	protected static $_belongs_to; // Belongs to relationship array
 	protected static $_class_name; // Class name if different to table name
 	protected $_columns = array(); // Table columns
-	protected $_primary_key_value; // Priamry key value
+	protected $_primary_key_value; // Primary key value
 	
 	/**
 	 * Used to build to assign the row data to the class as variables.
@@ -52,7 +52,7 @@ class Model
 	{
 		$primary_key = static::$_primary_key;
 		// Save
-		if (isset($this->$primary_key)) {
+		if ($this->_primary_key_value !== null) {
 			if ($this->is_valid()) {
 				$data = array();
 				foreach ($this->_columns as $column) {
@@ -73,6 +73,9 @@ class Model
 				unset($data[static::$_primary_key]);
 				
 				Database::link()->insert($data)->into(static::$_name)->exec();
+				
+				$this->$primary_key = Database::link()->insert_id();
+				$this->_primary_key_value = $this->$primary_key;
 			}
 		}
 	}
@@ -96,9 +99,11 @@ class Model
 	{
 		if (is_array($col)) {
 			foreach ($col as $var => $val) {
+				$this->_columns[] = $var;
 				$this->$var = $val;
 			}
 		} else {
+			$this->_columns[] = $col;
 			$this->$col = $val;
 		}
 	}

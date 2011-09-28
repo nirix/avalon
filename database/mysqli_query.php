@@ -24,6 +24,8 @@ class MySQLi_Query
 	{
 		if ($type == 'SELECT') {
 			$this->cols = ($data !== null ? $data : array('*'));
+		} else if ($type == 'INSERT INTO') {
+			$this->data = $data;
 		} else if ($type == 'UPDATE') {
 			$this->table = $data;
 		}
@@ -62,7 +64,7 @@ class MySQLi_Query
 	
 	public function set($data)
 	{
-		$this->set = $data;
+		$this->data = $data;
 		return $this;
 	}
 	
@@ -162,7 +164,7 @@ class MySQLi_Query
 			$keys = array();
 			$values = array();
 			
-			foreach($this->cols as $key => $value)
+			foreach($this->data as $key => $value)
 			{
 				$keys[] = "`{$key}`";
 				$values[] = $this->_process_value($value);
@@ -175,7 +177,7 @@ class MySQLi_Query
 			
 			$query[] = "SET";
 			$set = array();
-			foreach ($this->set as $column => $value) {
+			foreach ($this->data as $column => $value) {
 				$value = $this->_process_value($value);
 				$set[] = "`{$column}` = {$value}";
 			}

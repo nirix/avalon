@@ -6,11 +6,11 @@
  * @license http://opensource.org/licenses/BSD-3-Clause BSD License
  */
 
-require_once SYSPATH . '/core/error.php';
-require_once SYSPATH . '/core/load.php';
-require_once SYSPATH . '/core/controller.php';
-require_once SYSPATH . '/core/avalon.php';
-require_once SYSPATH . '/core/database.php';
+require SYSPATH . '/core/error.php';
+require SYSPATH . '/core/load.php';
+require SYSPATH . '/core/controller.php';
+require SYSPATH . '/core/avalon.php';
+require SYSPATH . '/core/database.php';
 
 Load::lib('request');
 Load::lib('router');

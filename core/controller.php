@@ -14,6 +14,7 @@ class Controller
 {
 	public $db;
 	public $_render = array('action' => true, 'layout' => 'default', 'view' => null);
+	public $_before = array();
 	
 	public function __construct()
 	{
