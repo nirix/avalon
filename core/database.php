@@ -15,7 +15,7 @@ class Database
 	{
 		require APPPATH . '/config/database.php';
 		require SYSPATH . '/core/model.php';
-		require SYSPATH . '/database/' . $db['driver'] . '.php';
+		require SYSPATH . '/database/' . strtolower($db['driver']) . '.php';
 		
 		$class = 'Avalon_' . $db['driver'];
 		static::$link = new $class($db);
