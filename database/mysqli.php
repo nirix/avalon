@@ -21,6 +21,7 @@ class Avalon_MySQLi
 		self::$_instance = $this;
 		$this->prefix = @$config['prefix'];
 		$this->connect($config['host'], $config['user'], $config['pass'])->select_db($config['name']);
+		Load::helper('time');
 		return $this;
 	}
 

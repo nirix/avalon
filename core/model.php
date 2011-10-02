@@ -21,6 +21,7 @@ class Model
 	protected static $_has_many; // Has many relationship array
 	protected static $_belongs_to; // Belongs to relationship array
 	protected static $_class_name; // Class name if different to table name
+	protected static $_after = array(); // After filters
 	protected $_columns = array(); // Table columns
 	protected $_primary_key_value; // Primary key value
 	
@@ -32,6 +33,13 @@ class Model
 	 */
 	public function __construct($data = null)
 	{
+		if (!isset(static::$_after['construct'])) {
+			static::$_after['construct'] = array();
+		}
+		if (!in_array('_date_time_convert', static::$_after['construct'])) {
+			static::$_after['construct'][] = '_date_time_convert';
+		}
+		
 		// Loop through the data and make it accessible
 		// via $model->column_name
 		$this->_data = $data;
@@ -45,6 +53,13 @@ class Model
 		// Set the primary key value
 		if (isset($data[static::$_primary_key])) {
 			$this->_primary_key_value = $data[static::$_primary_key];
+		}
+		
+		if (isset(static::$_after['construct'])) {
+			$filters = (is_array(static::$_after['construct']) ? static::$_after['construct'] : array(static::$_after['construct']));
+			foreach ($filters as $filter) {
+				$this->$filter();
+			}
 		}
 	}
 	
@@ -144,6 +159,7 @@ class Model
 		} else {
 			$select = $select->where($find . " = '?'", $value)->limit(1)->exec()->fetchAssoc();
 		}
+		
 		return new static($select);
 	}
 	
@@ -221,6 +237,15 @@ class Model
 			$this->$var = $model::find($belongs_to['foreign_key'], $this->$belongs_to['column']);
 		}
 		return $this->$var;
+	}
+	
+	public function _date_time_convert()
+	{
+		foreach (array('created_at', 'updated_at', 'published_at') as $var) {
+			if (isset($this->$var)) {
+				$this->$var = Time::gmtToLocal($this->$var);
+			}
+		}
 	}
 	
 	/**
