@@ -193,12 +193,19 @@ class MySQLi_Query
 	
 	private function _process_value($value)
 	{
-		if (!in_array($value, array("NOW()", "GMTTIME()"))) {
+		// WTF is with this POS thinking 0 is in the fucking array!?
+		if (in_array($value, array("NOW()", "GMTTIME()")) and $value != 0) {
+			if($value == 'NOW()'
+			or $value == 'GMTTIME()') {
+				$value = "'" . Time::gmt() . "'";
+			} else {
+				$value = $value;
+			}
+		} else {
 			$value = Avalon_MySQLi::get_instance()->real_escape_string($value);
 			$value = "'{$value}'";
-		} else if($value == 'NOW()' or $value == 'GMTTIME()') {
-			$value = "'" . Time::gmt() . "'";
 		}
+		
 		return $value;
 	}
 	
