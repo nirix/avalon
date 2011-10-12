@@ -23,7 +23,7 @@ class MySQLi_Query
 	public function __construct($type, $data = null)
 	{
 		if ($type == 'SELECT') {
-			$this->cols = ($data !== null ? $data : array('*'));
+			$this->cols = (is_array($data) ? $data : array('*'));
 		} else if ($type == 'INSERT INTO') {
 			$this->data = $data;
 		} else if ($type == 'UPDATE') {
@@ -119,13 +119,9 @@ class MySQLi_Query
 	private function _assemble()
 	{
 		$query = array();
-		
 		$query[] = $this->type;
 		
-		if ($this->type == "SELECT"
-		or $this->type == "SELECT DISTINCT"
-		or $this->type == "DELETE")
-		{
+		if (in_array($this->type, array("SELECT", "SELECT DISTINCT"))) {
 			$cols = array();
 			foreach ($this->cols as $col => $as) {
 				if (!is_numeric($col)) {
@@ -135,7 +131,10 @@ class MySQLi_Query
 				}
 			}
 			$query[] = implode(', ', $cols);
+		}
 		
+		if (in_array($this->type, array("SELECT", "SELECT DISTINCT", "DELETE")))
+		{
 			$query[] = "FROM `{$this->prefix}{$this->table}`";
 			
 			if (count($this->group_by) > 0)
@@ -164,8 +163,7 @@ class MySQLi_Query
 			$keys = array();
 			$values = array();
 			
-			foreach($this->data as $key => $value)
-			{
+			foreach($this->data as $key => $value) {
 				$keys[] = "`{$key}`";
 				$values[] = $this->_process_value($value);
 			}
@@ -193,20 +191,14 @@ class MySQLi_Query
 	
 	private function _process_value($value)
 	{
-		// WTF is with this POS thinking 0 is in the fucking array!?
-		if (in_array($value, array("NOW()", "GMTTIME()")) and $value != 0) {
-			if($value == 'NOW()'
-			or $value == 'GMTTIME()') {
-				$value = "'" . Time::gmt() . "'";
-			} else {
-				$value = $value;
-			}
+		// PHP bullshit thinks "0" is in the god damn array when its clearly NOT
+		// so lets make sure the value is NOT a numeric value.
+		// PHP really pisses me off sometimes.
+		if (!is_numeric($value) and in_array($value, array("NOW()", "GMTTIME()"))) {
+			return "'" . Time::gmt() . "'";
 		} else {
-			$value = Avalon_MySQLi::get_instance()->real_escape_string($value);
-			$value = "'{$value}'";
+			return "'" . Avalon_MySQLi::get_instance()->real_escape_string($value) . "'";
 		}
-		
-		return $value;
 	}
 	
 	public function __toString()
