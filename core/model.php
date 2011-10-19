@@ -24,6 +24,7 @@ class Model
 	protected static $_after = array(); // After filters
 	protected $_columns = array(); // Table columns
 	protected $_primary_key_value; // Primary key value
+	private $_new; // Used to determine if this is a new row or not, set when _new() is called.
 	
 	/**
 	 * Used to build to assign the row data to the class as variables.
@@ -66,6 +67,7 @@ class Model
 	public function save()
 	{
 		$primary_key = static::$_primary_key;
+		
 		// Save
 		if ($this->_primary_key_value !== null) {
 			if ($this->is_valid()) {
@@ -100,6 +102,16 @@ class Model
 		if ($this->_primary_key_value !== null) {
 			return Database::link()->delete()->from('users')->where(static::$_primary_key . " = '?'", $this->_primary_key_value)->exec();
 		}
+	}
+	
+	public function _new()
+	{
+		if ($this->_primary_key_value === null) {
+			$this->_new = true;
+		} else {
+			$this->_new = false;
+		}
+		return $this->_new;
 	}
 	
 	/**
