@@ -24,6 +24,7 @@ class Model
 	protected static $_after = array(); // After filters
 	protected $_columns = array(); // Table columns
 	protected $_primary_key_value; // Primary key value
+	protected $_data = array();
 	private $_new; // Used to determine if this is a new row or not, set when _new() is called.
 	
 	/**
@@ -73,7 +74,10 @@ class Model
 			if ($this->is_valid()) {
 				$data = array();
 				foreach ($this->_columns as $column) {
-					$data[$column] = $this->$column;
+					// Check if column is updated, if so, save.
+					if ($this->_data[$column] != $this->$column) {
+						$data[$column] = $this->$column;
+					}
 				}
 				unset($data[static::$_primary_key]);
 				
@@ -256,6 +260,7 @@ class Model
 		foreach (array('created_at', 'updated_at', 'published_at') as $var) {
 			if (isset($this->$var)) {
 				$this->$var = Time::gmtToLocal($this->$var);
+				$this->_data[$var] = $this->$var;
 			}
 		}
 	}
