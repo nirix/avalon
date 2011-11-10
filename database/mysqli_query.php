@@ -16,9 +16,9 @@ class MySQLi_Query
 	private $limit;
 	private $order_by = array();
 	private $custom_sql = array();
-	private $callback;
-	private $model;
 	private $set;
+	private $_callback;
+	private $_model;
 	
 	public function __construct($type, $data = null)
 	{
@@ -40,7 +40,13 @@ class MySQLi_Query
 	 */
 	public function _model($model)
 	{
-		$this->model = $model;
+		$this->_model = $model;
+		return $this;
+	}
+	
+	public function _callback($callback)
+	{
+		$this->_callback = $callback;
 		return $this;
 	}
 
@@ -97,23 +103,10 @@ class MySQLi_Query
 		$this->limit = implode(',', func_get_args());
 		return $this;
 	}
-	
-	public function callback($callback)
-	{
-		$this->callback = $callback;
-		return $this;
-	}
   
 	public function exec()
 	{
-		$result = Avalon_MySQLi::get_instance()->query($this->_assemble())->_model($this->model);
-		
-		if ($this->callback !== null) {
-			$method = $this->callback;
-			return $method($result);
-		} else {
-			return $result;
-		}
+		return Avalon_MySQLi::get_instance()->query($this->_assemble())->_model($this->_model)->_callback($this->_callback);
 	}
 	
 	private function _assemble()
