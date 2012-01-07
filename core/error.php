@@ -20,11 +20,11 @@ class Error
 		$body[] = "<blockquote style=\"font-family:'Helvetica Neue', Arial, Helvetica, sans-serif;background:#fbe3e4;color:#8a1f11;padding:0.8em;margin-bottom:1em;border:2px solid #fbc2c4;\">";
 		
 		if (!$title !== null) {
-			$body[] = "	<h1 style=\"margin: 0;\">{$title}</h1>";
+			$body[] = "  <h1 style=\"margin: 0;\">{$title}</h1>";
 		}
 		
-		$body[] = "	{$message}";
-		$body[] = " <div style=\"margin-top:8px;\"><small>Powered by Avalon " . Avalon::version() . "</small></div>";
+		$body[] = "  {$message}";
+		$body[] = "  <div style=\"margin-top:8px;\"><small>Powered by Avalon " . Avalon::version() . "</small></div>";
 		$body[] = "</blockquote>";
 		
 		echo implode(PHP_EOL, $body);

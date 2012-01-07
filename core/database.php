@@ -1,40 +1,72 @@
 <?php
-/**
+/*
  * Avalon
- * Copyright (C) 2011 Jack Polgar
- * 
- * @license http://opensource.org/licenses/BSD-3-Clause BSD License
+ * Copyright (C) 2011-2012 Jack Polgar
+ *
+ * @author Jack P. <nrx@nirix.net>
+ * @copyright Jack P.
+ * @license New BSD License
  */
 
+/**
+ * Database class
+ *
+ * @package Avalon
+ * @subpackage Core
+ * @since 0.1
+ * @author Jack P. <nrx@nirix.net>
+ * @copyright Copyright (c) Jack P.
+ */
 class Database
 {
-	private static $link;
+	private static $driver;
 	private static $initiated = false;
 	
+	/**
+	 * Connects to the database.
+	 *
+	 * @return object
+	 */
 	public static function init()
 	{
 		require APPPATH . '/config/database.php';
-		require SYSPATH . '/core/model.php';
+		require SYSPATH . '/database/model.php';
 		require SYSPATH . '/database/' . strtolower($db['driver']) . '.php';
 		
-		$class = 'Avalon_' . $db['driver'];
-		static::$link = new $class($db);
-		Model::$db =& static::$link;
+		// Build the class with DB_ prefix, to be safe.
+		// it to the $driver variable.
+		$class_name = 'DB_' . $db['driver'];
+		static::$driver = new $class_name($db);
 		
-		foreach(scandir(APPPATH . '/models') as $file) {
-			if(!is_dir($file)) {
+		Model::$db =& static::$driver;
+		
+		foreach(scandir(APPPATH . '/models') as $file)
+		{
+			if(!is_dir($file))
+			{
 				require(APPPATH . '/models/' . $file);
 			}
 		}
 		
 		static::$initiated = true;
+		return static::$driver;
 	}
 	
-	public static function link()
+	/**
+	 * Returns the database instance object.
+	 *
+	 * @return object
+	 */
+	public static function driver()
 	{
-		return static::$link;
+		return static::$driver;
 	}
 	
+	/**
+	 * Returns true if the database has been initiated, false if not.
+	 *
+	 * @return bool
+	 */
 	public static function initiated()
 	{
 		return static::$initiated;

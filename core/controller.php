@@ -1,9 +1,11 @@
 <?php
-/**
+/*
  * Avalon
- * Copyright (C) 2011 Jack Polgar
- * 
- * @license http://opensource.org/licenses/BSD-3-Clause BSD License
+ * Copyright (C) 2011-2012 Jack Polgar
+ *
+ * @author Jack P. <nrx@nirix.net>
+ * @copyright Jack P.
+ * @license New BSD License
  */
 
 /**
@@ -20,7 +22,7 @@ class Controller
 	{
 		// Get the database for easy access
 		if (Database::initiated()) {
-			$this->db = Database::link();
+			$this->db = Database::driver();
 		}
 		
 		// Allow the views to access the app,
