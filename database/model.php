@@ -24,7 +24,8 @@ class Model
 	protected static $_primary_key = 'id'; // Primary key
 	protected static $_has_many; // Has many relationship array
 	protected static $_belongs_to; // Belongs to relationship array
-	protected static $_after = array(); // After filters
+	protected static $_filters_before = array(); // Before filters
+	protected static $_filters_after = array(); // After filters
 	protected static $_properties = array(); // Table columns
 	protected $_changed_properties = array(); // Properties that have been changed
 	protected $_data = array();
@@ -40,15 +41,15 @@ class Model
 		$this->_data = $data;
 		$this->_is_new = $is_new;
 		
-		if (!isset(static::$_after['construct'])) {
-			static::$_after['construct'] = array();
+		if (!isset(static::$_filters_after['construct'])) {
+			static::$_filters_after['construct'] = array();
 		}
-		if (!in_array('_date_time_convert', static::$_after['construct'])) {
-			static::$_after['construct'][] = '_date_time_convert';
+		if (!in_array('_date_time_convert', static::$_filters_after['construct'])) {
+			static::$_filters_after['construct'][] = '_date_time_convert';
 		}
 			
-		if (isset(static::$_after['construct'])) {
-			$filters = (is_array(static::$_after['construct']) ? static::$_after['construct'] : array(static::$_after['construct']));
+		if (isset(static::$_filters_after['construct'])) {
+			$filters = (is_array(static::$_filters_after['construct']) ? static::$_filters_after['construct'] : array(static::$_filters_after['construct']));
 			foreach ($filters as $filter) {
 				$this->$filter();
 			}
@@ -178,16 +179,17 @@ class Model
 			$this->_data[$col] = $val;
 			$this->_set_changed($col);
 			
-			if (!isset(static::$_properties[$var]))
+			if (!isset(static::$_properties[$val]))
 			{
-				static::$_properties[] = $var;
+				static::$_properties[] = $val;
 			}
 		}
 	}
 	
 	private function _set_changed($property)
 	{
-		if (in_array($property, static::$_properties) and !in_array($property, $this->_changed_properties)) {
+		if (in_array($property, static::$_properties) and !in_array($property, $this->_changed_properties))
+		{
 			$this->_changed_properties[] = $property;
 		}
 	}
