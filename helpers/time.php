@@ -18,7 +18,7 @@ class Time
 		$time = ($time !== null ? $time : static::time());
 		
 		if (!is_numeric($time)) {
-			$time = static::toUnix($time);
+			$time = static::to_unix($time);
 		}
 		
 		return date($format, $time);
@@ -29,7 +29,7 @@ class Time
 		return date("Y-m-d H:i:s", time() - date("Z", time()));
 	}
 
-	public static function gmtToLocal($datetime)
+	public static function gmt_to_local($datetime)
 	{
 		$stamp = strtotime($datetime);
 		return date("Y-m-d H:i:s", $stamp + date("Z", $stamp));
@@ -40,7 +40,7 @@ class Time
 	 * @param datetime $original
 	 * @return mixed
 	 */
-	public static function toUnix($original)
+	public static function to_unix($original)
 	{
 		//return strtotime($original);
 		// YYYY-MM-DD HH:MM:SS
@@ -62,7 +62,7 @@ class Time
 		// Check what kind of format we're dealing with, timestamp or datetime
 		// and convert it to a timestamp if it is in datetime form.
 		if (!is_numeric($original)) {
-			$original = static::toUnix($original);
+			$original = static::to_unix($original);
 		}
 		
 		$now = time(); // Get the time right now...

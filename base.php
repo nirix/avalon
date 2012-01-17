@@ -19,3 +19,4 @@ Load::lib('request');
 Load::lib('router');
 Load::lib('output');
 Load::lib('view');
+Load::helper('time');
