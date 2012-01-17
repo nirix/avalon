@@ -47,6 +47,11 @@ class Request
 		return static::$url;
 	}
 	
+	public static function matches($uri)
+	{
+		return trim($uri, '/') == trim(implode('/', self::$segments), '/');
+	}
+	
 	public static function seg($num)
 	{
 		return @static::$segments[$num];
