@@ -322,8 +322,8 @@ class Model
 	 */
 	public static function _class()
 	{
-	  
-  }
+		return get_class(new static());
+	}
 	
 	/**
 	 * Converts the created_at, updated_at and published_at properties
