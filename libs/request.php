@@ -47,6 +47,11 @@ class Request
 		return '/' . static::$url;
 	}
 	
+	public static function full_uri()
+	{
+		return static::base(trim(static::url(), '/'));
+	}
+	
 	public static function matches($uri)
 	{
 		return trim($uri, '/') == trim(implode('/', self::$segments), '/');

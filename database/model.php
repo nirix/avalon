@@ -30,6 +30,7 @@ class Model
 	protected $_changed_properties = array(); // Properties that have been changed
 	protected $_data = array();
 	protected $_is_new = true; // Used to determine if this is a new row or not.
+	protected $errors = array();
 	
 	/**
 	 * Used to build to assign the row data to the class as variables.
@@ -247,7 +248,7 @@ class Model
 	{
 		if (in_array($var, static::$_properties))
 		{
-			return $this->_data[$var];
+			return isset($this->_data[$var]) ? $this->_data[$var] : '';
 		}
 		// Has many
 		if (is_array(static::$_has_many) and (in_array($var, static::$_has_many) or isset(static::$_has_many[$var])))
