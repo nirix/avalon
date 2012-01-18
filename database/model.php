@@ -271,7 +271,7 @@ class Model
 			
 			$model = $has_many['model'];
 			$column = $has_many['column'];
-			return $this->$var = $model::select()->where($has_many['foreign_key'] . " = '?'", $this->$column);
+			return $this->$var = $model::select()->where($has_many['foreign_key'], $this->$column);
 		}
 		// Belongs to
 		else if (is_array(static::$_belongs_to) and (in_array($var, static::$_belongs_to) or isset(static::$_belongs_to[$var])))
