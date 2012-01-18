@@ -151,10 +151,20 @@ class PDO_Query
 			$cols = array();
 			foreach ($this->cols as $col => $as)
 			{
-				if (!is_numeric($col)) {
-					$cols[] = "{$col} AS {$as}";
-				} else {
-					$cols[] = "{$as}";
+				// Check if we're fetching all columns
+				if ($col == '*')
+				{
+					$cols[] = '*';
+				}
+				// Check if we're fetching a column as an "alias"
+				else if (!is_numeric($col))
+				{
+					$cols[] = "`{$col}` AS `{$as}`";
+				}
+				// Normal column
+				else
+				{
+					$cols[] = "`{$as}`";
 				}
 			}
 			$query[] = implode(', ', $cols);
