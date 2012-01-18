@@ -44,7 +44,7 @@ class Request
 	
 	public static function url()
 	{
-		return static::$url;
+		return '/' . static::$url;
 	}
 	
 	public static function matches($uri)

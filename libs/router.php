@@ -26,9 +26,6 @@ class Router
 	 */
 	public static function process($request)
 	{
-		// Prefix a forward slash to the request.
-		$request = '/' . $request;
-		
 		// Fetch the routes
 		require_once APPPATH . '/config/routes.php';
 		
