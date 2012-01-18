@@ -125,8 +125,12 @@ class Model
 			
 			// Loop over the properties
 			$data = array();
-			foreach (static::$_properties as $column) {
-				$data[$column] = $this->_data[$column];
+			foreach (static::$_properties as $column)
+			{
+				if (isset($this->_data[$column]))
+				{
+					$data[$column] = $this->_data[$column];
+				}
 			}
 			unset($data[static::$_primary_key]);
 			
@@ -134,7 +138,7 @@ class Model
 			Database::driver()->insert($data)->into(static::$_name)->exec();
 			
 			// Set the primary key
-			$this->$primary_key = Database::driver()->last_insert_id();
+			$this->_data[$primary_key] = Database::driver()->last_insert_id();
 		}
 	}
 	
