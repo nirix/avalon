@@ -98,6 +98,15 @@ class Model
 		// Save
 		if ($this->_is_new() === false)
 		{
+			// Before save filters
+			if (isset(static::$_filters_before['save']) and is_array(static::$_filters_before['save']))
+			{
+				foreach (static::$_filters_before['save'] as $filter)
+				{
+					$this->$filter();
+				}
+			}
+			
 			// Loop over the properties
 			$data = array();
 			foreach (static::$_properties as $column) {
