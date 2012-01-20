@@ -193,7 +193,7 @@ class PDO_Query
 			// Order by
 			if (count($this->order_by) > 0)
 			{
-				$query[] = "ORDER BY `{$this->table}`.`{$this->order_by[0]}` {$this->order_by[1]}";
+				$query[] = "ORDER BY `{$this->prefix}{$this->table}`.`{$this->order_by[0]}` {$this->order_by[1]}";
 			}
 			
 			// Limit
