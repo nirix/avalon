@@ -157,7 +157,7 @@ class Model
 	public function delete()
 	{
 		if ($this->_is_new() === false) {
-			return Database::driver()->delete()->from('users')->where(static::$_primary_key, $this->_data[static::$_primary_key])->exec();
+			return Database::driver()->delete()->from(static::$_name)->where(static::$_primary_key, $this->_data[static::$_primary_key])->exec();
 		}
 	}
 	
