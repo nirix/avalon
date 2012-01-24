@@ -7,6 +7,20 @@
  */
 
 /**
+ * Shortcut to the HTML::link method.
+ *
+ * @param string $url The URL.
+ * @param string $label The label.
+ * @param array $attributes Options for the URL code (class, title, etc).
+ *
+ * @return string
+ */
+function link_to($label, $uri, array $attributes = array())
+{
+	return HTML::link($label, $uri, $attributes);
+}
+
+/**
  * HTML Helper
  * @package Avalon
  * @subpackage Helpers
