@@ -1,13 +1,15 @@
 <?php
-/**
+/*!
  * Avalon
- * Copyright (C) 2011 Jack Polgar
+ * Copyright (C) 2011-2012 Jack Polgar
  * 
  * @license http://opensource.org/licenses/BSD-3-Clause BSD License
  */
 
 /**
- * HTTP Request class
+ * Request class.
+ *
+ * @author Jack P.
  * @package Avalon
  */
 class Request
@@ -22,6 +24,10 @@ class Request
 	public static $method;
 	public static $post;
 	
+	/**
+	 * Processes the request and gets the URL,
+	 * request method, request type, and so on.
+	 */
 	public static function process()
 	{
 		static::$url = trim(static::_get_path_info(), '/');
@@ -32,47 +38,96 @@ class Request
 		static::$post = $_POST;
 	}
 	
+	/**
+	 * Determines the base URL of the app.
+	 *
+	 * @return string
+	 */
 	public static function base()
 	{
 		return str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']) . (func_num_args() > 0 ? implode('/' , func_get_args()) : '');
 	}
 	
+	/**
+	 * Redirects to the specified URL.
+	 *
+	 * @param string $url
+	 */
 	public static function redirect($url)
 	{
 		header("Location: " . $url);
 	}
 	
+	/**
+	 * Returns the requested URL.
+	 *
+	 * @return string
+	 */
 	public static function url()
 	{
 		return '/' . static::$url;
 	}
 	
+	/**
+	 * Returns the full URI of the request.
+	 *
+	 * @return string
+	 */
 	public static function full_uri()
 	{
 		return static::base(trim(static::url(), '/'));
 	}
 	
+	/**
+	 * Checks of the URI matches the specified URI.
+	 *
+	 * @param string $uri
+	 *
+	 * @return bool
+	 */
 	public static function matches($uri)
 	{
 		return trim($uri, '/') == trim(implode('/', self::$segments), '/');
 	}
 	
+	/**
+	 * Returns the segment at the specified index.
+	 *
+	 * @param integer $num
+	 *
+	 * @return string
+	 */
 	public static function seg($num)
 	{
 		return @static::$segments[$num];
 	}
 	
+	/**
+	 * Checks if the request was made via Ajax.
+	 *
+	 * @return bool
+	 */
 	public static function is_ajax()
 	{
 		return strtolower(static::$requested_with) == 'xmlhttprequest';
 	}
 	
+	/**
+	 * Gets the base URL
+	 *
+	 * @return string
+	 */
 	private static function _get_base_url()
 	{
 		static::$base_url = rtrim(dirname(static::_get_script_url()), '\\/');
 		return static::$base_url;
 	}
 	
+	/**
+	 * Determines the path info.
+	 *
+	 * @return string
+	 */
 	private static function _get_path_info()
 	{
 		if (static::$path_info === null) {
@@ -103,6 +158,11 @@ class Request
 		return static::$path_info;
 	}
 	
+	/**
+	 * Determines the script URL.
+	 *
+	 * @return string
+	 */
 	private static function _get_script_url()
 	{
 		if (static::$entry_file === null) {
@@ -140,6 +200,11 @@ class Request
 		return static::$entry_file;
 	}
 	
+	/**
+	 * Determines the requested URL.
+	 *
+	 * @return string
+	 */
 	private static function _get_request_url()
 	{
 		if (static::$url === null) {

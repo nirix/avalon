@@ -1,14 +1,17 @@
 <?php
-/**
+/*!
  * Avalon
- * Copyright (C) 2011 Jack Polgar
+ * Copyright (C) 2011-2012 Jack Polgar
  * 
  * @license http://opensource.org/licenses/BSD-3-Clause BSD License
  */
 
 /**
- * Avalon's Loader class
+ * Avalons loader class.
+ *
+ * @author Jack P.
  * @package Avalon
+ * @subpackage Core
  */
 class Load
 {
@@ -17,9 +20,12 @@ class Load
 	private static $helpers = array();
 	
 	/**
-	 * Library loader
+	 * Library loader.
+	 *
 	 * @param string $class The class name
 	 * @param boolean $init Initialize the class or not
+	 *
+	 * @return object
 	 */
 	public static function lib($class, $init = true)
 	{
@@ -48,6 +54,13 @@ class Load
 		return static::$libs[$class];
 	}
 	
+	/**
+	 * Helper loader.
+	 *
+	 * @param mixed $helper
+	 *
+	 * @return bool
+	 */
 	public static function helper()
 	{
 		$class = func_num_args() > 1 ? func_get_args() : func_get_arg(0);
@@ -78,6 +91,9 @@ class Load
 		return true;
 	}
 	
+	/**
+	 * Lower cases the specified string.
+	 */
 	private static function lowercase($string) {
 		$string = strtolower(preg_replace('/(?<=[a-z])([A-Z])/', '_' . '\\1', $string));
 		

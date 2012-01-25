@@ -1,21 +1,17 @@
 <?php
-/*
+/*!
  * Avalon
  * Copyright (C) 2011-2012 Jack Polgar
- *
- * @author Jack P. <nrx@nirix.net>
- * @copyright Jack P.
- * @license New BSD License
+ * 
+ * @license http://opensource.org/licenses/BSD-3-Clause BSD License
  */
 
 /**
- * Database class
+ * Database class.
  *
+ * @author Jack P.
  * @package Avalon
  * @subpackage Core
- * @since 0.1
- * @author Jack P. <nrx@nirix.net>
- * @copyright Copyright (c) Jack P.
  */
 class Database
 {

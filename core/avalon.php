@@ -1,14 +1,17 @@
 <?php
-/**
+/*!
  * Avalon
- * Copyright (C) 2011 Jack Polgar
+ * Copyright (C) 2011-2012 Jack Polgar
  * 
  * @license http://opensource.org/licenses/BSD-3-Clause BSD License
  */
 
 /**
- * The core avalon class
+ * The core Avalon class.
+ *
+ * @author Jack P.
  * @package Avalon
+ * @subpackage Core
  */
 class Avalon
 {

@@ -1,13 +1,15 @@
 <?php
-/**
+/*!
  * Avalon
- * Copyright (C) 2011 Jack Polgar
+ * Copyright (C) 2011-2012 Jack Polgar
  * 
  * @license http://opensource.org/licenses/BSD-3-Clause BSD License
  */
 
 /**
- * Avalon's View class
+ * View class.
+ *
+ * @author Jack P.
  * @package Avalon
  */
 class View
@@ -17,6 +19,12 @@ class View
 	public static $inherit_from;
 	private static $vars = array();
 	
+	/**
+	 * Renders the specified file.
+	 *
+	 * @param string $file
+	 * @param array $vars Variables to be passed to the view.
+	 */
 	public static function render($file, array $vars = array())
 	{
 		// Get the view content
@@ -33,6 +41,14 @@ class View
 		}
 	}
 	
+	/**
+	 * Renders and returns the specified file.
+	 *
+	 * @param string $file
+	 * @param array $vars Variables to be passed to the view.
+	 *
+	 * @return string
+	 */
 	public static function get($file, array $vars = array())
 	{
 		// Get the content and clean the buffer
@@ -41,6 +57,14 @@ class View
 		return $content;
 	}
 	
+	/**
+	 * Private function to handle the rendering of files.
+	 *
+	 * @param string $file
+	 * @param array $vars Variables to be passed to the view.
+	 *
+	 * @return string
+	 */
 	private static function _get_view($_file, array $vars = array())
 	{
 		// Get the file name/path
@@ -70,6 +94,13 @@ class View
 		return $content;
 	}
 	
+	/**
+	 * Determines the path of the view file.
+	 *
+	 * @param string $file File name.
+	 *
+	 * @return string
+	 */
 	private static function _view_file_path($file)
 	{
 		$file = strtolower($file);
@@ -94,6 +125,12 @@ class View
 		return $file;
 	}
 	
+	/**
+	 * Sends the variable to the view.
+	 *
+	 * @param string $var The variable name.
+	 * @param mixed $val The variables value.
+	 */
 	public static function set($var, $val)
 	{
 		if (is_array($var)) {
@@ -105,6 +142,11 @@ class View
 		}
 	}
 	
+	/**
+	 * Returns the variables array.
+	 *
+	 * @return array
+	 */
 	public static function vars()
 	{
 		return self::$vars;

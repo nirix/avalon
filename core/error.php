@@ -1,13 +1,15 @@
 <?php
-/**
+/*!
  * Avalon
- * Copyright (C) 2011 Jack Polgar
+ * Copyright (C) 2011-2012 Jack Polgar
  * 
  * @license http://opensource.org/licenses/BSD-3-Clause BSD License
  */
 
 /**
- * Avalon Error class
+ * Error class.
+ *
+ * @author Jack P.
  * @package Avalon
  */
 class Error

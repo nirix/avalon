@@ -1,18 +1,28 @@
 <?php
-/**
+/*!
  * Avalon
- * Copyright (C) 2011 Jack Polgar
+ * Copyright (C) 2011-2012 Jack Polgar
  * 
  * @license http://opensource.org/licenses/BSD-3-Clause BSD License
  */
 
 /**
  * Time Helper
+ *
+ * @author Jack P.
  * @package Avalon
  * @subpackage Helpers
  */
 class Time
 {
+	/**
+	 * Formats the date.
+	 *
+	 * @param string $format Date format
+	 * @param mixed $time Date in unix time or date-time format.
+	 *
+	 * @return string
+	 */
 	public function date($format = "Y-m-d H:i:s", $time = null)
 	{
 		$time = ($time !== null ? $time : static::time());
@@ -24,11 +34,23 @@ class Time
 		return date($format, $time);
 	}
 	
+	/**
+	 * Returns the current GMT date andtime in date/time format.
+	 *
+	 * @return string
+	 */
 	public static function gmt()
 	{
 		return date("Y-m-d H:i:s", time() - date("Z", time()));
 	}
 
+	/**
+	 * Converts the given GMT time to local time.
+	 *
+	 * @param string $datetime
+	 *
+	 * @return string
+	 */
 	public static function gmt_to_local($datetime)
 	{
 		$stamp = strtotime($datetime);
@@ -36,27 +58,39 @@ class Time
 	}
 	
 	/**
-	 * Converts a MySQL datetime timestamp into a unix timestamp.
+	 * Converts a datetime timestamp into a unix timestamp.
+	 *
 	 * @param datetime $original
+	 *
 	 * @return mixed
 	 */
 	public static function to_unix($original)
 	{
-		//return strtotime($original);
 		// YYYY-MM-DD HH:MM:SS
-		if (preg_match("#(?P<year>\d+)-(?P<month>\d+)-(?P<day>\d+) (?P<hour>\d+):(?P<minute>\d+):(?P<second>\d+)#siU", $original, $match)) {
+		if (preg_match("#(?P<year>\d+)-(?P<month>\d+)-(?P<day>\d+) (?P<hour>\d+):(?P<minute>\d+):(?P<second>\d+)#siU", $original, $match))
+		{
 			return mktime($match['hour'], $match['minute'], $match['second'], $match['month'], $match['day'], $match['year']);
 		}
 		// YYYY-MM-DD
-		elseif (preg_match("#(?P<year>\d+)-(?P<month>\d+)-(?P<day>\d+)#siU", $original, $match)) {
+		elseif (preg_match("#(?P<year>\d+)-(?P<month>\d+)-(?P<day>\d+)#siU", $original, $match))
+		{
 			return mktime(0, 0, 0, $match['month'], $match['day'], $match['year']);
 		}
 		// Fail
-		else {
+		else
+		{
 			return strtotime($original);
 		}
 	}
 	
+	/**
+	 * Returns time ago in words of the given date.
+	 *
+	 * @param string $original
+	 * @param bool $detailed
+	 *
+	 * @return string
+	 */
 	public static function ago_in_words($original, $detailed = true)
 	{
 		// Check what kind of format we're dealing with, timestamp or datetime

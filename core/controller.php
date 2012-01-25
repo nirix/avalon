@@ -1,16 +1,17 @@
 <?php
-/*
+/*!
  * Avalon
  * Copyright (C) 2011-2012 Jack Polgar
- *
- * @author Jack P. <nrx@nirix.net>
- * @copyright Jack P.
- * @license New BSD License
+ * 
+ * @license http://opensource.org/licenses/BSD-3-Clause BSD License
  */
 
 /**
- * The base controller class
+ * Base controller class.
+ *
+ * @author Jack P.
  * @package Avalon
+ * @subpackage Core
  */
 class Controller
 {
