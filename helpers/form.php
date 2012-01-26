@@ -103,7 +103,7 @@ class Form
 	 *
 	 * @return string
 	 */
-	public static function select($name, $values, $attributes = array())
+	public static function select($name, $options, $attributes = array())
 	{
 		// Extract the value
 		$value = isset($attributes['value']) ? $attributes['value'] : null;
@@ -115,9 +115,9 @@ class Form
 		$select = "<select " . HTML::build_attributes($attributes) . ">";
 		
 		// Options
-		foreach ($values as $value)
+		foreach ($options as $option)
 		{
-			$select .= '<option value="' . $value['value'] . '"' . ($value == $value['value'] ? ' selected="selected"' :'') . '>' . $value['label'] . '</option>';
+			$select .= '<option value="' . $option['value'] . '"' . ($value == $option['value'] ? ' selected="selected"' :'') . '>' . $option['label'] . '</option>';
 		}
 		
 		// Closing tags
