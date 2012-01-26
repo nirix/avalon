@@ -109,6 +109,8 @@ class Form
 		$value = isset($attributes['value']) ? $attributes['value'] : null;
 		unset($attributes['value']);
 		
+		$attributes['name'] = $name;
+
 		// Opening tag
 		$select = "<select " . HTML::build_attributes($attributes) . ">";
 		
@@ -155,29 +157,21 @@ class Form
 		// Merge default attributes with
 		// the specified attributes.
 		$attributes = array_merge(array('type' => $type, 'name' => $name), $attributes);
-		
-		// Text, password and hidden fields
-		if ($type == 'text'
-		or $type == 'password'
-		or $type == 'hidden')
+
+		// Textareas
+		if ($type == 'textarea')
 		{
-			$attributes['value'] = $value;
+			return "<textarea " . HTML::build_attributes($attributes) . ">{$value}</textarea>";
+		}
+		// Everything else
+		else
+		{
+			// Don't pass the checked attribute if its false.
+			if (isset($attributes['checked']) and !$attributes['checked'])
+			{
+				unset($attributes['checked']);
+			}
 			return "<input " . HTML::build_attributes($attributes) . ">";
-		}
-		// Text area
-		elseif ($type == 'textarea')
-		{
-			return '<textarea name="'.$name.'"'.(isset($args['id']) ? ' id="'.$args['id'].'"' :'').(isset($args['class']) ? ' class="'.$args['class'].'"' :'').(isset($args['cols']) ? ' cols="'.$args['cols'].'"' :'').(isset($args['rows']) ? ' rows="'.$args['rows'].'"' :'').'>'.$value.'</textarea>';
-		}
-		// Submit button
-		elseif ($type == 'submit')
-		{
-			return '<input type="'.$type.'" value="'.$value.'" class="'.$type.'" />';
-		}
-		// Checkbox
-		elseif ($type == 'checkbox')
-		{
-			return '<input type="'.$type.'" name="'.$name.'" value="'.$value.'" class="'.$type.'" '.(isset($args['checked']) && $args['checked'] ? 'checked ' :'').(isset($args['id']) ? ' id="'.$args['id'].'"' :'').'/>';
 		}
 	}
 }
