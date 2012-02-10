@@ -1,5 +1,5 @@
 <?php
-/*
+/*!
  * Avalon
  * Copyright (C) 2011-2012 Jack Polgar
  *
@@ -152,7 +152,7 @@ class PDO_Query
 			foreach ($this->cols as $col => $as)
 			{
 				// Check if we're fetching all columns
-				if ($col == '*')
+				if ($as == '*')
 				{
 					$cols[] = '*';
 				}
@@ -250,7 +250,7 @@ class PDO_Query
 			
 			foreach ($this->where as $param)
 			{
-				$where[] = '`' . $param[0] . '` ' . $param[1] . ' :' . $param[0];
+				$where[] = "`{$param[0]}` {$param[1]} :{$param[0]}";
 			}
 			
 			$query[] = "WHERE " . implode(' AND ', $where);
@@ -262,7 +262,7 @@ class PDO_Query
 	
 	private function _process_value($value)
 	{
-		if (!is_numeric($value) and in_array($value, array("NOW()"))) {
+		if ($value == "NOW()") {
 			return "'" . time() - date("Z", time()) . "'";
 		} else {
 			return Database::driver()->quote($value);
