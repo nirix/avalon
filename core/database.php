@@ -29,6 +29,9 @@ class Database
 		require SYSPATH . '/database/model.php';
 		require SYSPATH . '/database/' . strtolower($db['driver']) . '.php';
 		
+		// Define the DB_PREFIX constant
+		define("DB_PREFIX", isset($db['prefix']) ? $db['prefix'] : '');
+		
 		// Build the class with DB_ prefix, to be safe.
 		// it to the $driver variable.
 		$class_name = 'DB_' . $db['driver'];
