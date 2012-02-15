@@ -280,7 +280,7 @@ class Model
 			}
 			// Different column?
 			if (!isset($has_many['column'])) {
-				$has_many['column'] = 'id';
+				$has_many['column'] = static::$_primary_key;
 			}
 			
 			$model = $has_many['model'];
@@ -300,7 +300,7 @@ class Model
 			}
 			// Different foreign key?
 			if (!isset($belongs_to['foreign_key'])) {
-				$belongs_to['foreign_key'] = 'id';
+				$belongs_to['foreign_key'] = $belongs_to['model']::$_primary_key;
 			}
 			// Different column?
 			if (!isset($belongs_to['column'])) {
