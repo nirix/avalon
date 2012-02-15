@@ -28,6 +28,11 @@ class DB_PDO extends Driver
 	
 	public $prefix;
 	
+	/**
+	 * PDO wrapper constructor.
+	 *
+	 * @param array $config Database config array
+	 */
 	public function __construct($config)
 	{
 		try
@@ -44,11 +49,24 @@ class DB_PDO extends Driver
 		}
 	}
 	
+	/**
+	 * Quotes a string for use in a query.
+	 *
+	 * @param string $string
+	 * @param int $type Paramater type
+	 */
 	public function quote($string, $type = PDO::PARAM_STR)
 	{
 		return $this->connection->quote($string, $type);
 	}
 	
+	/**
+	 * Executes an SQL statement, returning a result set as a PDOStatement object.
+	 *
+	 * @param string $query
+	 *
+	 * @return mixed
+	 */
 	public function query($query)
 	{
 		$this->query_count++;
@@ -58,12 +76,27 @@ class DB_PDO extends Driver
 		return $rows;
 	}
 	
+	/**
+	 * Prepares a statement for execution and returns a statement object.
+	 *
+	 * @param string $query
+	 * @param array $options Driver options (not used)
+	 *
+	 * @return object
+	 */
 	public function prepare($query, array $options = array())
 	{
 		$this->last_query = $query;
 		return new PDO_Statement($this->connection->prepare($query, $options));
 	}
 	
+	/**
+	 * Returns a select query builder object.
+	 *
+	 * @param array $cols Columns to select
+	 *
+	 * @return object
+	 */
 	public function select($cols = array('*'))
 	{
 		if (!is_array($cols)) {
@@ -72,21 +105,45 @@ class DB_PDO extends Driver
 		return new PDO_Query("SELECT", $cols);
 	}
 	
+	/**
+	 * Returns an update query builder object.
+	 *
+	 * @param string $table Table name
+	 *
+	 * @return object
+	 */
 	public function update($table)
 	{
 		return new PDO_Query('UPDATE', $table);
 	}
 	
+	/**
+	 * Returns a delete query builder object.
+	 *
+	 * @return object
+	 */
 	public function delete()
 	{
 		return new PDO_Query("DELETE");
 	}
 
+	/**
+	 * Returns an insert query builder object.
+	 *
+	 * @param array $data Data to insert
+	 *
+	 * @return object
+	 */
 	public function insert(array $data)
 	{
 		return new PDO_Query("INSERT INTO", $data);
 	}
 	
+	/**
+	 * Returns the ID of the last inserted row.
+	 *
+	 * @return integer
+	 */
 	public function last_insert_id()
 	{
 		return $this->connection->lastInsertId();

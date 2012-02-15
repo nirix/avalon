@@ -19,6 +19,11 @@
  */
 class Driver
 {
+	/**
+	 * Shortcut to the Error::halt method.
+	 *
+	 * @param string $error DB error message
+	 */
 	public function halt($error = 'Unknown error')
 	{
 		if (is_array($error) and isset($error[2]) and !empty($error[2]))
