@@ -68,17 +68,22 @@ class Avalon
 		
 		// Start the controller
 		static::$app = new $controller_name();
+		
 		// Set the view
 		$view = (isset(Router::$namespace) ? Router::$namespace . '/' . Router::$controller . '/' . $method_view_name : Router::$controller .'/' . $method_view_name);
 		if (static::$app->_render['view'] === null) {
 			static::$app->_render['view'] = $view;
 		}
 		
-		// Check for a before action and execute if one exists
-		if (isset(static::$app->_before[Router::$method])) {
+		// Check for before actions and execute if there are any
+		if (isset(static::$app->_before[Router::$method]))
+		{
+			// Loop through the before actions for the routed method
 			$before = (is_array(static::$app->_before[Router::$method]) ? static::$app->_before[Router::$method] : array(static::$app->_before[Router::$method]) );
-			foreach ($before as $before_action) {
-				static::$app->$before_action();
+			foreach ($before as $before_action)
+			{
+				// Call the action and pass the routed method to it
+				static::$app->$before_action(Router::$method);
 			}
 		}
 		
