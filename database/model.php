@@ -330,6 +330,17 @@ class Model
 			$this->$var = $val;
 		}
 	}
+
+	/**
+	 * Used to add errors to the models error array.
+	 *
+	 * @param string $field
+	 * @param string $message
+	 */
+	public function _add_error($field, $message)
+	{
+		$this->errors[$field] = $message;
+	}
 	
 	/**
 	 * Returns the real name of this model class, not the top-most parent.
