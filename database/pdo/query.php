@@ -19,6 +19,7 @@
  */
 class PDO_Query
 {
+	private $driver;
 	private $type;
 	private $cols;
 	private $table;
@@ -38,7 +39,7 @@ class PDO_Query
 	 *
 	 * @return object
 	 */
-	public function __construct($type, $data = null)
+	public function __construct($driver, $type, $data = null)
 	{
 		if ($type == 'SELECT') {
 			$this->cols = (is_array($data) ? $data : array('*'));
@@ -48,8 +49,9 @@ class PDO_Query
 			$this->table = $data;
 		}
 		
+		$this->driver = $driver;
 		$this->type = $type;
-		$this->prefix = Database::driver()->prefix;
+		$this->prefix = $this->driver->prefix;
 		return $this;
 	}
 	
@@ -198,7 +200,7 @@ class PDO_Query
 	 */
 	public function exec()
 	{
-		$result = Database::driver()->prepare($this->_assemble());
+		$result = $this->driver->prepare($this->_assemble());
 		
 		if ($this->type != 'INSERT')
 		{
@@ -344,7 +346,7 @@ class PDO_Query
 		if ($value == "NOW()") {
 			return "'" . time() - date("Z", time()) . "'";
 		} else {
-			return Database::driver()->quote($value);
+			return $this->driver->quote($value);
 		}
 	}
 	
