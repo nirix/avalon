@@ -33,74 +33,112 @@ class Avalon
 	 */
 	public static function run()
 	{
-		// Fetch the AppController
-		if (file_exists(APPPATH . '/controllers/app_controller.php')) {
-			require APPPATH . '/controllers/app_controller.php';
-		} else {
-			new Error('Avalon::Run Error', 'The app controller could not be loaded.', 'HALT');
-		}
-		
-		// Setup the controller and method info
-		$controller_file = strtolower(APPPATH . '/controllers/' . (Router::$namespace != null ? Router::$namespace . '/' : '') . Router::$controller . '_controller.php');
-		$controller_name = (Router::$namespace != null ? Router::$namespace : '') . Router::$controller . 'Controller';
-		$method_view_name = Router::$method;
+		// Controller
+		$namespace = Router::$namespace;
+		$controller_name = str_replace('::', '', $namespace) . Router::$controller . "Controller";
+		$controller_file = strtolower(APPPATH . "/controllers/" . (Router::$namespace !== null ? str_replace('::', '/', Router::$namespace) . '/' : '') . Router::$controller . '_controller.php');
+
+		// View
+		$view_name = Router::$method;
+		$view_path = ($namespace !== null ? str_replace('::', '/', $namespace) . '/' : '') . Router::$controller . '/' . $view_name;
 		$method_name = 'action_' . Router::$method;
 		$method_args = Router::$args;
-		
-		// Check the controller file
-		if (!file_exists($controller_file)) {
-			$controller_file = APPPATH . '/controllers/error_controller.php';
+
+		// Load root namespace app controller
+		if (file_exists(APPPATH . "/controllers/app_controller.php"))
+		{
+			require APPPATH . "/controllers/app_controller.php";
 		}
-		
-		require_once $controller_file;
-		
-		// Check the controller and method
-		if (!class_exists($controller_name) or !method_exists($controller_name, $method_name)) {
-			if (!class_exists('ErrorController')) {
+
+		// Load controller namespaces app controllers
+		if ($namespace !== null)
+		{
+			$ns_path = array();
+			foreach (explode('::', $namespace) as $ns)
+			{
+				$ns_path[] = $ns;
+
+				// Check that the file exists...
+				$file_path = APPPATH . "/controllers/" . implode('/', $ns_path) . "/app_controller.php";
+				if (file_exists($file_path))
+				{
+					require $file_path;
+				}
+			}
+		}
+
+		// Check if the controller file exists...
+		if (file_exists($controller_file))
+		{
+			require $controller_file;
+		}
+
+		// Check for the controller and method
+		if (!class_exists($controller_name) or !method_exists($controller_name, $method_name))
+		{
+			// Load the error controller
+			if (!class_exists('ErrorController'))
+			{
 				require APPPATH . '/controllers/error_controller.php';
 			}
-			Router::$namespace = null;
-			Router::$controller = 'Error';
+
+			// Set the error controller info
 			$controller_name = 'ErrorController';
-			$method_view_name = '404';
+			$view_path = 'error/404';
 			$method_name = 'action_404';
+			$method_args = array();
 		}
-		
-		// Start the controller
+
+		// Start the app/controller
 		static::$app = new $controller_name();
-		
-		// Set the view
-		$view = (isset(Router::$namespace) ? Router::$namespace . '/' . Router::$controller . '/' . $method_view_name : Router::$controller .'/' . $method_view_name);
-		if (static::$app->_render['view'] === null) {
-			static::$app->_render['view'] = $view;
-		}
-		
-		// Check for before actions and execute if there are any
-		if (isset(static::$app->_before[Router::$method]))
+
+		// Set the view;
+		if (static::$app->_render['view'] === null)
 		{
-			// Loop through the before actions for the routed method
-			$before = (is_array(static::$app->_before[Router::$method]) ? static::$app->_before[Router::$method] : array(static::$app->_before[Router::$method]) );
-			foreach ($before as $before_action)
+			static::$app->_render['view'] = $view_path;
+		}
+
+		// Run before filters
+		if (is_array(static::$app->_before))
+		{
+			// Before all
+			if (isset(static::$app->_before['all']) and is_array(static::$app->_before['all']))
 			{
-				// Call the action and pass the routed method to it
-				static::$app->$before_action(Router::$method);
+				// Execute the filters
+				foreach (static::$app->_before['all'] as $filter)
+				{
+					static::$app->$filter();
+				}
+			}
+
+			// Before certain methods
+			if (isset(static::$app->_before[Router::$method]) and is_array(static::$app->_before[Router::$method]))
+			{
+				// Execute the filters
+				foreach (static::$app->_before[Router::$method] as $filter)
+				{
+					static::$app->$filter();
+				}
 			}
 		}
-		
+
 		// Call the method
-		if (static::$app->_render['action']) {
+		if (static::$app->_render['action'])
+		{
 			call_user_func_array(array(static::$app, $method_name), $method_args);
 		}
 		
-		// Call the 'destructor', why not just use PHP's?
-		// even after die or exit is called, the __destruct() is still executed.
-		if (method_exists(static::$app, '__shutdown')) {
+		// Call our custom 'destructor'. Why not use __destruct(): becayse even
+		// after 'die', 'exit', etc is called, __destruct() is still executed.
+		if (method_exists(static::$app, '__shutdown'))
+		{
 			static::$app->__shutdown();
 		}
 	}
 	
 	/**
 	 * Returns the application object.
+	 *
 	 * @return object
 	 */
 	public static function app()
@@ -110,6 +148,7 @@ class Avalon
 	
 	/**
 	 * Returns the version of the Avalon framework.
+	 *
 	 * @return string
 	 */
 	public static function version()

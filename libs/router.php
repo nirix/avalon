@@ -82,20 +82,15 @@ class Router
 	 */
 	private static function set_request($route)
 	{
-		// Seperate the method arguments from the route
-		$bits = explode('/', $route['value']);
-		static::$params = $route['params'];
-		static::$args = array_slice($bits, 1);
-		
-		// Check if there's a namespace specified
-		$bits = explode('::', $bits[0]);
-		if (count($bits) == 3) {
-			static::$namespace = $bits[0];
-			static::$controller = $bits[1];
-			static::$method = $bits[2];
-		} else {
-			static::$controller = $bits[0];
-			static::$method = $bits[1];
-		}
+		// Seperate the namespace, controller, method and arguments
+		$bits = explode('::', $route['value']);
+		$method_bits = explode('/', end($bits));
+
+		static::$namespace = ($ns = implode('::', array_slice($bits, 0, -2)) and !empty($ns)) ? $ns : null;
+		static::$controller = $bits[count($bits) - 2];
+		static::$method = $method_bits[0];
+		static::$args = (isset($method_bits[1])) ? explode(',', $method_bits[1]) : array();
+
+		unset($bits, $method_bits, $ns);
 	}
 }
