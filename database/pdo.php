@@ -39,8 +39,29 @@ class DB_PDO extends Driver
 		{
 			$this->prefix = isset($config['prefix']) ? $config['prefix'] : '';
 			
-			$dsn = strtolower($config['type']) . ':dbname=' . $config['database'] . ';host=' . $config['host'];
-			$this->connection = new PDO($dsn, $config['username'], $config['password'], isset($config['options']) ? $config['options'] : array());
+			// Check if a DSN is already specified
+			if (isset($config['dsn']))
+			{
+				$dsn = $config['dsn'];
+			}
+			// SQLite
+			elseif ($config['type'] == 'sqlite')
+			{
+				$dsn = strtolower("sqlite:" . $config['path']);
+			}
+			// Something else...
+			else
+			{
+				$dsn = strtolower($config['type']) . ':dbname=' . $config['database'] . ';host=' . $config['host'];
+			}
+
+			$this->connection = new PDO(
+				$dsn,
+				isset($config['username']) ? $config['username'] : null,
+				isset($config['password']) ? $config['password'] : null,
+				isset($config['options']) ? $config['options'] : array()
+			);
+
 			unset($dsn);
 		}
 		catch (PDOException $e)
