@@ -108,7 +108,7 @@ class DB_PDO extends Driver
 	public function prepare($query, array $options = array())
 	{
 		$this->last_query = $query;
-		return new PDO_Statement($this->connection->prepare($query, $options));
+		return new PDO_Statement($this, $this->connection->prepare($query, $options));
 	}
 	
 	/**
@@ -123,7 +123,7 @@ class DB_PDO extends Driver
 		if (!is_array($cols)) {
 			$cols = func_get_args();
 		}
-		return new PDO_Query("SELECT", $cols);
+		return new PDO_Query($this, "SELECT", $cols);
 	}
 	
 	/**
@@ -135,7 +135,7 @@ class DB_PDO extends Driver
 	 */
 	public function update($table)
 	{
-		return new PDO_Query('UPDATE', $table);
+		return new PDO_Query($this, "UPDATE", $table);
 	}
 	
 	/**
@@ -145,7 +145,7 @@ class DB_PDO extends Driver
 	 */
 	public function delete()
 	{
-		return new PDO_Query("DELETE");
+		return new PDO_Query($this, "DELETE");
 	}
 
 	/**
@@ -157,7 +157,7 @@ class DB_PDO extends Driver
 	 */
 	public function insert(array $data)
 	{
-		return new PDO_Query("INSERT INTO", $data);
+		return new PDO_Query($this, "INSERT INTO", $data);
 	}
 	
 	/**

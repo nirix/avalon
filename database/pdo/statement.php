@@ -19,6 +19,7 @@
  */
 class PDO_Statement
 {
+	private $driver;
 	private $statement;
 	private $_model;
 	
@@ -29,8 +30,9 @@ class PDO_Statement
 	 *
 	 * @return object
 	 */
-	public function __construct($statement)
+	public function __construct($driver, $statement)
 	{
+		$this->driver = $driver;
 		$this->statement = $statement;
 		return $this;
 	}
@@ -148,7 +150,7 @@ class PDO_Statement
 		}
 		else
 		{
-			Database::driver()->halt($this->statement->errorInfo());
+			$this->driver->halt($this->statement->errorInfo());
 		}
 	}
 	
