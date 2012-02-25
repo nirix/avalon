@@ -101,24 +101,26 @@ class Avalon
 		// Run before filters
 		if (is_array(static::$app->_before))
 		{
+			$filters = array();
+
 			// Before all
-			if (isset(static::$app->_before['all']) and is_array(static::$app->_before['all']))
+			if (isset(static::$app->_before['*']) and is_array(static::$app->_before['*']))
 			{
-				// Execute the filters
-				foreach (static::$app->_before['all'] as $filter)
-				{
-					static::$app->$filter();
-				}
+				// Merge them into the filters array
+				$filters = array_merge($filters, static::$app->_before['*']);
 			}
 
 			// Before certain methods
 			if (isset(static::$app->_before[Router::$method]) and is_array(static::$app->_before[Router::$method]))
 			{
-				// Execute the filters
-				foreach (static::$app->_before[Router::$method] as $filter)
-				{
-					static::$app->$filter();
-				}
+				// Merge them into the fitlers array
+				$filters = array_merge($filters, static::$app->_before[Router::$method]);
+			}
+
+			// Execute the filters
+			foreach ($filters as $filter)
+			{
+				static::$app->$filter();
 			}
 		}
 
@@ -128,7 +130,7 @@ class Avalon
 			call_user_func_array(array(static::$app, $method_name), $method_args);
 		}
 		
-		// Call our custom 'destructor'. Why not use __destruct(): becayse even
+		// Call our custom 'destructor'. Why not use __destruct(): because even
 		// after 'die', 'exit', etc is called, __destruct() is still executed.
 		if (method_exists(static::$app, '__shutdown'))
 		{
