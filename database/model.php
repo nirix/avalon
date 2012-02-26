@@ -335,6 +335,16 @@ class Model
 	}
 
 	/**
+	 * Returns the models data as an array.
+	 *
+	 * @return array
+	 */
+	public function __toArray()
+	{
+		return $this->_data;
+	}
+
+	/**
 	 * Used to add errors to the models error array.
 	 *
 	 * @param string $field
