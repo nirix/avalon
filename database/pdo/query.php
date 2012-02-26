@@ -19,7 +19,7 @@
  */
 class PDO_Query
 {
-	private $driver;
+	private $connection_name;
 	private $type;
 	private $cols;
 	private $table;
@@ -39,8 +39,10 @@ class PDO_Query
 	 *
 	 * @return object
 	 */
-	public function __construct($driver, $type, $data = null)
+	public function __construct($type, $data = null, $connection_name = 'main')
 	{
+		$this->connection_name = $connection_name;
+
 		if ($type == 'SELECT') {
 			$this->cols = (is_array($data) ? $data : array('*'));
 		} else if ($type == 'INSERT INTO') {
@@ -49,9 +51,8 @@ class PDO_Query
 			$this->table = $data;
 		}
 		
-		$this->driver = $driver;
 		$this->type = $type;
-		$this->prefix = $this->driver->prefix;
+		$this->prefix = $this->_conn()->prefix;
 		return $this;
 	}
 	
@@ -200,7 +201,7 @@ class PDO_Query
 	 */
 	public function exec()
 	{
-		$result = $this->driver->prepare($this->_assemble());
+		$result = $this->_conn()->prepare($this->_assemble());
 		
 		if ($this->type != 'INSERT')
 		{
@@ -346,10 +347,20 @@ class PDO_Query
 		if ($value == "NOW()") {
 			return "'" . time() - date("Z", time()) . "'";
 		} else {
-			return $this->driver->quote($value);
+			return $this->_conn()->quote($value);
 		}
 	}
 	
+	/**
+	 * Private function to return the database connection.
+	 *
+	 * @return object
+	 */
+	private function _conn()
+	{
+		return Database::connection($this->connection_name);
+	}
+
 	/**
 	 * Magic method that converts the query to a string.
 	 * And some PHP team members have said PHP is not a magic language,

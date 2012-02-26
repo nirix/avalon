@@ -19,14 +19,17 @@
  */
 class Model
 {
-	public static $db;
+	// Static information
 	protected static $_name; // Table name
 	protected static $_primary_key = 'id'; // Primary key
 	protected static $_has_many; // Has many relationship array
+	protected static $_properties = array(); // Table columns
 	protected static $_belongs_to; // Belongs to relationship array
 	protected static $_filters_before = array(); // Before filters
 	protected static $_filters_after = array(); // After filters
-	protected static $_properties = array(); // Table columns
+	protected static $_connection_name = 'main'; // Name of the connection to use
+
+	// Information different per table row
 	protected $_changed_properties = array(); // Properties that have been changed
 	protected $_data = array();
 	protected $_is_new = true; // Used to determine if this is a new row or not.
@@ -67,7 +70,7 @@ class Model
 	 */
 	public static function find($find, $value = null)
 	{
-		$select = Database::driver()->select()->from(static::$_name);
+		$select = static::db()->select()->from(static::$_name);
 		if ($value == null) {
 			$select = $select->where(static::$_primary_key, $find)->limit(1)->exec();
 		} else {
@@ -118,7 +121,7 @@ class Model
 			unset($data[static::$_primary_key]);
 			
 			// Save the row..
-			Database::driver()->update(static::$_name)->set($data)->where(static::$_primary_key, $this->_data[static::$_primary_key])->exec();
+			static::db()->update(static::$_name)->set($data)->where(static::$_primary_key, $this->_data[static::$_primary_key])->exec();
 		}
 		// Create
 		else
@@ -144,10 +147,10 @@ class Model
 			unset($data[static::$_primary_key]);
 			
 			// Insert the row..
-			Database::driver()->insert($data)->into(static::$_name)->exec();
+			static::db()->insert($data)->into(static::$_name)->exec();
 			
 			// Set the primary key
-			$this->_data[$primary_key] = Database::driver()->last_insert_id();
+			$this->_data[$primary_key] = static::db()->last_insert_id();
 		}
 	}
 	
@@ -157,7 +160,7 @@ class Model
 	public function delete()
 	{
 		if ($this->_is_new() === false) {
-			return Database::driver()->delete()->from(static::$_name)->where(static::$_primary_key, $this->_data[static::$_primary_key])->exec();
+			return static::db()->delete()->from(static::$_name)->where(static::$_primary_key, $this->_data[static::$_primary_key])->exec();
 		}
 	}
 	
@@ -217,7 +220,7 @@ class Model
 	 */
 	public static function select($cols = null)
 	{
-		return Database::driver()->select($cols === null ? static::$_properties : $cols)->from(static::$_name)->_model(static::_class());
+		return static::db()->select($cols === null ? static::$_properties : $cols)->from(static::$_name)->_model(static::_class());
 	}
 	
 	/**
@@ -225,7 +228,7 @@ class Model
 	 */
 	public function update()
 	{
-		return Database::driver()->update(static::$_name)->where(static::$_primary_key, $this->data[static::$_primary_key]);
+		return static::db()->update(static::$_name)->where(static::$_primary_key, $this->data[static::$_primary_key]);
 	}
 		
 	/**
@@ -236,7 +239,7 @@ class Model
 	public static function fetch_all()
 	{
 		$rows = array();
-		$fetched = Database::driver()->select(static::$_properties)->from(static::$_name)->exec()->fetch_all();
+		$fetched = static::db()->select(static::$_properties)->from(static::$_name)->exec()->fetch_all();
 		
 		foreach ($fetched as $row) {
 			$rows[] = new static($row);
@@ -363,5 +366,15 @@ class Model
 				$this->_data[$var] = Time::gmt_to_local($this->_data[$var]);
 			}
 		}
+	}
+
+	/**
+	 * Private function to get the database connection.
+	 *
+	 * @return object
+	 */
+	protected static function db()
+	{
+		return Database::connection(static::$_connection_name);
 	}
 }

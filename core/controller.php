@@ -23,7 +23,7 @@ class Controller
 	{
 		// Get the database for easy access
 		if (Database::initiated()) {
-			$this->db = Database::driver();
+			$this->db = Database::connection();
 		}
 		
 		// Allow the views to access the app,

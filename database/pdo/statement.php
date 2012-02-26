@@ -19,7 +19,7 @@
  */
 class PDO_Statement
 {
-	private $driver;
+	private $connection_name;
 	private $statement;
 	private $_model;
 	
@@ -30,10 +30,10 @@ class PDO_Statement
 	 *
 	 * @return object
 	 */
-	public function __construct($driver, $statement)
+	public function __construct($statement, $connection_name = 'main')
 	{
-		$this->driver = $driver;
 		$this->statement = $statement;
+		$this->connection_name = $connection_name;
 		return $this;
 	}
 	
@@ -150,7 +150,7 @@ class PDO_Statement
 		}
 		else
 		{
-			$this->driver->halt($this->statement->errorInfo());
+			Database::connection($this->connection_name)->halt($this->statement->errorInfo());
 		}
 	}
 	

@@ -23,6 +23,7 @@ require __DIR__ . '/pdo/statement.php';
 class DB_PDO extends Driver
 {
 	private $connection;
+	private $connection_name;
 	private $query_count = 0;
 	protected $last_query;
 	
@@ -33,10 +34,11 @@ class DB_PDO extends Driver
 	 *
 	 * @param array $config Database config array
 	 */
-	public function __construct($config)
+	public function __construct($config, $name)
 	{
 		try
 		{
+			$this->connection_name = $name;
 			$this->prefix = isset($config['prefix']) ? $config['prefix'] : '';
 			
 			// Check if a DSN is already specified
@@ -108,7 +110,7 @@ class DB_PDO extends Driver
 	public function prepare($query, array $options = array())
 	{
 		$this->last_query = $query;
-		return new PDO_Statement($this, $this->connection->prepare($query, $options));
+		return new PDO_Statement($this->connection->prepare($query, $options), $this->connection_name);
 	}
 	
 	/**
@@ -123,7 +125,7 @@ class DB_PDO extends Driver
 		if (!is_array($cols)) {
 			$cols = func_get_args();
 		}
-		return new PDO_Query($this, "SELECT", $cols);
+		return new PDO_Query("SELECT", $cols, $this->connection_name);
 	}
 	
 	/**
@@ -135,7 +137,7 @@ class DB_PDO extends Driver
 	 */
 	public function update($table)
 	{
-		return new PDO_Query($this, "UPDATE", $table);
+		return new PDO_Query("UPDATE", $table, $this->connection_name);
 	}
 	
 	/**
@@ -145,7 +147,7 @@ class DB_PDO extends Driver
 	 */
 	public function delete()
 	{
-		return new PDO_Query($this, "DELETE");
+		return new PDO_Query("DELETE", null, $this->connection_name);
 	}
 
 	/**
@@ -157,7 +159,7 @@ class DB_PDO extends Driver
 	 */
 	public function insert(array $data)
 	{
-		return new PDO_Query($this, "INSERT INTO", $data);
+		return new PDO_Query("INSERT INTO", $data, $this->connection_name);
 	}
 	
 	/**
