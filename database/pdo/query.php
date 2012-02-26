@@ -152,7 +152,7 @@ class PDO_Query
 	 * @example
 	 *    where("count", 5, ">=")
 	 *    or
-	 *    where(array(array('count', '>=', 5)));
+	 *    where(array(array('count', 5, '>=')));
 	 *
 	 * @param string $columm Column
 	 * @param mixed $value Column value
@@ -168,7 +168,7 @@ class PDO_Query
 			// Loop though the columns and add them
 			foreach($columm as $where)
 			{
-				$this->where($where[0], $where[1], $where[2]);
+				$this->where($where[0], $where[1], (isset($where[2]) ? $where[2] : '='));
 			}
 		}
 		// Just one, add it.
