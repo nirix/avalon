@@ -19,7 +19,11 @@ class Router
 	public static $method;
 	public static $params = array();
 	public static $args = array();
+	public static $extension;
 	private static $routes = array();
+
+	// Router stuff
+	public static $extensions = array('.json', '.xml', '.rss');
 	
 	/**
 	 * Matche the request to a route and get the controller, method and arguments.
@@ -45,12 +49,13 @@ class Router
 		
 		// Loop through routes and find a regex match
 		foreach (static::$routes as $route => $args) {
-			$route = '#^' . $route . '$#';
+			$route = '#^' . $route . '(?<extension>' . implode('|', static::$extensions) . ')?$#';
 			
 			if (preg_match($route, $request, $params)) {
 				unset($params[0]);
 				$args['params'] = array_merge($args['params'], $params);
 				$args['value'] = preg_replace($route, $args['value'], $request);
+				$args['extension'] = isset($params['extension']) ? $params['extension'] : null;
 				static::set_request($args);
 				return true;
 			}
@@ -90,7 +95,18 @@ class Router
 		static::$controller = $bits[count($bits) - 2];
 		static::$method = $method_bits[0];
 		static::$args = (isset($method_bits[1])) ? explode(',', $method_bits[1]) : array();
+		static::$extension = isset($route['extension']) ? $route['extension'] : null;
 
 		unset($bits, $method_bits, $ns);
+	}
+
+	/**
+	 * Returns the namespace in the form of a directory path.
+	 *
+	 * @return string
+	 */
+	public static function namespace_path()
+	{
+		return str_replace('::', '/', static::$namespace) . '/';
 	}
 }

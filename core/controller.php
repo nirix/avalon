@@ -28,12 +28,42 @@ class Controller
 
 		// Set the view path
 		$this->_render['view'] = strtolower((Router::$namespace !== null ? Router::namespace_path() : '') . Router::$controller . '/' . Router::$method);
+
+		// Check if the route has an extension
+		if (Router::$extension !== null)
+		{
+			$this->_render['view'] = $this->_render['view'] . Router::$extension;
+			
+			// Lets make sure the view for the extension exists
+			if (View::exists($this->_render['view']) === false)
+			{
+				$this->show_404();
+			}
+			else
+			{
+				$this->_render['layout'] = 'plain';
+			}
+		}
 		
 		// Allow the views to access the app,
 		// even though its not good practice...
 		View::set('app', $this);
 	}
-	
+
+	/**
+	 * Used to display the 404 page.
+	 */
+	public function show_404()
+	{
+		// Send the request to the view and
+		// change the view file to error/404.php
+		// and disable the calling of the routed
+		// controller method.
+		View::set('request', Request::url());
+		$this->_render['view'] = 'error/404';
+		$this->_render['action'] = false;
+	}
+
 	public function __shutdown()
 	{
 		if (!$this->_render['view']) {
