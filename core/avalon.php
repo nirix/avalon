@@ -38,9 +38,7 @@ class Avalon
 		$controller_name = str_replace('::', '', $namespace) . Router::$controller . "Controller";
 		$controller_file = strtolower(APPPATH . "/controllers/" . (Router::$namespace !== null ? str_replace('::', '/', Router::$namespace) . '/' : '') . Router::$controller . '_controller.php');
 
-		// View
-		$view_name = Router::$method;
-		$view_path = ($namespace !== null ? str_replace('::', '/', $namespace) . '/' : '') . Router::$controller . '/' . $view_name;
+		// Method
 		$method_name = 'action_' . Router::$method;
 		$method_args = Router::$args;
 
@@ -91,12 +89,6 @@ class Avalon
 
 		// Start the app/controller
 		static::$app = new $controller_name();
-
-		// Set the view;
-		if (static::$app->_render['view'] === null)
-		{
-			static::$app->_render['view'] = $view_path;
-		}
 
 		// Run before filters
 		if (is_array(static::$app->_before))

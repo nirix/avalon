@@ -25,6 +25,9 @@ class Controller
 		if (Database::initiated()) {
 			$this->db = Database::connection();
 		}
+
+		// Set the view path
+		$this->_render['view'] = strtolower((Router::$namespace !== null ? Router::namespace_path() : '') . Router::$controller . '/' . Router::$method);
 		
 		// Allow the views to access the app,
 		// even though its not good practice...
