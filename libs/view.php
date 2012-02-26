@@ -104,25 +104,49 @@ class View
 	private static function _view_file_path($file)
 	{
 		$file = strtolower($file);
-		
+		$path = static::exists($file);
+
 		// Check if the theme has this view
-		if (self::$theme != null and file_exists(APPPATH.'/views/'.(self::$theme != null ? self::$theme.'/' : '').$file.'.php')) {
-			$file = APPPATH.'/views/'.self::$theme.'/'.$file.'.php';
-		}
-		// I guess not, let's see if we can inherit it?
-		elseif (self::$inherit_from != null and file_exists((self::$inherit_from != null ? self::$inherit_from.'/' : '').$file.'.php')) {
-			$file = self::$inherit_from.'/'.$file.'.php';
-		}
-		// No? Well what about the root of the views direcotry?
-		elseif(file_exists(APPPATH.'/views/'.$file.'.php')) {
-			$file = APPPATH.'/views/'.$file.'.php';
-		}
-		// Not there either? I'm not sure then..
-		else {
+		if (!$path)
+		{
 			Error::halt("View Error", "Unable to load view '{$file}'", 'HALT');
 		}
 		
-		return $file;
+		unset($file);
+		return $path;
+	}
+
+	public static function exists($name)
+	{
+		$dirs = array();
+
+		// Add the theme path, if a theme is set
+		if (static::$theme !== null)
+		{
+			$dirs[] = APPPATH . '/views/' . static::$theme . '/';
+		}
+
+		// Add the inheritance path, if there is one
+		if (static::$inherit_from !== null)
+		{
+			$dirs[] = static::$inherit_from . '/';
+		}
+
+		// Add the regular path
+		$dirs[] = APPPATH . '/views/';
+
+		// Loop over and find the view
+		foreach ($dirs as $dir)
+		{
+			$path = $dir . $name . '.php';
+			if (file_exists($path))
+			{
+				return $path;
+			}
+		}
+
+		// Damn it Jim, I'm a doctor not a view path.
+		return false;
 	}
 	
 	/**
