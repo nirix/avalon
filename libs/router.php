@@ -96,6 +96,7 @@ class Router
 		static::$method = $method_bits[0];
 		static::$args = (isset($method_bits[1])) ? explode(',', $method_bits[1]) : array();
 		static::$extension = isset($route['extension']) ? $route['extension'] : null;
+		static::$params = $route['params'];
 
 		unset($bits, $method_bits, $ns);
 	}
