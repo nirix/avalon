@@ -339,9 +339,24 @@ class Model
 	 *
 	 * @return array
 	 */
-	public function __toArray()
+	public function __toArray($fields = null)
 	{
-		return $this->_data;
+		// Returns the models data for all fields
+		if ($fields == null)
+		{
+			return $this->_data;
+		}
+		// Return only the fields specified
+		else
+		{
+			$data = array();
+			foreach($fields as $field)
+			{
+				$data[$field] = $this->_data[$field];
+			}
+			unset($fields, $field);
+			return $data;
+		}
 	}
 
 	/**
