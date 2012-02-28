@@ -23,7 +23,7 @@ class Model
 	protected static $_name; // Table name
 	protected static $_primary_key = 'id'; // Primary key
 	protected static $_has_many; // Has many relationship array
-	protected static $_properties = array(); // Table columns
+	protected static $_properties = array('*'); // Table columns
 	protected static $_belongs_to; // Belongs to relationship array
 	protected static $_filters_before = array(); // Before filters
 	protected static $_filters_after = array(); // After filters
@@ -44,17 +44,31 @@ class Model
 	{
 		$this->_data = $data;
 		$this->_is_new = $is_new;
+
+		// Is there any data?
+		if (is_array($data))
+		{
+			// If so get the columns and add them to
+			// the properties array
+			foreach (array_keys($data) as $column)
+			{
+				static::$_properties[] = $column;
+			}
+		}
 		
+		// Create an after construct filter array
 		if (!isset(static::$_filters_after['construct'])) {
 			static::$_filters_after['construct'] = array();
 		}
+
+		// Add the _date_time_convert method it to
 		if (!in_array('_date_time_convert', static::$_filters_after['construct'])) {
 			static::$_filters_after['construct'][] = '_date_time_convert';
 		}
-			
+		
+		// And run the after construct filter array...
 		if (isset(static::$_filters_after['construct'])) {
-			$filters = (is_array(static::$_filters_after['construct']) ? static::$_filters_after['construct'] : array(static::$_filters_after['construct']));
-			foreach ($filters as $filter) {
+			foreach (static::$_filters_after['construct'] as $filter) {
 				$this->$filter();
 			}
 		}
@@ -387,7 +401,7 @@ class Model
 	public function _date_time_convert()
 	{
 		foreach (array('created_at', 'updated_at', 'published_at') as $var) {
-			if (isset($this->_data[$var])) {
+			if (!$this->_is_new() and isset($this->_data[$var])) {
 				$this->_data[$var] = Time::gmt_to_local($this->_data[$var]);
 			}
 		}
