@@ -210,7 +210,7 @@ class Model
 			$this->_data[$col] = $val;
 			$this->_set_changed($col);
 			
-			if (!isset(static::$_properties[$val]))
+			if (!in_array($val, static::$_properties))
 			{
 				static::$_properties[] = $val;
 			}
