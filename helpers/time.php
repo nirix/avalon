@@ -23,7 +23,7 @@ class Time
 	 *
 	 * @return string
 	 */
-	public function date($format = "Y-m-d H:i:s", $time = null)
+	public static function date($format = "Y-m-d H:i:s", $time = null)
 	{
 		$time = ($time !== null ? $time : static::time());
 		
