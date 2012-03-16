@@ -36,7 +36,8 @@ class Database
 		// Load the models
 		foreach(scandir(APPPATH . '/models') as $file)
 		{
-			if(!is_dir($file))
+			// Make sure it's not a directory and is a php file
+			if(!is_dir($file) and substr($file, -3) == 'php')
 			{
 				require(APPPATH . '/models/' . $file);
 			}
