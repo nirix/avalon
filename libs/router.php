@@ -32,6 +32,7 @@ class Router
 	public static $params = array();
 	public static $args = array();
 	public static $extension;
+	public static $error404;
 	private static $routes = array();
 
 	// Router stuff

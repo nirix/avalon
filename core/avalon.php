@@ -93,6 +93,9 @@ class Avalon
 			}
 
 			// Set the error controller info
+			Router::$namespace = null;
+			Router::$controller = 'Error';
+			Router::$method = '404';
 			$controller_name = 'ErrorController';
 			$view_path = 'error/404';
 			$method_name = 'action_404';
