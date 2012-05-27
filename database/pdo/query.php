@@ -354,7 +354,7 @@ class PDO_Query
 	 */
 	private function _process_value($value)
 	{
-		if ($value == "NOW()") {
+		if ($value === "NOW()") {
 			return "'" . time() - date("Z", time()) . "'";
 		} else {
 			return $this->_conn()->quote($value);
