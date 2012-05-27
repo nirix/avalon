@@ -57,7 +57,7 @@ class Request
 	 */
 	public static function base()
 	{
-		return str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']) . (func_num_args() > 0 ? implode('/' , func_get_args()) : '');
+		return str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']) . (func_num_args() > 0 ? trim(implode('/' , func_get_args()), '/') : '');
 	}
 	
 	/**
