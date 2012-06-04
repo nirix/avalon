@@ -28,6 +28,24 @@
 class Form
 {
 	/**
+	 * Creates a label.
+	 *
+	 * @param string $text
+	 * @param string $for
+	 * @param array $attributes
+	 *
+	 * @return string
+	 */
+	public static function label($text, $for = null, $attributes = array())
+	{
+		if ($for !== null)
+		{
+			$attributes['for'] = $for;
+		}
+		return "<label ". HTML::build_attributes($attributes) .">{$text}</label>";
+	}
+
+	/**
 	 * Creates a text input field.
 	 *
 	 * @param string $name
