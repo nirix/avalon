@@ -66,16 +66,26 @@ class Model
 			}
 		}
 		
-		// Create an after construct filter array
-		if (!isset(static::$_filters_after['construct'])) {
-			static::$_filters_after['construct'] = array();
+		// Create filter arrays if they aren't already
+		foreach (array('construct', 'create', 'save') as $filter)
+		{
+			// Before filters
+			if (!isset(static::$_filters_before[$filter]))
+			{
+				static::$_filters_before[$filter] = array();
+			}
+
+			// After filters
+			if (!isset(static::$_filters_after[$filter]))
+			{
+				static::$_filters_before[$filter] = array();
+			}
 		}
 
-		// Add the _date_time_convert method it to
-		if (!in_array('_date_time_convert', static::$_filters_after['construct'])) {
-			static::$_filters_after['construct'][] = '_date_time_convert';
-		}
-		
+		static::$_filters_after['construct'][] = '_date_time_convert';
+		static::$_filters_before['create'][] = '_timestamps';
+		static::$_filters_before['save'][] = '_timestamps';
+
 		// And run the after construct filter array...
 		if (isset(static::$_filters_after['construct'])) {
 			foreach (static::$_filters_after['construct'] as $filter) {
@@ -146,6 +156,8 @@ class Model
 			
 			// Save the row..
 			static::db()->update(static::$_name)->set($data)->where(static::$_primary_key, $this->_data[static::$_primary_key])->exec();
+
+			return true;
 		}
 		// Create
 		else
@@ -169,12 +181,14 @@ class Model
 				}
 			}
 			unset($data[static::$_primary_key]);
-			
+
 			// Insert the row..
 			static::db()->insert($data)->into(static::$_name)->exec();
 			
 			// Set the primary key
 			$this->_data[$primary_key] = static::db()->last_insert_id();
+
+			return true;
 		}
 	}
 	
@@ -405,10 +419,28 @@ class Model
 	}
 	
 	/**
+	 * Sets the created_at and updated_at fields when saving.
+	 */
+	private function _timestamps()
+	{		
+		// Created at field
+		if ($this->_is_new() and in_array('created_at', static::$_properties) and !isset($this->_data['created_at']))
+		{
+			$this->_data['created_at'] = "NOW()";
+		}
+
+		// Updated at field
+		if (!$this->_is_new() and in_array('updated_at', static::$_properties) and !isset($this->_data['updated_at']))
+		{
+			$this->_data['updated_at'] = "NOW()";
+		}
+	}
+
+	/**
 	 * Converts the created_at, updated_at and published_at properties
 	 * to local time from gmt time.
 	 */
-	public function _date_time_convert()
+	private function _date_time_convert()
 	{
 		foreach (array('created_at', 'updated_at', 'published_at') as $var) {
 			if (!$this->_is_new() and isset($this->_data[$var])) {
