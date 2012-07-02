@@ -53,7 +53,7 @@ class Time
 	 */
 	public static function gmt()
 	{
-		return date("Y-m-d H:i:s", time() - date("Z", time()));
+		return date("Y-m-d H:i:s", time() - date("Z"));
 	}
 
 	/**
@@ -65,8 +65,8 @@ class Time
 	 */
 	public static function gmt_to_local($datetime)
 	{
-		$stamp = strtotime($datetime);
-		return date("Y-m-d H:i:s", $stamp + date("Z", $stamp));
+		$stamp = static::to_unix($datetime);
+		return date("Y-m-d H:i:s", $stamp + date("Z"));
 	}
 	
 	/**
@@ -78,6 +78,11 @@ class Time
 	 */
 	public static function to_unix($original)
 	{
+		if (is_numeric($original))
+		{
+			return $original;
+		}
+
 		// YYYY-MM-DD HH:MM:SS
 		if (preg_match("#(?P<year>\d+)-(?P<month>\d+)-(?P<day>\d+) (?P<hour>\d+):(?P<minute>\d+):(?P<second>\d+)#siU", $original, $match))
 		{

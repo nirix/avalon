@@ -78,14 +78,25 @@ class Model
 			// After filters
 			if (!isset(static::$_filters_after[$filter]))
 			{
-				static::$_filters_before[$filter] = array();
+				static::$_filters_after[$filter] = array();
 			}
 		}
 
-		static::$_filters_after['construct'][] = '_date_time_convert';
-		static::$_filters_before['create'][] = '_timestamps';
-		static::$_filters_before['save'][] = '_timestamps';
+		if (!in_array('_date_time_convert', static::$_filters_after['construct']))
+		{
+			static::$_filters_after['construct'][] = '_date_time_convert';
+		}
 
+		if (!in_array('_timestamps', static::$_filters_before['create']))
+		{
+			static::$_filters_before['create'][] = '_timestamps';
+		}
+
+		if (!in_array('_timestamps', static::$_filters_before['save']))
+		{
+			static::$_filters_before['save'][] = '_timestamps';
+		}
+		
 		// And run the after construct filter array...
 		if (isset(static::$_filters_after['construct'])) {
 			foreach (static::$_filters_after['construct'] as $filter) {
