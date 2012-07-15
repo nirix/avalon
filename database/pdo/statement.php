@@ -100,6 +100,11 @@ class PDO_Statement
 	 */
 	public function fetch($style = PDO::FETCH_ASSOC, $orientation = PDO::FETCH_ORI_NEXT, $offset = 0)
 	{
+		if ($this->row_count() == 0)
+		{
+			return false;
+		}
+
 		$result = $this->statement->fetch($style, $orientation, $offset);
 		
 		if ($this->_model !== null)
