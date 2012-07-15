@@ -252,7 +252,12 @@ class Model
 		}
 	}
 	
-	private function _set_changed($property)
+	/**
+	 * Adds the property to the changed properties array.
+	 *
+	 * @param string $property
+	 */
+	protected function _set_changed($property)
 	{
 		if (in_array($property, static::$_properties) and !in_array($property, $this->_changed_properties))
 		{
@@ -441,9 +446,9 @@ class Model
 		}
 
 		// Updated at field
-		if (!$this->_is_new() and in_array('updated_at', static::$_properties) and !isset($this->_data['updated_at']))
+		if (!$this->_is_new() and in_array('updated_at', static::$_properties))
 		{
-			$this->_data['updated_at'] = "NOW()";
+			$this->updated_at = "NOW()";
 		}
 	}
 
