@@ -142,18 +142,43 @@ class Form
 		$attributes['name'] = $name;
 
 		// Opening tag
-		$select = "<select " . HTML::build_attributes($attributes) . ">";
+		$select = array();
+		$select[] = "<select " . HTML::build_attributes($attributes) . ">";
 		
 		// Options
-		foreach ($options as $option)
+		foreach ($options as $index => $option)
 		{
-			$select .= '<option value="' . $option['value'] . '"' . ($value == $option['value'] ? ' selected="selected"' :'') . '>' . $option['label'] . '</option>';
+			if (!is_numeric($index))
+			{
+				$select[] = '<optgroup label="' . $index . '">';
+				foreach ($option as $opt)
+				{
+					$select[] = static::select_option($opt, $value);
+				}
+				$select[] = '</optgroup>'; 
+			}
+			else
+			{
+				$select[] = static::select_option($option, $value);
+			}
 		}
 		
 		// Closing tags
-		$select .= '</select>';
+		$select[] = '</select>';
 		
-		return $select;
+		return implode(PHP_EOL, $select);
+	}
+
+	/**
+	 * Return the HTML for a select option.
+	 *
+	 * @param array $option
+	 *
+	 * @return string
+	 */
+	private static function select_option($option, $value)
+	{
+		return '<option value="' . $option['value'] . '"' . ($value == $option['value'] ? ' selected="selected"' :'') . '>' . $option['label'] . '</option>';
 	}
 	
 	/**
