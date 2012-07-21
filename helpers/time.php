@@ -37,7 +37,7 @@ class Time
 	 */
 	public static function date($format = "Y-m-d H:i:s", $time = null)
 	{
-		$time = ($time !== null ? $time : static::time());
+		$time = ($time !== null ? $time : time());
 		
 		if (!is_numeric($time)) {
 			$time = static::to_unix($time);
@@ -45,7 +45,7 @@ class Time
 		
 		return date($format, $time);
 	}
-	
+
 	/**
 	 * Returns the current GMT date andtime in date/time format.
 	 *
