@@ -115,6 +115,7 @@ class Form
 	 * Creates a checkbox field.
 	 *
 	 * @param string $name
+	 * @param mixed $value
 	 * @param array $attributes
 	 *
 	 * @return string
@@ -123,6 +124,21 @@ class Form
 	{
 		$attributes['value'] = $value;
 		return self::input('checkbox', $name, $attributes);
+	}
+
+	/**
+	 * Creates a radio field.
+	 *
+	 * @param string $name
+	 * @param mixed $value
+	 * @param array $attributes
+	 *
+	 * @return string
+	 */
+	public static function radio($name, $value, $attributes = array())
+	{
+		$attributes['value'] = $value;
+		return self::input('radio', $name, $attributes);
 	}
 	
 	/**
@@ -192,6 +208,13 @@ class Form
 	 */
 	public static function input($type, $name, $attributes)
 	{
+		// Set id attribute to be same as the name
+		// if one has not been set
+		if (!isset($attributes['id']))
+		{
+			$attributes['id'] =  $name;
+		}
+
 		// Check if the value is set in the
 		// attributes array
 		if (isset($attributes['value']))
@@ -207,6 +230,19 @@ class Form
 		else
 		{
 			$value = '';
+		}
+
+		// Add selected or checked attribute?
+		foreach (array('selected', 'checked') as $attr)
+		{
+			if (isset($attributes[$attr]) and !$attributes[$attr])
+			{
+				unset($attributes[$attr]);
+			}
+			elseif (isset($attributes[$attr]))
+			{
+				$attributes[$attr] = $attr;
+			}
 		}
 		
 		// Merge default attributes with
