@@ -155,7 +155,15 @@ class Form
 		$value = isset($attributes['value']) ? $attributes['value'] : null;
 		unset($attributes['value']);
 		
+		// Set the name
 		$attributes['name'] = $name;
+
+		// Set the id to the name if one
+		// is not already set.
+		if (!isset($attributes['id']))
+		{
+			$attributes['id'] = $name;
+		}
 
 		// Opening tag
 		$select = array();
