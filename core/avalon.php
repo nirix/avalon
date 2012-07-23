@@ -127,7 +127,7 @@ class Avalon
 			// Execute the filters
 			foreach ($filters as $filter)
 			{
-				static::$app->$filter();
+				static::$app->$filter(Router::$method);
 			}
 		}
 
