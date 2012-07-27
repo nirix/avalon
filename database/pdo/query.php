@@ -356,6 +356,8 @@ class PDO_Query
 	{
 		if ($value === "NOW()") {
 			return $this->_conn()->quote(gmdate("Y-m-d H:i:s"));
+		} elseif ($value === "NULL") {
+			return 'NULL';
 		} else {
 			return $this->_conn()->quote($value);
 		}
