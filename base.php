@@ -18,6 +18,7 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
+require SYSPATH . '/libs/fishhook.php';
 require SYSPATH . '/core/error.php';
 require SYSPATH . '/core/load.php';
 require SYSPATH . '/core/controller.php';

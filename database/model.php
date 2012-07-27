@@ -103,6 +103,9 @@ class Model
 				$this->$filter();
 			}
 		}
+
+		// Plugin hook
+		FishHook::run('model:__construct', array(get_called_class()));
 	}
 	
 	/**
@@ -126,6 +129,9 @@ class Model
 		{
 			return false;
 		}
+
+		// Plugin hook
+		FishHook::run('model:find', array(get_called_class(), $find, $value));
 		
 		return new static($select->fetch(), false);
 	}
@@ -249,6 +255,9 @@ class Model
 			{
 				static::$_properties[] = $val;
 			}
+
+			// Plugin hook
+			FishHook::run('model:set', array(get_called_class(), $col, $val));
 		}
 	}
 	
@@ -316,12 +325,18 @@ class Model
 	 */
 	public function __get($var)
 	{
+		// Model data
 		if (in_array($var, static::$_properties))
 		{
-			return isset($this->_data[$var]) ? $this->_data[$var] : '';
+			$val = isset($this->_data[$var]) ? $this->_data[$var] : '';
+			
+			// Plugin hook
+			FishHook::run('model:__get', array(get_called_class(), $var, $this->_data, &$val));
+			
+			return $val;
 		}
 		// Has many
-		if (is_array(static::$_has_many) and (in_array($var, static::$_has_many) or isset(static::$_has_many[$var])))
+		else if (is_array(static::$_has_many) and (in_array($var, static::$_has_many) or isset(static::$_has_many[$var])))
 		{
 			$has_many = array();
 			if (isset(static::$_has_many[$var])) {
@@ -368,6 +383,11 @@ class Model
 		}
 		else
 		{
+			$val = $this->$var;
+
+			// Plugin hook
+			FishHook::run('model:__get', array(get_called_class(), $var, $this->_data, &$val));
+
 			return $this->$var;
 		}
 	}
