@@ -48,7 +48,7 @@ class Avalon
 		// Controller
 		$namespace = Router::$namespace;
 		$controller_name = str_replace('::', '', $namespace) . Router::$controller . "Controller";
-		$controller_file = strtolower(APPPATH . "/controllers/" . (Router::$namespace !== null ? str_replace('::', '/', Router::$namespace) . '/' : '') . Router::$controller . '_controller.php');
+		$controller_file = Load::controller((Router::$namespace !== null ? str_replace('::', '/', Router::$namespace) . '/' : '') . Router::$controller);
 
 		// Method
 		$method_name = 'action_' . Router::$method;
@@ -81,25 +81,6 @@ class Avalon
 		if (file_exists($controller_file))
 		{
 			require $controller_file;
-		}
-
-		// Check for the controller and method
-		if (!class_exists($controller_name) or !method_exists($controller_name, $method_name))
-		{
-			// Load the error controller
-			if (!class_exists('ErrorController'))
-			{
-				require APPPATH . '/controllers/error_controller.php';
-			}
-
-			// Set the error controller info
-			Router::$namespace = null;
-			Router::$controller = 'Error';
-			Router::$method = '404';
-			$controller_name = 'ErrorController';
-			$view_path = 'error/404';
-			$method_name = 'action_404';
-			$method_args = array();
 		}
 
 		// Start the app/controller

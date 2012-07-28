@@ -138,6 +138,15 @@ class View
 			$dirs[] = APPPATH . '/views/' . static::$theme . '/';
 		}
 
+		// Registered search paths
+		foreach (Load::$search_paths as $path)
+		{
+			if (is_dir($path . '/views'))
+			{
+				$dirs[] = $path . '/views/';
+			}
+		}
+
 		// Add the inheritance path, if there is one
 		if (static::$inherit_from !== null)
 		{

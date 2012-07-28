@@ -30,7 +30,45 @@ class Load
 	private static $undo = array('my_sql' => 'mysql', 'java_script' => 'javascript');
 	private static $libs = array();
 	private static $helpers = array();
+	public static $search_paths = array();
 	
+	/**
+	 * Loads the specified controller.
+	 *
+	 * @param string $controller
+	 *
+	 * @return string
+	 */
+	public static function controller($controller)
+	{
+		$controller = strtolower($controller);
+
+		// Add the apps controller directory
+		$dirs = array();
+		$dirs[] = APPPATH . '/controllers';
+
+		// Add the registered paths
+		foreach (static::$search_paths as $path)
+		{
+			if (is_dir($path . '/controllers'))
+			{
+				$dirs[] = $path . '/controllers';
+			}
+		}
+
+		// Search for the controller
+		foreach ($dirs as $dir)
+		{
+			if (file_exists("{$dir}/{$controller}_controller.php"))
+			{
+				return "{$dir}/{$controller}_controller.php";
+			}
+		}
+
+		// No controller found...
+		return APPPATH . '/controllers/error_controller.php';
+	}
+
 	/**
 	 * Library loader.
 	 *
@@ -41,25 +79,40 @@ class Load
 	 */
 	public static function lib($class, $init = true)
 	{
+		// If it already loaded?
 		if (isset(static::$libs[$class])) {
 			return static::$libs[$class];
 		}
 		
+		// Set the class and file name
 		$class_name = ucfirst($class);
 		$file_name = static::lowercase($class);
 		
-		if (file_exists(APPPATH . '/libs/' . $file_name . '.php')) {
+		// App library
+		if (file_exists(APPPATH . '/libs/' . $file_name . '.php'))
+		{
 			require APPPATH . '/libs/' . $file_name . '.php';
-		} elseif (file_exists(SYSPATH . '/libs/' . $file_name . '.php')) {
+		}
+		// Avalon library
+		elseif (file_exists(SYSPATH . '/libs/' . $file_name . '.php'))
+		{
 			require SYSPATH . '/libs/' . $file_name . '.php';
-		} else {
+		}
+		// Not found
+		else
+		{
 			Error::halt("Loader Error", "Unable to load library '{$class}'");
 			return false;
 		}
 		
-		if ($init) {
+		// Initiate the class?
+		if ($init)
+		{
 			static::$libs[$class] = new $class_name();
-		} else {
+		}
+		// No, just load it
+		else
+		{
 			static::$libs[$class] = $class_name;
 		}
 		
@@ -75,8 +128,10 @@ class Load
 	 */
 	public static function helper()
 	{
+		// In case we're loading multiple helpers
 		$class = func_num_args() > 1 ? func_get_args() : func_get_arg(0);
 		
+		// Multiple helpers
 		if (is_array($class)) {
 			foreach ($class as $helper) {
 				static::helper($helper);
@@ -84,23 +139,43 @@ class Load
 			return;
 		}
 		
+		// Is it already loaded?
 		if (in_array($class, static::$helpers)) {
 			return true;
 		}
 		
+		// Lowercase the file name
 		$file_name = static::lowercase($class);
 		
-		if (file_exists(APPPATH . '/helpers/' . $file_name . '.php')) {
+		// App helper
+		if (file_exists(APPPATH . '/helpers/' . $file_name . '.php'))
+		{
 			require APPPATH . '/helpers/' . $file_name . '.php';
-		} elseif (file_exists(SYSPATH . '/helpers/' . $file_name . '.php')) {
+		}
+		// Avalon helper
+		elseif (file_exists(SYSPATH . '/helpers/' . $file_name . '.php'))
+		{
 			require SYSPATH . '/helpers/' . $file_name . '.php';
-		} else {
+		}
+		// Not found
+		else
+		{
 			Error::halt("Loader Error", "Unable to load helper '{$class}'");
 			return false;
 		}
 		
 		static::$helpers[] = $class;
 		return true;
+	}
+
+	/**
+	 * Adds a path to be searched when loading controllers and views.
+	 *
+	 * @param string $path
+	 */
+	public static function register_path($path)
+	{
+		static::$search_paths[] = $path;
 	}
 	
 	/**
