@@ -87,11 +87,13 @@ class Router
 	 */
 	public static function add($route, $value, $params = array())
 	{
-		static::$routes[$route] = array(
-			'template' => $route,
-			'value' => $value,
-			'params' => $params
-		);
+		if (!isset(static::$routes[$route])) {
+			static::$routes[$route] = array(
+				'template' => $route,
+				'value' => $value,
+				'params' => $params
+			);
+		}
 	}
 	
 	/**
