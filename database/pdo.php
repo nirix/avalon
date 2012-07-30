@@ -46,6 +46,9 @@ class DB_PDO extends Driver
 	 */
 	public function __construct($config, $name)
 	{
+		// Lowercase the database type
+		$config['type'] = strtolower($config['type']);
+
 		try
 		{
 			$this->connection_name = $name;
