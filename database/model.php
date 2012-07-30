@@ -105,7 +105,7 @@ class Model
 		}
 
 		// Plugin hook
-		FishHook::run('model:__construct', array(get_called_class()));
+		FishHook::run('model::__construct', array(get_called_class()));
 	}
 	
 	/**
@@ -131,7 +131,7 @@ class Model
 		}
 
 		// Plugin hook
-		FishHook::run('model:find', array(get_called_class(), $find, $value));
+		FishHook::run('model::find', array(get_called_class(), $find, $value));
 		
 		return new static($select->fetch(), false);
 	}
@@ -171,6 +171,8 @@ class Model
 			}
 			unset($data[static::$_primary_key]);
 			
+			FishHook::run('model::save/save', array(get_called_class(), &$data));
+
 			// Save the row..
 			static::db()->update(static::$_name)->set($data)->where(static::$_primary_key, $this->_data[static::$_primary_key])->exec();
 
@@ -198,6 +200,8 @@ class Model
 				}
 			}
 			unset($data[static::$_primary_key]);
+
+			FishHook::run('model::save/create', array(get_called_class(), &$data));
 
 			// Insert the row..
 			static::db()->insert($data)->into(static::$_name)->exec();
@@ -257,7 +261,7 @@ class Model
 			}
 
 			// Plugin hook
-			FishHook::run('model:set', array(get_called_class(), $col, $val));
+			FishHook::run('model::set', array(get_called_class(), $col, $val));
 		}
 	}
 	
@@ -331,7 +335,7 @@ class Model
 			$val = isset($this->_data[$var]) ? $this->_data[$var] : '';
 			
 			// Plugin hook
-			FishHook::run('model:__get', array(get_called_class(), $var, $this->_data, &$val));
+			FishHook::run('model::__get', array(get_called_class(), $var, $this->_data, &$val));
 			
 			return $val;
 		}
@@ -386,7 +390,7 @@ class Model
 			$val = $this->$var;
 
 			// Plugin hook
-			FishHook::run('model:__get', array(get_called_class(), $var, $this->_data, &$val));
+			FishHook::run('model::__get', array(get_called_class(), $var, $this->_data, &$val));
 
 			return $this->$var;
 		}
@@ -399,6 +403,7 @@ class Model
 	{
 		if (in_array($var, static::$_properties))
 		{
+			FishHook::run('model::__set', array(get_called_class(), $var, &$val));
 			$this->_data[$var] = $val;
 			$this->_set_changed($var);
 		}
