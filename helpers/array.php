@@ -58,33 +58,6 @@ function array_remove_keys($array, $keys)
  */
 function to_array($data)
 {
-	/*
-	// Check if it's a boolean
-	if (is_bool($data)
-	or is_double($data)   // or a double
-	or is_float($data)    // or a float
-	or is_int($data)      // or an integer
-	or is_long($data)     // or a long integer
-	or is_null($data)     // or if its null
-	or is_numeric($data)  // or some kind of numeric thing
-	or is_string($data))  // or even a regular string
-	{
-		// If so, return it
-		return $data;
-	}
-	// Is it an array itself?
-	// lets try to convert its values...
-	elseif (in_array($data))
-	{
-		// Loop over the data
-		foreach ($data as $key => $val)
-		{
-			// and turn it into an array
-			$data[$key] = to_array($val);
-		}
-		return $data;
-	}
-	*/
 	// Is it an object with a __toArray() method?
 	if (is_object($data) and method_exists($data, '__toArray'))
 	{
@@ -107,8 +80,14 @@ function to_array($data)
 		// And return the array.
 		return $array;
 	}
+	// Array containing other things?
+	elseif (is_array($data))
+	{
+		foreach ($data as $k => $v)
+		{
+			$data[$k] = to_array($v);
+		}
+	}
 
-	// I have no idea what it is...
-	// just return it...
 	return $data;
 }
