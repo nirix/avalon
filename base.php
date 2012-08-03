@@ -18,16 +18,5 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
+require SYSPATH . '/autoloader.php';
 require SYSPATH . '/libs/fishhook.php';
-require SYSPATH . '/core/error.php';
-require SYSPATH . '/core/load.php';
-require SYSPATH . '/core/controller.php';
-require SYSPATH . '/core/avalon.php';
-require SYSPATH . '/core/database.php';
-require SYSPATH . '/database/driver.php';
-
-Load::lib('request');
-Load::lib('router');
-Load::lib('output');
-Load::lib('view');
-Load::helper('time');

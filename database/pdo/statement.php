@@ -18,6 +18,10 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace avalon\database\pdo;
+
+use avalon\database\PDO;
+
 /**
  * PDO Database wrapper statement class
  *
@@ -27,7 +31,7 @@
  * @author Jack P. <nrx@nirix.net>
  * @copyright Copyright (c) Jack P.
  */
-class PDO_Statement
+class Statement
 {
 	private $connection_name;
 	private $statement;
@@ -67,7 +71,7 @@ class PDO_Statement
 	 */
 	public function fetch_all()
 	{
-		$result = $this->statement->fetchAll(PDO::FETCH_ASSOC);
+		$result = $this->statement->fetchAll(\PDO::FETCH_ASSOC);
 		$rows = array();
 		
 		if ($this->_model !== null)
@@ -98,7 +102,7 @@ class PDO_Statement
 	 *
 	 * @return object
 	 */
-	public function fetch($style = PDO::FETCH_ASSOC, $orientation = PDO::FETCH_ORI_NEXT, $offset = 0)
+	public function fetch($style = \PDO::FETCH_ASSOC, $orientation = \PDO::FETCH_ORI_NEXT, $offset = 0)
 	{
 		if ($this->row_count() == 0)
 		{
@@ -129,7 +133,7 @@ class PDO_Statement
 	 *
 	 * @return object
 	 */
-	public function bind_param($param, &$value, $type = PDO::PARAM_STR, $length = 0, $options = array())
+	public function bind_param($param, &$value, $type = \PDO::PARAM_STR, $length = 0, $options = array())
 	{
 		$this->statement->bindParam($param, $value, $type, $length, $options);
 		return $this;
@@ -144,7 +148,7 @@ class PDO_Statement
 	 *
 	 * @return object
 	 */
-	public function bind_value($param, $value, $type = PDO::PARAM_STR)
+	public function bind_value($param, $value, $type = \PDO::PARAM_STR)
 	{
 		$this->statement->bindValue($param, $value, $type);
 		return $this;

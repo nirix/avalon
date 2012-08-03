@@ -18,8 +18,10 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
-require __DIR__ . '/pdo/query.php';
-require __DIR__ . '/pdo/statement.php';
+namespace avalon\database;
+
+use avalon\database\pdo\Query;
+use avalon\database\pdo\Statement;
 
 /**
  * PDO Database wrapper
@@ -30,7 +32,7 @@ require __DIR__ . '/pdo/statement.php';
  * @author Jack P. <nrx@nirix.net>
  * @copyright Copyright (c) Jack P.
  */
-class DB_PDO extends Driver
+class PDO extends Driver
 {
 	private $connection;
 	private $connection_name;
@@ -46,6 +48,14 @@ class DB_PDO extends Driver
 	 */
 	public function __construct($config, $name)
 	{
+		if (!is_array($config))
+		{
+			//throw new \Exception("Error Processing Request", 1);
+			//return;
+
+			print_r($config);
+		}
+
 		// Lowercase the database type
 		$config['type'] = strtolower($config['type']);
 
@@ -70,7 +80,7 @@ class DB_PDO extends Driver
 				$dsn = strtolower($config['type']) . ':dbname=' . $config['database'] . ';host=' . $config['host'];
 			}
 
-			$this->connection = new PDO(
+			$this->connection = new \PDO(
 				$dsn,
 				isset($config['username']) ? $config['username'] : null,
 				isset($config['password']) ? $config['password'] : null,
@@ -79,7 +89,7 @@ class DB_PDO extends Driver
 
 			unset($dsn);
 		}
-		catch (PDOException $e)
+		catch (\PDOException $e)
 		{
 			$this->halt($e->getMessage());
 		}
@@ -91,7 +101,7 @@ class DB_PDO extends Driver
 	 * @param string $string
 	 * @param int $type Paramater type
 	 */
-	public function quote($string, $type = PDO::PARAM_STR)
+	public function quote($string, $type = \PDO::PARAM_STR)
 	{
 		return $this->connection->quote($string, $type);
 	}
@@ -123,7 +133,7 @@ class DB_PDO extends Driver
 	public function prepare($query, array $options = array())
 	{
 		$this->last_query = $query;
-		return new PDO_Statement($this->connection->prepare($query, $options), $this->connection_name);
+		return new Statement($this->connection->prepare($query, $options), $this->connection_name);
 	}
 	
 	/**
@@ -138,7 +148,7 @@ class DB_PDO extends Driver
 		if (!is_array($cols)) {
 			$cols = func_get_args();
 		}
-		return new PDO_Query("SELECT", $cols, $this->connection_name);
+		return new Query("SELECT", $cols, $this->connection_name);
 	}
 	
 	/**
@@ -150,7 +160,7 @@ class DB_PDO extends Driver
 	 */
 	public function update($table)
 	{
-		return new PDO_Query("UPDATE", $table, $this->connection_name);
+		return new Query("UPDATE", $table, $this->connection_name);
 	}
 	
 	/**
@@ -160,7 +170,7 @@ class DB_PDO extends Driver
 	 */
 	public function delete()
 	{
-		return new PDO_Query("DELETE", null, $this->connection_name);
+		return new Query("DELETE", null, $this->connection_name);
 	}
 
 	/**
@@ -172,7 +182,7 @@ class DB_PDO extends Driver
 	 */
 	public function insert(array $data)
 	{
-		return new PDO_Query("INSERT INTO", $data, $this->connection_name);
+		return new Query("INSERT INTO", $data, $this->connection_name);
 	}
 	
 	/**

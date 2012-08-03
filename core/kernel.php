@@ -18,6 +18,11 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace avalon\core;
+
+use avalon\http\Request;
+use avalon\http\Router;
+
 /**
  * The core Avalon class.
  *
@@ -25,7 +30,7 @@
  * @package Avalon
  * @subpackage Core
  */
-class Avalon
+class Kernel
 {
 	private static $version = '0.1';
 	private static $app;

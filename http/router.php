@@ -18,6 +18,8 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace avalon\http;
+
 /**
  * The router.
  *

@@ -18,6 +18,14 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace avalon\core;
+
+use avalon\core\Kernel;
+use avalon\Database;
+use avalon\http\Router;
+use avalon\output\View;
+use avalon\output\Body;
+
 /**
  * Base controller class.
  *
@@ -84,12 +92,12 @@ class Controller
 		
 		// Render the view, get the content and clear the output
 		View::render($this->_render['view']);
-		$output = Output::body();
-		Output::clear();
+		$output = Body::body();
+		Body::clear();
 		
 		// Set the X-Powered-By header and render the layout with the content
-		header("X-Powered-By: Avalon/" . Avalon::version());
+		header("X-Powered-By: Avalon/" . Kernel::version());
 		View::render("layouts/{$this->_render['layout']}", array('output' => $output));
-		echo Output::body();
+		echo Body::body();
 	}
 }

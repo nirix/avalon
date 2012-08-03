@@ -18,6 +18,8 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace avalon;
+
 /**
  * Database class.
  *
@@ -35,14 +37,13 @@ class Database
 	 *
 	 * @return object
 	 */
-	public static function init()
+	public static function init($db)
 	{
-		require APPPATH . '/config/database.php';
 		require SYSPATH . '/database/model.php';
 		
 		// Define the DB_PREFIX constant
 		define("DB_PREFIX", isset($db['prefix']) ? $db['prefix'] : '');
-		
+
 		static::factory($db, 'main');
 
 		// Load the models
@@ -76,7 +77,7 @@ class Database
 		}
 
 		// Prepend 'DB_' to the driver name
-		$class_name = 'DB_' . $config['driver'];
+		$class_name = "\\avalon\\database\\{$config['driver']}";
 
 		// Load the driver class
 		if (!class_exists($class_name))

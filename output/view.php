@@ -18,6 +18,10 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace avalon\output;
+
+use avalon\core\Load;
+
 /**
  * View class.
  *
@@ -48,7 +52,7 @@ class View
 		}
 		// Append it to the output
 		else {
-			Output::append($content);
+			Body::append($content);
 			@ob_end_clean();
 		}
 	}

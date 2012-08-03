@@ -18,13 +18,15 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace avalon\output;
+
 /**
  * Content output class.
  *
  * @author Jack P.
  * @package Avalon
  */
-class Output
+class Body
 {
 	private static $body = '';
 	

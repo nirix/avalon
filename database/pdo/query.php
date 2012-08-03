@@ -18,6 +18,11 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace avalon\database\pdo;
+
+use avalon\Database;
+use avalon\database\PDO;
+
 /**
  * PDO Database wrapper query builder
  *
@@ -27,7 +32,7 @@
  * @author Jack P. <nrx@nirix.net>
  * @copyright Copyright (c) Jack P.
  */
-class PDO_Query
+class Query
 {
 	private $connection_name;
 	private $type;

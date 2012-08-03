@@ -18,6 +18,12 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace avalon\database;
+
+use avalon\Database;
+use avalon\helpers\Time;
+use \FishHook;
+
 /**
  * Database Model class
  *
