@@ -19,6 +19,7 @@
  */
 
 namespace avalon\database;
+use avalon\core\Error;
 
 /**
  * Database driver base.

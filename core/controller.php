@@ -22,6 +22,7 @@ namespace avalon\core;
 
 use avalon\core\Kernel;
 use avalon\Database;
+use avalon\http\Request;
 use avalon\http\Router;
 use avalon\output\View;
 use avalon\output\Body;
