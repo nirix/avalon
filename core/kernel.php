@@ -32,7 +32,7 @@ use avalon\http\Router;
  */
 class Kernel
 {
-	private static $version = '0.1';
+	private static $version = '0.2';
 	private static $app;
 	
 	/**
