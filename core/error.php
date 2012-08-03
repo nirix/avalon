@@ -40,7 +40,7 @@ class Error
 		}
 		
 		$body[] = "  {$message}";
-		$body[] = "  <div style=\"margin-top:8px;\"><small>Powered by Avalon " . Avalon::version() . "</small></div>";
+		$body[] = "  <div style=\"margin-top:8px;\"><small>Powered by Avalon " . Kernel::version() . "</small></div>";
 		$body[] = "</blockquote>";
 		
 		echo implode(PHP_EOL, $body);
