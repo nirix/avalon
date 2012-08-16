@@ -20,6 +20,7 @@
 
 namespace avalon\database\pdo;
 
+use avalon\Database;
 use avalon\database\PDO;
 
 /**
