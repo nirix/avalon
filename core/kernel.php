@@ -71,7 +71,7 @@ class Kernel
 			$ns_path = array();
 			foreach (explode('::', $namespace) as $ns)
 			{
-				$ns_path[] = $ns;
+				$ns_path[] = strtolower($ns);
 
 				// Check that the file exists...
 				$file_path = APPPATH . "/controllers/" . implode('/', $ns_path) . "/app_controller.php";
