@@ -21,6 +21,7 @@
 namespace avalon\output;
 
 use avalon\core\Load;
+use avalon\core\Error;
 
 /**
  * View class.
