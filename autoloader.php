@@ -32,7 +32,7 @@ class Autoloader
 	private static $vendor_path;
 	private static $registered_namespaces = array();
 	private static $classes = array();
-	
+
 	/**
 	 * Registers the class as the autoloader.
 	 */
@@ -145,7 +145,7 @@ class Autoloader
 	 */
 	public static function file_path($class, $vendor_path = null)
 	{
-		return (($vendor_path === null) ? static::$vendor_path : $vendor_path) . static::lowercase(str_replace(['\\', '_'], '/', "/{$class}.php"));
+		return (($vendor_path === null) ? static::$vendor_path : $vendor_path) . static::lowercase(str_replace(array('\\', '_'), '/', "/{$class}.php"));
 	}
 
 	/**
@@ -157,13 +157,13 @@ class Autoloader
 	 */
 	private static function lowercase($string) {
 		$string = strtolower(preg_replace('/(?<=[a-z])([A-Z])/', '_' . '\\1', $string));
-		
+
 		// There are certain things we don't want under_scored
 		// such as mysql.
 		$undo = array(
 			'my_sql' => 'mysql'
 		);
-		
+
 		return str_replace(array_keys($undo), array_values($undo), $string);
 	}
 }
