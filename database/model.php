@@ -111,7 +111,7 @@ class Model
 		}
 
 		// Plugin hook
-		FishHook::run('model::__construct', array(get_called_class()));
+		FishHook::run('model::__construct', array(get_called_class(), $this, &static::$_properties));
 	}
 	
 	/**
@@ -398,7 +398,7 @@ class Model
 			// Plugin hook
 			FishHook::run('model::__get', array(get_called_class(), $var, $this->_data, &$val));
 
-			return $this->$var;
+			return $val;
 		}
 	}
 	
