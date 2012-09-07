@@ -418,6 +418,18 @@ class Model
 	}
 
 	/**
+	 * Adds a data property to the model.
+	 *
+	 * @param string $name
+	 */
+	public static function _add_property($name)
+	{
+		if (!in_array($name, static::$_properties)) {
+			static::$_properties[] = $name;
+		}
+	}
+
+	/**
 	 * Returns the real name of this model class, not the top-most parent.
 	 *
 	 * @return string
