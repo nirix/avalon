@@ -65,7 +65,9 @@ class Model
 			// If so get the columns and add them to
 			// the properties array
 			foreach (array_keys($data) as $column) {
-				static::$_properties[] = $column;
+				if (!in_array($column, static::$_properties)) {
+					static::$_properties[] = $column;
+				}
 			}
 		}
 
