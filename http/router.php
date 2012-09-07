@@ -47,9 +47,6 @@ class Router
 	 */
 	public static function process($request)
 	{
-		// Fetch the routes
-		require_once APPPATH . '/config/routes.php';
-		
 		// Are we on the front page?
 		if ($request == '/') {
 			static::set_request(static::$routes['root']);
