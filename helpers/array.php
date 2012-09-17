@@ -50,6 +50,31 @@ function array_remove_keys($array, $keys)
 }
 
 /**
+ * Merges two arrays recursively.
+ * Unlike the standard array_merge_recursive which converts values with duplicate keys to arrays 
+ * this one overwrites them.
+ *
+ * @param array $first
+ * @param array $second
+ *
+ * @return array
+ */
+function array_merge_recursive2(&$first, &$second)
+{
+	$merged = $first;
+
+	foreach ($second as $key => &$value) {
+		if (is_array($value) && isset($merged [$key]) && is_array($merged[$key])) {
+			$merged[$key] = array_merge_recursive2($merged [$key], $value);
+		} else {
+			$merged[$key] = $value;
+		}
+	}
+
+	return $merged;
+}
+
+/**
  * Converts the given data to an array.
  *
  * @param mixed $data
