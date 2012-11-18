@@ -35,7 +35,7 @@ class View
 	public static $theme;
 	public static $inherit_from;
 	private static $vars = array();
-	
+
 	/**
 	 * Renders the specified file.
 	 *
@@ -46,7 +46,7 @@ class View
 	{
 		// Get the view content
 		$content = self::_get_view($file, $vars);
-		
+
 		// Check if we need to flush or append
 		if(ob_get_level() > self::$ob_level + 1) {
 			ob_end_flush();
@@ -57,7 +57,7 @@ class View
 			@ob_end_clean();
 		}
 	}
-	
+
 	/**
 	 * Renders and returns the specified file.
 	 *
@@ -73,7 +73,7 @@ class View
 		ob_end_clean();
 		return $content;
 	}
-	
+
 	/**
 	 * Private function to handle the rendering of files.
 	 *
@@ -86,31 +86,31 @@ class View
 	{
 		// Get the file name/path
 		$_file = self::_view_file_path($_file);
-		
+
 		// Make sure the ob_level is set
 		if (self::$ob_level === null) {
 			self::$ob_level = ob_get_level();
 		}
-		
+
 		// Make the set variables accessible
 		foreach (self::$vars as $_var => $_val) {
 			$$_var = $_val;
 		}
-		
+
 		// Make the vars for this view accessible
 		if (count($vars)) {
 			foreach($vars as $_var => $_val)
 				$$_var = $_val;
 		}
-		
+
 		// Load up the view and get the contents
 		ob_start();
 		include($_file);
 		$content = ob_get_contents();
-		
+
 		return $content;
 	}
-	
+
 	/**
 	 * Determines the path of the view file.
 	 *
@@ -128,7 +128,7 @@ class View
 		{
 			Error::halt("View Error", "Unable to load view '{$file}'", 'HALT');
 		}
-		
+
 		unset($file);
 		return $path;
 	}
@@ -164,17 +164,18 @@ class View
 		// Loop over and find the view
 		foreach ($dirs as $dir)
 		{
-			$path = $dir . $name . '.php';
-			if (file_exists($path))
-			{
-				return $path;
+			$path = $dir . $name;
+			if (file_exists($path . '.phtml')) {
+				return $path . '.phtml';
+			} elseif (file_exists($path . '.php')) {
+				return $path . '.php';
 			}
 		}
 
 		// Damn it Jim, I'm a doctor not a view path.
 		return false;
 	}
-	
+
 	/**
 	 * Sends the variable to the view.
 	 *
@@ -191,7 +192,7 @@ class View
 			self::$vars[$var] = $val;
 		}
 	}
-	
+
 	/**
 	 * Returns the variables array.
 	 *
