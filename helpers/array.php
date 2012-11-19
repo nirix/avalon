@@ -32,26 +32,24 @@
  */
 function array_remove_keys($array, $keys)
 {
-	// Loop over the array
-	foreach ($array as $key => $value)
-	{
-		// Check if we want to remove it...
-		if (!is_numeric($key) and in_array($key, $keys))
-		{
-			unset($array[$key]);
-			continue;
-		}
+    // Loop over the array
+    foreach ($array as $key => $value) {
+        // Check if we want to remove it...
+        if (!is_numeric($key) and in_array($key, $keys)) {
+            unset($array[$key]);
+            continue;
+        }
 
-		// Filter the value if it's an array also
-		$array[$key] = is_array($value) ? array_remove_keys($value, $keys) : $value;
-	}
+        // Filter the value if it's an array also
+        $array[$key] = is_array($value) ? array_remove_keys($value, $keys) : $value;
+    }
 
-	return $array;
+    return $array;
 }
 
 /**
  * Merges two arrays recursively.
- * Unlike the standard array_merge_recursive which converts values with duplicate keys to arrays 
+ * Unlike the standard array_merge_recursive which converts values with duplicate keys to arrays
  * this one overwrites them.
  *
  * @param array $first
@@ -61,17 +59,17 @@ function array_remove_keys($array, $keys)
  */
 function array_merge_recursive2(&$first, &$second)
 {
-	$merged = $first;
+    $merged = $first;
 
-	foreach ($second as $key => &$value) {
-		if (is_array($value) && isset($merged [$key]) && is_array($merged[$key])) {
-			$merged[$key] = array_merge_recursive2($merged [$key], $value);
-		} else {
-			$merged[$key] = $value;
-		}
-	}
+    foreach ($second as $key => &$value) {
+        if (is_array($value) && isset($merged [$key]) && is_array($merged[$key])) {
+            $merged[$key] = array_merge_recursive2($merged [$key], $value);
+        } else {
+            $merged[$key] = $value;
+        }
+    }
 
-	return $merged;
+    return $merged;
 }
 
 /**
@@ -83,36 +81,31 @@ function array_merge_recursive2(&$first, &$second)
  */
 function to_array($data)
 {
-	// Is it an object with a __toArray() method?
-	if (is_object($data) and method_exists($data, '__toArray'))
-	{
-		// Hell yeah, we don't need to do anything.
-		return $data->__toArray();
-	}
-	// Just an object, take its variables!
-	elseif (is_object($data))
-	{
-		// Create an array
-		$array = array();
+    // Is it an object with a __toArray() method?
+    if (is_object($data) and method_exists($data, '__toArray')) {
+        // Hell yeah, we don't need to do anything.
+        return $data->__toArray();
+    }
+    // Just an object, take its variables!
+    elseif (is_object($data)) {
+        // Create an array
+        $array = array();
 
-		// Loop over the classes variables
-		foreach (get_class_vars($data) as $var => $val)
-		{
-			// And steal them! MY PRECIOUS!
-			$array[$var] = $val;
-		}
+        // Loop over the classes variables
+        foreach (get_class_vars($data) as $var => $val) {
+            // And steal them! MY PRECIOUS!
+            $array[$var] = $val;
+        }
 
-		// And return the array.
-		return $array;
-	}
-	// Array containing other things?
-	elseif (is_array($data))
-	{
-		foreach ($data as $k => $v)
-		{
-			$data[$k] = to_array($v);
-		}
-	}
+        // And return the array.
+        return $array;
+    }
+    // Array containing other things?
+    elseif (is_array($data)) {
+        foreach ($data as $k => $v) {
+            $data[$k] = to_array($v);
+        }
+    }
 
-	return $data;
+    return $data;
 }

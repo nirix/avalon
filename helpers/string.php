@@ -30,10 +30,10 @@
  */
 function strshorten($string, $length, $append = '...')
 {
-	// Check if it's longer than the length
-	if (isset($string[$length-1])) {
-		return trim(substr($string, 0, $length)) . '...';
-	} else {
-		return $string;
-	}
+    // Check if it's longer than the length
+    if (isset($string[$length-1])) {
+        return trim(substr($string, 0, $length)) . '...';
+    } else {
+        return $string;
+    }
 }

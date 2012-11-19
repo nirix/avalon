@@ -27,19 +27,19 @@
  */
 class JS
 {
-	/**
-	 * Escapes the specified content.
-	 *
-	 * @param string $content
-	 *
-	 * @return string
-	 */
-	public static function escape($content)
-	{
-		$replace = array(
-			"\r" => '',
-			"\n" => ''
-		);
-		return addslashes(str_replace(array_keys($replace), array_values($replace), $content));
-	}
+    /**
+     * Escapes the specified content.
+     *
+     * @param string $content
+     *
+     * @return string
+     */
+    public static function escape($content)
+    {
+        $replace = array(
+            "\r" => '',
+            "\n" => ''
+        );
+        return addslashes(str_replace(array_keys($replace), array_values($replace), $content));
+    }
 }
