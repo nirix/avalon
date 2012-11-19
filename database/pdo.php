@@ -50,7 +50,7 @@ class PDO extends Driver
     public function __construct($config, $name)
     {
         if (!is_array($config)) {
-            Error::halt('Database config must be an array.');
+            Error::halt('PDO Error', 'Database config must be an array.');
         }
 
         // Lowercase the database type
