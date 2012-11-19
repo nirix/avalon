@@ -28,33 +28,33 @@ namespace avalon\output;
  */
 class Body
 {
-	private static $body = '';
-	
-	/**
-	 * Returns the contents of the body.
-	 *
-	 * @return string
-	 */
-	public static function body()
-	{
-		return static::$body;
-	}
-	
-	/**
-	 * Appends the content to the body.
-	 *
-	 * @param string $content
-	 */
-	public static function append($content)
-	{
-		static::$body .= $content;
-	}
-	
-	/**
-	 * Clears the body.
-	 */
-	public static function clear()
-	{
-		static::$body = '';
-	}
+    private static $body = '';
+
+    /**
+     * Returns the contents of the body.
+     *
+     * @return string
+     */
+    public static function body()
+    {
+        return static::$body;
+    }
+
+    /**
+     * Appends the content to the body.
+     *
+     * @param string $content
+     */
+    public static function append($content)
+    {
+        static::$body .= $content;
+    }
+
+    /**
+     * Clears the body.
+     */
+    public static function clear()
+    {
+        static::$body = '';
+    }
 }
