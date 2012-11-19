@@ -35,442 +35,437 @@ use \FishHook;
  */
 class Model
 {
-	// Static information
-	protected static $_name; // Table name
-	protected static $_primary_key = 'id'; // Primary key
-	protected static $_has_many; // Has many relationship array
-	protected static $_properties = array('*'); // Table columns
-	protected static $_belongs_to; // Belongs to relationship array
-	protected static $_filters_before = array(); // Before filters
-	protected static $_filters_after = array(); // After filters
-	protected static $_connection_name = 'main'; // Name of the connection to use
+    // Static information
+    protected static $_name; // Table name
+    protected static $_primary_key = 'id'; // Primary key
+    protected static $_has_many; // Has many relationship array
+    protected static $_properties = array('*'); // Table columns
+    protected static $_belongs_to; // Belongs to relationship array
+    protected static $_filters_before = array(); // Before filters
+    protected static $_filters_after = array(); // After filters
+    protected static $_connection_name = 'main'; // Name of the connection to use
 
-	// Information different per table row
-	protected $_changed_properties = array(); // Properties that have been changed
-	protected $_data = array();
-	protected $_is_new = true; // Used to determine if this is a new row or not.
-	protected $errors = array();
+    // Information different per table row
+    protected $_changed_properties = array(); // Properties that have been changed
+    protected $_data = array();
+    protected $_is_new = true; // Used to determine if this is a new row or not.
+    protected $errors = array();
 
-	/**
-	 * Used to build to assign the row data to the class as variables.
-	 *
-	 * @param array $data The row data
-	 */
-	public function __construct($data = null, $is_new = true) {
-		$this->_data = $data;
-		$this->_is_new = $is_new;
+    /**
+     * Used to build to assign the row data to the class as variables.
+     *
+     * @param array $data The row data
+     */
+    public function __construct($data = null, $is_new = true) {
+        $this->_data = $data;
+        $this->_is_new = $is_new;
 
-		// Is there any data?
-		if (is_array($data)) {
-			// If so get the columns and add them to
-			// the properties array
-			foreach (array_keys($data) as $column) {
-				if (!in_array($column, static::$_properties)) {
-					static::$_properties[] = $column;
-				}
-			}
-		}
+        // Is there any data?
+        if (is_array($data)) {
+            // If so get the columns and add them to
+            // the properties array
+            foreach (array_keys($data) as $column) {
+                if (!in_array($column, static::$_properties)) {
+                    static::$_properties[] = $column;
+                }
+            }
+        }
 
-		// Create filter arrays if they aren't already
-		foreach (array('construct', 'create', 'save') as $filter) {
-			// Before filters
-			if (!isset(static::$_filters_before[$filter])) {
-				static::$_filters_before[$filter] = array();
-			}
+        // Create filter arrays if they aren't already
+        foreach (array('construct', 'create', 'save') as $filter) {
+            // Before filters
+            if (!isset(static::$_filters_before[$filter])) {
+                static::$_filters_before[$filter] = array();
+            }
 
-			// After filters
-			if (!isset(static::$_filters_after[$filter])) {
-				static::$_filters_after[$filter] = array();
-			}
-		}
+            // After filters
+            if (!isset(static::$_filters_after[$filter])) {
+                static::$_filters_after[$filter] = array();
+            }
+        }
 
-		if (!in_array('_date_time_convert', static::$_filters_after['construct'])) {
-			static::$_filters_after['construct'][] = '_date_time_convert';
-		}
+        if (!in_array('_date_time_convert', static::$_filters_after['construct'])) {
+            static::$_filters_after['construct'][] = '_date_time_convert';
+        }
 
-		if (!in_array('_timestamps', static::$_filters_before['create'])) {
-			static::$_filters_before['create'][] = '_timestamps';
-		}
+        if (!in_array('_timestamps', static::$_filters_before['create'])) {
+            static::$_filters_before['create'][] = '_timestamps';
+        }
 
-		if (!in_array('_timestamps', static::$_filters_before['save'])) {
-			static::$_filters_before['save'][] = '_timestamps';
-		}
+        if (!in_array('_timestamps', static::$_filters_before['save'])) {
+            static::$_filters_before['save'][] = '_timestamps';
+        }
 
-		// And run the after construct filter array...
-		if (isset(static::$_filters_after['construct'])) {
-			foreach (static::$_filters_after['construct'] as $filter) {
-				$this->$filter();
-			}
-		}
+        // And run the after construct filter array...
+        if (isset(static::$_filters_after['construct'])) {
+            foreach (static::$_filters_after['construct'] as $filter) {
+                $this->$filter();
+            }
+        }
 
-		// Plugin hook
-		FishHook::run('model::__construct', array(get_called_class(), $this, &static::$_properties));
-	}
+        // Plugin hook
+        FishHook::run('model::__construct', array(get_called_class(), $this, &static::$_properties));
+    }
 
-	/**
-	 * Find the first matching row and returns it.
-	 *
-	 * @param string $find Either the value of the primary key, or the field name.
-	 * @param value $value The value of the field to find if the $find param is the field name.
-	 *
-	 * @return Object
-	 */
-	public static function find($find, $value = null) {
-		$select = static::db()->select()->from(static::$_name);
-		if ($value == null) {
-			$select = $select->where(static::$_primary_key, $find)->limit(1)->exec();
-		} else {
-			$select = $select->where($find, $value)->limit(1)->exec();
-		}
+    /**
+     * Find the first matching row and returns it.
+     *
+     * @param string $find Either the value of the primary key, or the field name.
+     * @param value $value The value of the field to find if the $find param is the field name.
+     *
+     * @return Object
+     */
+    public static function find($find, $value = null) {
+        $select = static::db()->select()->from(static::$_name);
+        if ($value == null) {
+            $select = $select->where(static::$_primary_key, $find)->limit(1)->exec();
+        } else {
+            $select = $select->where($find, $value)->limit(1)->exec();
+        }
 
-		if ($select->row_count() == 0) {
-			return false;
-		}
+        if ($select->row_count() == 0) {
+            return false;
+        }
 
-		// Plugin hook
-		FishHook::run('model::find', array(get_called_class(), $find, $value));
+        // Plugin hook
+        FishHook::run('model::find', array(get_called_class(), $find, $value));
 
-		return new static($select->fetch(), false);
-	}
+        return new static($select->fetch(), false);
+    }
 
-	/**
-	 * Creates a new row or saves the changed properties.
-	 */
-	public function save() {
-		$primary_key = static::$_primary_key;
+    /**
+     * Creates a new row or saves the changed properties.
+     */
+    public function save() {
+        $primary_key = static::$_primary_key;
 
-		// Make sure the data is valid..
-		if (!$this->is_valid()) {
-			return false;
-		}
+        // Make sure the data is valid..
+        if (!$this->is_valid()) {
+            return false;
+        }
 
-		// Save
-		if ($this->_is_new() === false) {
-			// Before save filters
-			if (isset(static::$_filters_before['save']) and is_array(static::$_filters_before['save'])) {
-				foreach (static::$_filters_before['save'] as $filter) {
-					$this->$filter();
-				}
-			}
+        // Save
+        if ($this->_is_new() === false) {
+            // Before save filters
+            if (isset(static::$_filters_before['save']) and is_array(static::$_filters_before['save'])) {
+                foreach (static::$_filters_before['save'] as $filter) {
+                    $this->$filter();
+                }
+            }
 
-			// Loop over the properties
-			$data = array();
-			foreach (static::$_properties as $column) {
-				// Check if column is updated, if so, save.
-				if (in_array($column, $this->_changed_properties)) {
-					$data[$column] = $this->_data[$column];
-				}
-			}
-			unset($data[static::$_primary_key]);
+            // Loop over the properties
+            $data = array();
+            foreach (static::$_properties as $column) {
+                // Check if column is updated, if so, save.
+                if (in_array($column, $this->_changed_properties)) {
+                    $data[$column] = $this->_data[$column];
+                }
+            }
+            unset($data[static::$_primary_key]);
 
-			FishHook::run('model::save/save', array(get_called_class(), &$data));
+            FishHook::run('model::save/save', array(get_called_class(), &$data));
 
-			// Save the row..
-			static::db()->update(static::$_name)->set($data)->where(static::$_primary_key, $this->_data[static::$_primary_key])->exec();
+            // Save the row..
+            static::db()->update(static::$_name)->set($data)->where(static::$_primary_key, $this->_data[static::$_primary_key])->exec();
 
-			return true;
-		}
-		// Create
-		else
-		{
-			// Before create filters
-			if (isset(static::$_filters_before['create']) and is_array(static::$_filters_before['create'])) {
-				foreach (static::$_filters_before['create'] as $filter) {
-					$this->$filter();
-				}
-			}
+            return true;
+        }
+        // Create
+        else {
+            // Before create filters
+            if (isset(static::$_filters_before['create']) and is_array(static::$_filters_before['create'])) {
+                foreach (static::$_filters_before['create'] as $filter) {
+                    $this->$filter();
+                }
+            }
 
-			// Loop over the properties
-			$data = array();
-			foreach (static::$_properties as $column) {
-				if (isset($this->_data[$column])) {
-					$data[$column] = $this->_data[$column];
-				}
-			}
-			unset($data[static::$_primary_key]);
+            // Loop over the properties
+            $data = array();
+            foreach (static::$_properties as $column) {
+                if (isset($this->_data[$column])) {
+                    $data[$column] = $this->_data[$column];
+                }
+            }
+            unset($data[static::$_primary_key]);
 
-			FishHook::run('model::save/create', array(get_called_class(), &$data));
+            FishHook::run('model::save/create', array(get_called_class(), &$data));
 
-			// Insert the row..
-			static::db()->insert($data)->into(static::$_name)->exec();
+            // Insert the row..
+            static::db()->insert($data)->into(static::$_name)->exec();
 
-			// Set the primary key
-			$this->_data[$primary_key] = static::db()->last_insert_id();
+            // Set the primary key
+            $this->_data[$primary_key] = static::db()->last_insert_id();
 
-			return true;
-		}
-	}
+            return true;
+        }
+    }
 
-	/**
-	 * Deletes the row.
-	 */
-	public function delete() {
-		if ($this->_is_new() === false) {
-			return static::db()->delete()->from(static::$_name)->where(static::$_primary_key, $this->_data[static::$_primary_key])->exec();
-		}
-	}
+    /**
+     * Deletes the row.
+     */
+    public function delete() {
+        if ($this->_is_new() === false) {
+            return static::db()->delete()->from(static::$_name)->where(static::$_primary_key, $this->_data[static::$_primary_key])->exec();
+        }
+    }
 
-	/**
-	 * Checks if the row is new or not.
-	 *
-	 * @return bool
-	 */
-	public function _is_new($is_new = null) {
-		if ($is_new !== null) {
-			$this->_is_new =  $is_new;
-		}
-		return $this->_is_new;
-	}
+    /**
+     * Checks if the row is new or not.
+     *
+     * @return bool
+     */
+    public function _is_new($is_new = null) {
+        if ($is_new !== null) {
+            $this->_is_new =  $is_new;
+        }
+        return $this->_is_new;
+    }
 
-	/**
-	 * Sets the value of the column(s) to the value(s).
-	 *
-	 * @param mixed $col Either the column or an array to update multiple columns.
-	 * @param mixed $val The value of the column if only updating one column.
-	 *
-	 * @example $model->set(array('col1'=>'val1', 'col2'=>'val2'));
-	 *          $model->set('col1', 'val1');
-	 */
-	public function set($col, $val = null) {
-		if (is_array($col)) {
-			foreach ($col as $var => $val) {
-				$this->set($var, $val);
-			}
-		} else {
-			$this->_data[$col] = $val;
-			$this->_set_changed($col);
+    /**
+     * Sets the value of the column(s) to the value(s).
+     *
+     * @param mixed $col Either the column or an array to update multiple columns.
+     * @param mixed $val The value of the column if only updating one column.
+     *
+     * @example $model->set(array('col1'=>'val1', 'col2'=>'val2'));
+     *          $model->set('col1', 'val1');
+     */
+    public function set($col, $val = null) {
+        if (is_array($col)) {
+            foreach ($col as $var => $val) {
+                $this->set($var, $val);
+            }
+        } else {
+            $this->_data[$col] = $val;
+            $this->_set_changed($col);
 
-			if (!in_array($val, static::$_properties)) {
-				static::$_properties[] = $val;
-			}
+            if (!in_array($val, static::$_properties)) {
+                static::$_properties[] = $val;
+            }
 
-			// Plugin hook
-			FishHook::run('model::set', array(get_called_class(), $col, $val));
-		}
-	}
+            // Plugin hook
+            FishHook::run('model::set', array(get_called_class(), $col, $val));
+        }
+    }
 
-	/**
-	 * Adds the property to the changed properties array.
-	 *
-	 * @param string $property
-	 */
-	protected function _set_changed($property) {
-		if (in_array($property, static::$_properties) and !in_array($property, $this->_changed_properties)) {
-			$this->_changed_properties[] = $property;
-		}
-	}
+    /**
+     * Adds the property to the changed properties array.
+     *
+     * @param string $property
+     */
+    protected function _set_changed($property) {
+        if (in_array($property, static::$_properties) and !in_array($property, $this->_changed_properties)) {
+            $this->_changed_properties[] = $property;
+        }
+    }
 
-	/**
-	 * Shortcut of the select() function for the database.
-	 *
-	 * @param mixed $cols The columns to select.
-	 *
-	 * @return object
-	 */
-	public static function select($cols = null) {
-		return static::db()->select($cols === null ? static::$_properties : $cols)->from(static::$_name)->_model(static::_class());
-	}
+    /**
+     * Shortcut of the select() function for the database.
+     *
+     * @param mixed $cols The columns to select.
+     *
+     * @return object
+     */
+    public static function select($cols = null) {
+        return static::db()->select($cols === null ? static::$_properties : $cols)->from(static::$_name)->_model(static::_class());
+    }
 
-	/**
-	 * Aliases the database's update() method for the current row.
-	 */
-	public function update() {
-		return static::db()->update(static::$_name)->where(static::$_primary_key, $this->data[static::$_primary_key]);
-	}
+    /**
+     * Aliases the database's update() method for the current row.
+     */
+    public function update() {
+        return static::db()->update(static::$_name)->where(static::$_primary_key, $this->data[static::$_primary_key]);
+    }
 
-	/**
-	 * Fetches all the rows for the table.
-	 *
-	 * @return array
-	 */
-	public static function fetch_all() {
-		$rows = array();
-		$fetched = static::db()->select(static::$_properties)->from(static::$_name)->exec()->fetch_all();
+    /**
+     * Fetches all the rows for the table.
+     *
+     * @return array
+     */
+    public static function fetch_all() {
+        $rows = array();
+        $fetched = static::db()->select(static::$_properties)->from(static::$_name)->exec()->fetch_all();
 
-		foreach ($fetched as $row) {
-			$rows[] = new static($row);
-			unset($row);
-		}
+        foreach ($fetched as $row) {
+            $rows[] = new static($row);
+            unset($row);
+        }
 
-		return $rows;
-	}
+        return $rows;
+    }
 
-	public function is_valid() {
-		// Until the validation stuff is done we will return false,
-		// to work around this each model will have to create its own
-		// is_valid method.
-		return false;
-	}
+    public function is_valid() {
+        // Until the validation stuff is done we will return false,
+        // to work around this each model will have to create its own
+        // is_valid method.
+        return false;
+    }
 
-	/**
-	 * Magical function to load the relationships.
-	 */
-	public function __get($var) {
-		// Model data
-		if (in_array($var, static::$_properties)) {
-			$val = isset($this->_data[$var]) ? $this->_data[$var] : '';
+    /**
+     * Magical function to load the relationships.
+     */
+    public function __get($var) {
+        // Model data
+        if (in_array($var, static::$_properties)) {
+            $val = isset($this->_data[$var]) ? $this->_data[$var] : '';
 
-			// Plugin hook
-			FishHook::run('model::__get', array(get_called_class(), $var, $this->_data, &$val));
+            // Plugin hook
+            FishHook::run('model::__get', array(get_called_class(), $var, $this->_data, &$val));
 
-			return $val;
-		}
-		// Has many
-		else if (is_array(static::$_has_many) and (in_array($var, static::$_has_many) or isset(static::$_has_many[$var]))) {
-			$has_many = array();
-			if (isset(static::$_has_many[$var])) {
-				$has_many = static::$_has_many[$var];
-			}
-			// Model
-			if (!isset($has_many['model'])) {
-				$has_many['model'] = ucfirst((substr($var, -1) == 's' ? substr($var, 0, -1) : $var));
-			}
-			// Different foreign key?
-			if (!isset($has_many['foreign_key'])) {
-				$has_many['foreign_key'] = substr(static::$_name, 0, -1) . '_id';
-			}
-			// Different column?
-			if (!isset($has_many['column'])) {
-				$has_many['column'] = static::$_primary_key;
-			}
+            return $val;
+        }
+        // Has many
+        elseif (is_array(static::$_has_many) and (in_array($var, static::$_has_many) or isset(static::$_has_many[$var]))) {
+            $has_many = array();
+            if (isset(static::$_has_many[$var])) {
+                $has_many = static::$_has_many[$var];
+            }
+            // Model
+            if (!isset($has_many['model'])) {
+                $has_many['model'] = ucfirst((substr($var, -1) == 's' ? substr($var, 0, -1) : $var));
+            }
+            // Different foreign key?
+            if (!isset($has_many['foreign_key'])) {
+                $has_many['foreign_key'] = substr(static::$_name, 0, -1) . '_id';
+            }
+            // Different column?
+            if (!isset($has_many['column'])) {
+                $has_many['column'] = static::$_primary_key;
+            }
 
-			$model = $has_many['model'];
-			$column = $has_many['column'];
-			return $this->$var = $model::select()->where($has_many['foreign_key'], $this->$column);
-		}
-		// Belongs to
-		else if (is_array(static::$_belongs_to) and (in_array($var, static::$_belongs_to) or isset(static::$_belongs_to[$var]))) {
-			$belongs_to = array();
-			if (isset(static::$_belongs_to[$var])) {
-				$belongs_to = static::$_belongs_to[$var];
-			}
-			// Model
-			if (!isset($belongs_to['model'])) {
-				$belongs_to['model'] = ucfirst($var);
-			}
-			// Different foreign key?
-			if (!isset($belongs_to['foreign_key'])) {
-				$belongs_to['foreign_key'] = $belongs_to['model']::$_primary_key;
-			}
-			// Different column?
-			if (!isset($belongs_to['column'])) {
-				$belongs_to['column'] = $var . '_id';
-			}
-			$model = $belongs_to['model'];
-			return $this->$var = $model::find($belongs_to['foreign_key'], $this->$belongs_to['column']);
-		}
-		else
-		{
-			$val = $this->$var;
+            $model = $has_many['model'];
+            $column = $has_many['column'];
+            return $this->$var = $model::select()->where($has_many['foreign_key'], $this->$column);
+        }
+        // Belongs to
+        else if (is_array(static::$_belongs_to) and (in_array($var, static::$_belongs_to) or isset(static::$_belongs_to[$var]))) {
+            $belongs_to = array();
+            if (isset(static::$_belongs_to[$var])) {
+                $belongs_to = static::$_belongs_to[$var];
+            }
+            // Model
+            if (!isset($belongs_to['model'])) {
+                $belongs_to['model'] = ucfirst($var);
+            }
+            // Different foreign key?
+            if (!isset($belongs_to['foreign_key'])) {
+                $belongs_to['foreign_key'] = $belongs_to['model']::$_primary_key;
+            }
+            // Different column?
+            if (!isset($belongs_to['column'])) {
+                $belongs_to['column'] = $var . '_id';
+            }
+            $model = $belongs_to['model'];
+            return $this->$var = $model::find($belongs_to['foreign_key'], $this->$belongs_to['column']);
+        } else {
+            $val = $this->$var;
 
-			// Plugin hook
-			FishHook::run('model::__get', array(get_called_class(), $var, $this->_data, &$val));
+            // Plugin hook
+            FishHook::run('model::__get', array(get_called_class(), $var, $this->_data, &$val));
 
-			return $val;
-		}
-	}
+            return $val;
+        }
+    }
 
-	/**
-	 * Magical set function to check if the property exists or not.
-	 */
-	public function __set($var, $val) {
-		if (in_array($var, static::$_properties)) {
-			FishHook::run('model::__set', array(get_called_class(), $var, &$val));
-			$this->_data[$var] = $val;
-			$this->_set_changed($var);
-		}
-		else
-		{
-			$this->$var = $val;
-		}
-	}
+    /**
+     * Magical set function to check if the property exists or not.
+     */
+    public function __set($var, $val) {
+        if (in_array($var, static::$_properties)) {
+            FishHook::run('model::__set', array(get_called_class(), $var, &$val));
+            $this->_data[$var] = $val;
+            $this->_set_changed($var);
+        } else {
+            $this->$var = $val;
+        }
+    }
 
-	/**
-	 * Returns the models data as an array.
-	 *
-	 * @return array
-	 */
-	public function __toArray($fields = null) {
-		// Returns the models data for all fields
-		if ($fields == null) {
-			return $this->_data;
-		}
-		// Return only the fields specified
-		else
-		{
-			$data = array();
-			foreach($fields as $field) {
-				$data[$field] = $this->_data[$field];
-			}
-			unset($fields, $field);
-			return $data;
-		}
-	}
+    /**
+     * Returns the models data as an array.
+     *
+     * @return array
+     */
+    public function __toArray($fields = null) {
+        // Returns the models data for all fields
+        if ($fields == null) {
+            return $this->_data;
+        }
+        // Return only the fields specified
+        else
+        {
+            $data = array();
+            foreach($fields as $field) {
+                $data[$field] = $this->_data[$field];
+            }
+            unset($fields, $field);
+            return $data;
+        }
+    }
 
-	/**
-	 * Used to add errors to the models error array.
-	 *
-	 * @param string $field
-	 * @param string $message
-	 */
-	public function _add_error($field, $message) {
-		$this->errors[$field] = $message;
-	}
+    /**
+     * Used to add errors to the models error array.
+     *
+     * @param string $field
+     * @param string $message
+     */
+    public function _add_error($field, $message) {
+        $this->errors[$field] = $message;
+    }
 
-	/**
-	 * Adds a data property to the model.
-	 *
-	 * @param string $name
-	 */
-	public static function _add_property($name)
-	{
-		if (!in_array($name, static::$_properties)) {
-			static::$_properties[] = $name;
-		}
-	}
+    /**
+     * Adds a data property to the model.
+     *
+     * @param string $name
+     */
+    public static function _add_property($name)
+    {
+        if (!in_array($name, static::$_properties)) {
+            static::$_properties[] = $name;
+        }
+    }
 
-	/**
-	 * Returns the real name of this model class, not the top-most parent.
-	 *
-	 * @return string
-	 */
-	public static function _class() {
-		return get_class(new static());
-	}
+    /**
+     * Returns the real name of this model class, not the top-most parent.
+     *
+     * @return string
+     */
+    public static function _class() {
+        return get_class(new static());
+    }
 
-	/**
-	 * Sets the created_at and updated_at fields when saving.
-	 */
-	private function _timestamps() {
-		// Created at field
-		if ($this->_is_new() and in_array('created_at', static::$_properties) and !isset($this->_data['created_at'])) {
-			$this->_data['created_at'] = "NOW()";
-		}
+    /**
+     * Sets the created_at and updated_at fields when saving.
+     */
+    private function _timestamps() {
+        // Created at field
+        if ($this->_is_new() and in_array('created_at', static::$_properties) and !isset($this->_data['created_at'])) {
+            $this->_data['created_at'] = "NOW()";
+        }
 
-		// Updated at field
-		if (!$this->_is_new() and in_array('updated_at', static::$_properties)) {
-			$this->updated_at = "NOW()";
-		}
-	}
+        // Updated at field
+        if (!$this->_is_new() and in_array('updated_at', static::$_properties)) {
+            $this->updated_at = "NOW()";
+        }
+    }
 
-	/**
-	 * Converts the created_at, updated_at and published_at properties
-	 * to local time from gmt time.
-	 */
-	private function _date_time_convert() {
-		foreach (array('created_at', 'updated_at', 'published_at') as $var) {
-			if (!$this->_is_new() and isset($this->_data[$var])) {
-				$this->_data[$var] = Time::gmt_to_local($this->_data[$var]);
-			}
-		}
-	}
+    /**
+     * Converts the created_at, updated_at and published_at properties
+     * to local time from gmt time.
+     */
+    private function _date_time_convert() {
+        foreach (array('created_at', 'updated_at', 'published_at') as $var) {
+            if (!$this->_is_new() and isset($this->_data[$var])) {
+                $this->_data[$var] = Time::gmt_to_local($this->_data[$var]);
+            }
+        }
+    }
 
-	/**
-	 * Private function to get the database connection.
-	 *
-	 * @return object
-	 */
-	protected static function db() {
-		return Database::connection(static::$_connection_name);
-	}
+    /**
+     * Private function to get the database connection.
+     *
+     * @return object
+     */
+    protected static function db() {
+        return Database::connection(static::$_connection_name);
+    }
 }

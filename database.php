@@ -29,90 +29,86 @@ namespace avalon;
  */
 class Database
 {
-	private static $connections = array();
-	private static $initiated = array();
-	
-	/**
-	 * Connects to the database.
-	 *
-	 * @return object
-	 */
-	public static function init($db)
-	{
-		require SYSPATH . '/database/model.php';
-		
-		// Define the DB_PREFIX constant
-		define("DB_PREFIX", isset($db['prefix']) ? $db['prefix'] : '');
+    private static $connections = array();
+    private static $initiated = array();
 
-		static::factory($db, 'main');
+    /**
+     * Connects to the database.
+     *
+     * @return object
+     */
+    public static function init($db)
+    {
+        require SYSPATH . '/database/model.php';
 
-		// Load the models
-		foreach(scandir(APPPATH . '/models') as $file)
-		{
-			// Make sure it's not a directory and is a php file
-			if(!is_dir($file) and substr($file, -3) == 'php')
-			{
-				require(APPPATH . '/models/' . $file);
-			}
-		}
+        // Define the DB_PREFIX constant
+        define("DB_PREFIX", isset($db['prefix']) ? $db['prefix'] : '');
 
-		return static::$connections['main'];
-	}
+        static::factory($db, 'main');
 
-	/**
-	 * Create a new database connection based off the passed
-	 * config array and the specified name.
-	 *
-	 * @param array $config
-	 * @param string $name
-	 *
-	 * @return object
-	 */
-	public static function factory(array $config, $name)
-	{
-		// Make sure the connection name is available
-		if (isset(static::$connections[$name]))
-		{
-			throw new Exception("Database connection name '{$name}' already initiated");
-		}
+        // Load the models
+        foreach(scandir(APPPATH . '/models') as $file) {
+            // Make sure it's not a directory and is a php file
+            if(!is_dir($file) and substr($file, -3) == 'php') {
+                require(APPPATH . '/models/' . $file);
+            }
+        }
 
-		// Prepend 'DB_' to the driver name
-		$class_name = "\\avalon\\database\\{$config['driver']}";
+        return static::$connections['main'];
+    }
 
-		// Load the driver class
-		if (!class_exists($class_name))
-		{
-			require SYSPATH . '/database/' . strtolower($config['driver']) . '.php';
-		}
+    /**
+     * Create a new database connection based off the passed
+     * config array and the specified name.
+     *
+     * @param array $config
+     * @param string $name
+     *
+     * @return object
+     */
+    public static function factory(array $config, $name)
+    {
+        // Make sure the connection name is available
+        if (isset(static::$connections[$name])) {
+            throw new Exception("Database connection name '{$name}' already initiated");
+        }
 
-		// Create the connection and mark it as initiated.
-		static::$connections[$name] = new $class_name($config, $name);
-		static::$initiated[$name] = true;
+        // Prepend 'DB_' to the driver name
+        $class_name = "\\avalon\\database\\{$config['driver']}";
 
-		return static::$connections[$name];
-	}
-	
-	/**
-	 * Returns the database instance object.
-	 *
-	 * @param string $name Connection name
-	 *
-	 * @return object
-	 */
-	public static function connection($name = 'main')
-	{
-		return isset(static::$connections[$name]) ? static::$connections[$name] : false;
-	}
-	
-	/**
-	 * Returns true if the database has been initiated, false if not.
-	 *
-	 * @param string $name Connection name
-	 *
-	 * @return bool
-	 */
-	public static function initiated($name = 'main')
-	{
-		return isset(static::$initiated[$name]) ? static::$initiated[$name] : false;
-	}
+        // Load the driver class
+        if (!class_exists($class_name)) {
+            require SYSPATH . '/database/' . strtolower($config['driver']) . '.php';
+        }
+
+        // Create the connection and mark it as initiated.
+        static::$connections[$name] = new $class_name($config, $name);
+        static::$initiated[$name] = true;
+
+        return static::$connections[$name];
+    }
+
+    /**
+     * Returns the database instance object.
+     *
+     * @param string $name Connection name
+     *
+     * @return object
+     */
+    public static function connection($name = 'main')
+    {
+        return isset(static::$connections[$name]) ? static::$connections[$name] : false;
+    }
+
+    /**
+     * Returns true if the database has been initiated, false if not.
+     *
+     * @param string $name Connection name
+     *
+     * @return bool
+     */
+    public static function initiated($name = 'main')
+    {
+        return isset(static::$initiated[$name]) ? static::$initiated[$name] : false;
+    }
 }

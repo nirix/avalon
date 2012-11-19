@@ -32,26 +32,23 @@ use avalon\core\Error;
  */
 class Driver
 {
-	/**
-	 * Shortcut to the Error::halt method.
-	 *
-	 * @param string $error DB error message
-	 */
-	public function halt($error = 'Unknown error')
-	{
-		if (is_array($error) and isset($error[2]) and !empty($error[2]))
-		{
-			$error = $error[2];
-		}
-		else if (!is_array($error))
-		{
-			$error = $error;
-		}
-		else
-		{
-			$error = 'Unknown error. ' . implode('/', $error);
-		}
-		
-		Error::halt("Database Error", $error . '<br />' . $this->last_query);
-	}
+    /**
+     * Shortcut to the Error::halt method.
+     *
+     * @param string $error DB error message
+     */
+    public function halt($error = 'Unknown error')
+    {
+        if (is_array($error) and isset($error[2]) and !empty($error[2])) {
+            $error = $error[2];
+        }
+        else if (!is_array($error)) {
+            $error = $error;
+        }
+        else {
+            $error = 'Unknown error. ' . implode('/', $error);
+        }
+
+        Error::halt("Database Error", $error . '<br />' . $this->last_query);
+    }
 }
