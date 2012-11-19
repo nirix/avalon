@@ -32,122 +32,111 @@ use avalon\http\Router;
  */
 class Kernel
 {
-	private static $version = '0.2';
-	private static $app;
-	
-	/**
-	 * Initialize the Avalon framework
-	 */
-	public static function init()
-	{
-		// Route the request
-		Request::process();
-		Router::process(Request::url());
-	}
-	
-	/**
-	 * Execute the routed controller and method
-	 */
-	public static function run()
-	{
-		// Controller
-		$namespace = Router::$namespace;
-		$controller_name = str_replace('::', '', $namespace) . Router::$controller . "Controller";
-		$controller_file = Load::controller((Router::$namespace !== null ? str_replace('::', '/', Router::$namespace) . '/' : '') . Router::$controller);
+    private static $version = '0.2';
+    private static $app;
 
-		// Method
-		$method_name = 'action_' . Router::$method;
-		$method_args = Router::$args;
+    /**
+     * Initialize the Avalon framework
+     */
+    public static function init()
+    {
+        // Route the request
+        Request::process();
+        Router::process(Request::url());
+    }
 
-		// Load root namespace app controller
-		if (file_exists(APPPATH . "/controllers/app_controller.php"))
-		{
-			require APPPATH . "/controllers/app_controller.php";
-		}
+    /**
+     * Execute the routed controller and method
+     */
+    public static function run()
+    {
+        // Controller
+        $namespace = Router::$namespace;
+        $controller_name = str_replace('::', '', $namespace) . Router::$controller . "Controller";
+        $controller_file = Load::controller((Router::$namespace !== null ? str_replace('::', '/', Router::$namespace) . '/' : '') . Router::$controller);
 
-		// Load controller namespaces app controllers
-		if ($namespace !== null)
-		{
-			$ns_path = array();
-			foreach (explode('::', $namespace) as $ns)
-			{
-				$ns_path[] = strtolower($ns);
+        // Method
+        $method_name = 'action_' . Router::$method;
+        $method_args = Router::$args;
 
-				// Check that the file exists...
-				$file_path = APPPATH . "/controllers/" . implode('/', $ns_path) . "/app_controller.php";
-				if (file_exists($file_path))
-				{
-					require $file_path;
-				}
-			}
-		}
+        // Load root namespace app controller
+        if (file_exists(APPPATH . "/controllers/app_controller.php")) {
+            require APPPATH . "/controllers/app_controller.php";
+        }
 
-		// Check if the controller file exists...
-		if (file_exists($controller_file))
-		{
-			require $controller_file;
-		}
+        // Load controller namespaces app controllers
+        if ($namespace !== null) {
+            $ns_path = array();
+            foreach (explode('::', $namespace) as $ns) {
+                $ns_path[] = strtolower($ns);
 
-		// Start the app/controller
-		static::$app = new $controller_name();
+                // Check that the file exists...
+                $file_path = APPPATH . "/controllers/" . implode('/', $ns_path) . "/app_controller.php";
+                if (file_exists($file_path)) {
+                    require $file_path;
+                }
+            }
+        }
 
-		// Run before filters
-		if (is_array(static::$app->_before))
-		{
-			$filters = array();
+        // Check if the controller file exists...
+        if (file_exists($controller_file)) {
+            require $controller_file;
+        }
 
-			// Before all
-			if (isset(static::$app->_before['*']) and is_array(static::$app->_before['*']))
-			{
-				// Merge them into the filters array
-				$filters = array_merge($filters, static::$app->_before['*']);
-			}
+        // Start the app/controller
+        static::$app = new $controller_name();
 
-			// Before certain methods
-			if (isset(static::$app->_before[Router::$method]) and is_array(static::$app->_before[Router::$method]))
-			{
-				// Merge them into the fitlers array
-				$filters = array_merge($filters, static::$app->_before[Router::$method]);
-			}
+        // Run before filters
+        if (is_array(static::$app->_before)) {
+            $filters = array();
 
-			// Execute the filters
-			foreach ($filters as $filter)
-			{
-				static::$app->$filter(Router::$method);
-			}
-		}
+            // Before all
+            if (isset(static::$app->_before['*']) and is_array(static::$app->_before['*'])) {
+                // Merge them into the filters array
+                $filters = array_merge($filters, static::$app->_before['*']);
+            }
 
-		// Call the method
-		if (static::$app->_render['action'])
-		{
-			call_user_func_array(array(static::$app, $method_name), $method_args);
-		}
-		
-		// Call our custom 'destructor'. Why not use __destruct(): because even
-		// after 'die', 'exit', etc is called, __destruct() is still executed.
-		if (method_exists(static::$app, '__shutdown'))
-		{
-			static::$app->__shutdown();
-		}
-	}
-	
-	/**
-	 * Returns the application object.
-	 *
-	 * @return object
-	 */
-	public static function app()
-	{
-		return static::$app;
-	}
-	
-	/**
-	 * Returns the version of the Avalon framework.
-	 *
-	 * @return string
-	 */
-	public static function version()
-	{
-		return static::$version;
-	}
+            // Before certain methods
+            if (isset(static::$app->_before[Router::$method]) and is_array(static::$app->_before[Router::$method])) {
+                // Merge them into the fitlers array
+                $filters = array_merge($filters, static::$app->_before[Router::$method]);
+            }
+
+            // Execute the filters
+            foreach ($filters as $filter) {
+                static::$app->$filter(Router::$method);
+            }
+        }
+
+        // Call the method
+        if (static::$app->_render['action']) {
+            call_user_func_array(array(static::$app, $method_name), $method_args);
+        }
+
+        // Call our custom 'destructor'. Why not use __destruct(): because even
+        // after 'die', 'exit', etc is called, __destruct() is still executed.
+        if (method_exists(static::$app, '__shutdown')) {
+            static::$app->__shutdown();
+        }
+    }
+
+    /**
+     * Returns the application object.
+     *
+     * @return object
+     */
+    public static function app()
+    {
+        return static::$app;
+    }
+
+    /**
+     * Returns the version of the Avalon framework.
+     *
+     * @return string
+     */
+    public static function version()
+    {
+        return static::$version;
+    }
 }
