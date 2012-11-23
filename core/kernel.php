@@ -80,6 +80,16 @@ class Kernel
     }
 
     /**
+     * Returns the app object.
+     *
+     * @return object
+     */
+    public static function app()
+    {
+        return static::$app;
+    }
+
+    /**
      * Returns the version of Avalon.
      *
      * @return string
