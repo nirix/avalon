@@ -322,7 +322,13 @@ class Model
             }
             // Model
             if (!isset($has_many['model'])) {
-                $has_many['model'] = ucfirst((substr($var, -1) == 's' ? substr($var, 0, -1) : $var));
+                $namespace = explode('\\', get_called_class());
+                unset($namespace[count($namespace) - 1]);
+
+                $model = ucfirst((substr($var, -1) == 's' ? substr($var, 0, -1) : $var));
+                $class = '\\' . implode('\\', $namespace) . '\\' . $model;
+
+                $has_many['model'] = $class;
             }
             // Different foreign key?
             if (!isset($has_many['foreign_key'])) {
@@ -345,7 +351,13 @@ class Model
             }
             // Model
             if (!isset($belongs_to['model'])) {
-                $belongs_to['model'] = ucfirst($var);
+                $namespace = explode('\\', get_called_class());
+                unset($namespace[count($namespace) - 1]);
+
+                $model = ucfirst($var);
+                $class = '\\' . implode('\\', $namespace) . '\\' . $model;
+
+                $belongs_to['model'] = $class;
             }
             // Different foreign key?
             if (!isset($belongs_to['foreign_key'])) {
