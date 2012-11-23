@@ -65,6 +65,17 @@ class Request
     }
 
     /**
+     * Static function for returning
+     * the requested URI.
+     *
+     * @return string
+     */
+    public static function requestUri()
+    {
+        return static::$uri;
+    }
+
+    /**
      * Gets the URI segment.
      *
      * @param integer $segment Segment index
