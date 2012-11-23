@@ -20,6 +20,7 @@
 
 namespace avalon\core;
 
+use avalon\http\Request;
 use avalon\http\Router;
 use avalon\output\Body;
 use avalon\output\View;
@@ -28,7 +29,7 @@ use avalon\output\View;
  * Controller
  *
  * @since 0.3
- * @package Radium
+ * @package Avalon
  * @subpackage Core
  * @author Jack P.
  * @copyright (C) Jack P.
@@ -43,7 +44,10 @@ class Controller
 
     public function __construct()
     {
-        $this->render['view'] = get_called_class() . '/' . Router::$method;
+        $called_class = explode('\\', get_called_class());
+        unset($called_class[0], $called_class[1]);
+
+        $this->render['view'] = str_replace('\\', '/', implode('/', $called_class) . '/' . Router::$method);
 
         // Check if the route has an extension
         if (Router::$extension !== null) {
@@ -71,7 +75,7 @@ class Controller
         // change the view file to error/404.php
         // and disable the calling of the routed
         // controller method.
-        View::set('request', Request::url());
+        View::set('request', Request::requestUri());
         $this->_render['view'] = 'error/404';
         $this->_render['action'] = false;
     }
@@ -84,13 +88,13 @@ class Controller
 
         // Are we wrapping the view in a layout?
         if ($this->render['layout']) {
-            $content = Body::$content;
+            $content = Body::body();
             Body::clear();
-            Body::append(View::render("layouts/{$this->render['layout']}", ['output' => $content]));
+            Body::append(View::render("layouts/{$this->render['layout']}", array('output' => $content)));
         }
 
         // Set the X-Powered-By header and render the layout with the content
         header("X-Powered-By: Avalon/" . Kernel::version());
-        print(Body::content());
+        print(Body::body());
     }
 }
