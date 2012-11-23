@@ -38,6 +38,7 @@ class Router
     public static $controller;
     public static $method;
     public static $params = array();
+    public static $vars = array();
     public static $extension;
 
     /**
@@ -115,6 +116,7 @@ class Router
 
         static::$controller = str_replace('::', '\\', '\\'.$value[0]);
         static::$method = $method[0];
-        static::$params = (isset($method[1]) and $params = explode(',', $method[1])) ? $params : array();
+        static::$params = $route['params'];
+        static::$vars = (isset($method[1]) and $vars = explode(',', $method[1])) ? $vars : array();
     }
 }
