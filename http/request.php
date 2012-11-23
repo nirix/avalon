@@ -36,6 +36,7 @@ class Request
     private static $method;
     private static $requested_with;
     public static $request = array();
+    public static $post = array();
 
     public function __construct()
     {
@@ -51,28 +52,41 @@ class Request
         // Requested with
         static::$requested_with = @$_SERVER['HTTP_X_REQUESTED_WITH'];
 
+        // _REQUEST
         static::$request = $_REQUEST;
+
+        // _POST
+        static::$post = $_POST;
     }
 
     /**
-     * Returns the requested URI.
+     * Returns the relative requested URI.
      *
      * @return string
      */
-    public function uri()
+    public function getUri()
     {
         return static::$uri;
     }
 
     /**
-     * Static function for returning
-     * the requested URI.
+     * Static method for returning relative the URI.
+     *
+     * @return string
+     */
+    public static function uri()
+    {
+        return static::$uri;
+    }
+
+    /**
+     * Returns the full requested URI.
      *
      * @return string
      */
     public static function requestUri()
     {
-        return static::$uri;
+        return $_SERVER['REQUEST_URI'];
     }
 
     /**
