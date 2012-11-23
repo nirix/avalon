@@ -70,7 +70,7 @@ class Request
      */
     public static function seg($segment)
     {
-        return (isset(static::$segments[$segment]) ? static::$segments[$segments] : false);
+        return (isset(static::$segments[$segment]) ? static::$segments[$segment] : false);
     }
 
     /**
