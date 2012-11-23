@@ -36,6 +36,7 @@ use avalon\output\View;
  */
 class Kernel
 {
+    private static $version = '0.5';
     private static $app;
 
     /**
@@ -76,5 +77,14 @@ class Kernel
         }
 
         static::$app->__shutdown();
+    }
+
+    /**
+     * Returns the version of Avalon.
+     *
+     * @return string
+     */
+    public static function version() {
+        return static::$version;
     }
 }
