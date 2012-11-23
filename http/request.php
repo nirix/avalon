@@ -35,6 +35,7 @@ class Request
     private static $segments = array();
     private static $method;
     private static $requested_with;
+    public static $request = array();
 
     public function __construct()
     {
@@ -49,6 +50,8 @@ class Request
 
         // Requested with
         static::$requested_with = @$_SERVER['HTTP_X_REQUESTED_WITH'];
+
+        static::$request = $_REQUEST;
     }
 
     /**
