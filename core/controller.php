@@ -20,35 +20,30 @@
 
 namespace avalon\core;
 
-use avalon\core\Kernel;
-use avalon\Database;
-use avalon\http\Request;
 use avalon\http\Router;
-use avalon\output\View;
 use avalon\output\Body;
+use avalon\output\View;
 
 /**
- * Base controller class.
+ * Controller
  *
- * @author Jack P.
- * @package Avalon
+ * @since 0.3
+ * @package Radium
  * @subpackage Core
+ * @author Jack P.
+ * @copyright (C) Jack P.
  */
 class Controller
 {
-    public $db;
-    public $_render = array('action' => true, 'layout' => 'default', 'view' => null);
-    public $_before = array();
+    public $render = array(
+        'action' => true,     // Call the routed action, or not
+        'view'   => false,    // View to render, set in __construct()
+        'layout' => 'default' // Layout to render
+    );
 
     public function __construct()
     {
-        // Get the database for easy access
-        if (Database::initiated()) {
-            $this->db = Database::connection();
-        }
-
-        // Set the view path
-        $this->_render['view'] = strtolower((Router::$namespace !== null ? Router::namespace_path() : '') . Router::$controller . '/' . Router::$method);
+        $this->render['view'] = get_called_class() . '/' . Router::$method;
 
         // Check if the route has an extension
         if (Router::$extension !== null) {
@@ -83,18 +78,19 @@ class Controller
 
     public function __shutdown()
     {
-        if (!$this->_render['view']) {
-            return;
+        if ($this->render['view']) {
+            View::render($this->render['view']);
         }
 
-        // Render the view, get the content and clear the output
-        View::render($this->_render['view']);
-        $output = Body::body();
-        Body::clear();
+        // Are we wrapping the view in a layout?
+        if ($this->render['layout']) {
+            $content = Body::$content;
+            Body::clear();
+            Body::append(View::render("layouts/{$this->render['layout']}", ['output' => $content]));
+        }
 
         // Set the X-Powered-By header and render the layout with the content
         header("X-Powered-By: Avalon/" . Kernel::version());
-        View::render("layouts/{$this->_render['layout']}", array('output' => $output));
-        echo Body::body();
+        print(Body::content());
     }
 }

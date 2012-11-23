@@ -21,45 +21,56 @@
 namespace avalon\http;
 
 /**
- * Request class.
+ * Avalon's HTTP request class.
  *
- * @author Jack P.
+ * @since 0.1
  * @package Avalon
+ * @subpackage HTTP
+ * @author Jack P.
+ * @copyright (C) Jack P.
  */
 class Request
 {
-    private static $entry_file;
-    private static $path_info;
-    private static $base_url;
-    private static $url;
-    private static $segments;
+    private static $uri;
+    private static $segments = array();
+    private static $method;
     private static $requested_with;
-    public static $request;
-    public static $method;
-    public static $post;
 
-    /**
-     * Processes the request and gets the URL,
-     * request method, request type, and so on.
-     */
-    public static function process()
+    public function __construct()
     {
-        static::$url = trim(static::_get_path_info(), '/');
-        static::$segments = explode('/', trim(static::$url, '/'));
-        static::$requested_with = @$_SERVER['HTTP_X_REQUESTED_WITH'];
-        static::$request = $_REQUEST;
+        // Get the request path
+        static::$uri = ($uri = static::requestPath() and $uri != '') ? $uri : '/';
+
+        // Request segments
+        static::$segments = explode('/', trim(static::$uri, '/'));
+
+        // Set the request method
         static::$method = strtolower($_SERVER['REQUEST_METHOD']);
-        static::$post = $_POST;
+
+        // Requested with
+        static::$requested_with = @$_SERVER['HTTP_X_REQUESTED_WITH'];
     }
 
     /**
-     * Determines the base URL of the app.
+     * Returns the requested URI.
      *
      * @return string
      */
-    public static function base()
+    public function uri()
     {
-        return str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']) . (func_num_args() > 0 ? trim(implode('/' , func_get_args()), '/') : '');
+        return static::$uri;
+    }
+
+    /**
+     * Gets the URI segment.
+     *
+     * @param integer $segment Segment index
+     *
+     * @return mixed
+     */
+    public static function seg($segment)
+    {
+        return (isset(static::$segments[$segment]) ? static::$segments[$segments] : false);
     }
 
     /**
@@ -74,47 +85,14 @@ class Request
     }
 
     /**
-     * Returns the requested URL.
+     * Redirects to the specified path relative to the
+     * entry file.
      *
-     * @return string
+     * @param string $path
      */
-    public static function url()
+    public static function redirectTo($path)
     {
-        return '/' . static::$url;
-    }
-
-    /**
-     * Returns the full URI of the request.
-     *
-     * @return string
-     */
-    public static function full_uri()
-    {
-        return static::base(trim(static::url(), '/'));
-    }
-
-    /**
-     * Checks of the URI matches the specified URI.
-     *
-     * @param string $uri
-     *
-     * @return bool
-     */
-    public static function matches($uri)
-    {
-        return trim($uri, '/') == trim(implode('/', self::$segments), '/');
-    }
-
-    /**
-     * Returns the segment at the specified index.
-     *
-     * @param integer $num
-     *
-     * @return string
-     */
-    public static function seg($num)
-    {
-        return @static::$segments[$num];
+        static::redirect(static::base($path));
     }
 
     /**
@@ -122,7 +100,7 @@ class Request
      *
      * @return bool
      */
-    public static function is_ajax()
+    public static function isAjax()
     {
         return strtolower(static::$requested_with) == 'xmlhttprequest';
     }
@@ -132,121 +110,49 @@ class Request
      *
      * @return string
      */
-    private static function _get_base_url()
+    public static function base($path = '')
     {
-        static::$base_url = rtrim(dirname(static::_get_script_url()), '\\/');
-        return static::$base_url;
+        return str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']) . trim($path, '/');
     }
 
-    /**
-     * Determines the path info.
-     *
-     * @return string
-     */
-    private static function _get_path_info()
+    private function requestPath()
     {
-        if (static::$path_info === null) {
-            $path_info = static::_get_request_url();
-
-            if (($pos = strpos($path_info, '?')) !== false) {
-               $path_info = substr($path_info, 0, $pos);
-            }
-            $path_info = urldecode($path_info);
-
-            $script_url = static::_get_script_url();
-            $base_url = static::_get_base_url();
-            if (strpos($path_info, $script_url) === 0) {
-                $path_info = substr($path_info, strlen($script_url));
-            }
-            elseif ($base_url === '' || strpos($path_info, $base_url) === 0) {
-                $path_info = substr($path_info, strlen($base_url));
-            }
-            elseif (strpos($_SERVER['PHP_SELF'],$script_url) === 0) {
-                $path_info = substr($_SERVER['PHP_SELF'], strlen($script_url));
-            } else {
-                throw new Exception("Unable to determin path info.");
-            }
-
-            static::$path_info = trim($path_info, '/');
+        // Check if there is a PATH_INFO variable
+        // Note: some servers seem to have trouble with getenv()
+        $path = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : @getenv('PATH_INFO');
+        if (trim($path, '/') != '' && $path != "/index.php") {
+            return $path;
         }
 
-        return static::$path_info;
-    }
-
-    /**
-     * Determines the script URL.
-     *
-     * @return string
-     */
-    private static function _get_script_url()
-    {
-        if (static::$entry_file === null) {
-            $file_name = basename($_SERVER['SCRIPT_FILENAME']);
-
-            // script_name
-            if (basename($_SERVER['SCRIPT_NAME']) === $file_name) {
-                static::$entry_file = $_SERVER['SCRIPT_NAME'];
-            }
-            // php_self
-            elseif (basename($_SERVER['PHP_SELF']) === $file_name) {
-                static::$entry_file = $_SERVER['PHP_SELF'];
-            }
-            // orig_script_name
-            elseif (isset($_SERVER['ORIG_SCRIPT_NAME']) && basename($_SERVER['ORIG_SCRIPT_NAME']) === $file_name)
-            {
-                static::$entry_file = $_SERVER['ORIG_SCRIPT_NAME'];
-            }
-            // more php_self
-            elseif (($pos=strpos($_SERVER['PHP_SELF'], '/' . $file_name))!==false)
-            {
-                static::$entry_file = substr($_SERVER['SCRIPT_NAME'], 0, $pos) . '/' . $file_name;
-            }
-            // document_root
-            elseif (isset($_SERVER['DOCUMENT_ROOT']) && strpos($_SERVER['SCRIPT_FILENAME'], $_SERVER['DOCUMENT_ROOT']) === 0)
-            {
-                static::$entry_file = str_replace('\\', '/', str_replace($_SERVER['DOCUMENT_ROOT'], '', $_SERVER['SCRIPT_FILENAME']));
-            }
-            // /wrists
-            else {
-                throw new Exception("Unable to determin entry file.");
-            }
+        // Check if ORIG_PATH_INFO exists
+        $path = str_replace($_SERVER['SCRIPT_NAME'], '', (isset($_SERVER['ORIG_PATH_INFO'])) ? $_SERVER['ORIG_PATH_INFO'] : @getenv('ORIG_PATH_INFO'));
+        if (trim($path, '/') != '' && $path != "/index.php") {
+            return $path;
         }
 
-        return static::$entry_file;
-    }
-
-    /**
-     * Determines the requested URL.
-     *
-     * @return string
-     */
-    private static function _get_request_url()
-    {
-        if (static::$url === null) {
-            // IIS
-            if (isset($_SERVER['HTTP_X_REWRITE_URL'])) {
-                static::$url = $_SERVER['HTTP_X_REWRITE_URL'];
-            } elseif (isset($_SERVER['REQUEST_URI'])) {
-                static::$url = $_SERVER['REQUEST_URI'];
-                if(isset($_SERVER['HTTP_HOST'])) {
-                    if (strpos(static::$url, $_SERVER['HTTP_HOST']) !== false) {
-                        static::$url = preg_replace('/^\w+:\/\/[^\/]+/', '', static::$url);
-                    }
-                } else {
-                    static::$url = preg_replace('/^(http|https):\/\/[^\/]+/i', '', static::$url);
-                }
-            }
-            // IIS 5.0 CGI
-            elseif (isset($_SERVER['ORIG_PATH_INFO'])) {
-                static::$url = $_SERVER['ORIG_PATH_INFO'];
-                if(!empty($_SERVER['QUERY_STRING'])) {
-                    static::$url .= '?' . $_SERVER['QUERY_STRING'];
-                }
-            } else {
-                throw new Exception("Unable to determin URI.");
-            }
+        // Check for ?uri=x/y/z
+        if (isset($_REQUEST['url'])) {
+            return $_REQUEST['url'];
         }
 
-        return static::$url;
+        // Check the _GET variable
+        if (is_array($_GET) && count($_GET) == 1 && trim(key($_GET), '/') != '') {
+            return key($_GET);
+        }
+
+        // Check for QUERY_STRING
+        $path = (isset($_SERVER['QUERY_STRING'])) ? $_SERVER['QUERY_STRING'] : @getenv('QUERY_STRING');
+        if (trim($path, '/') != '') {
+            return $path;
+        }
+
+        // Check for REQUEST_URI
+        $path = str_replace($_SERVER['SCRIPT_NAME'], '', $_SERVER['REQUEST_URI']);
+        if (trim($path, '/') != '' && $path != "/index.php") {
+            return str_replace(str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']), '', $path);
+        }
+
+        // I dont know what else to try, screw it..
+        return '';
     }
 }

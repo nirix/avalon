@@ -21,14 +21,17 @@
 namespace avalon\core;
 
 /**
- * Error class.
+ * Error class
  *
- * @author Jack P.
+ * @since 0.1
  * @package Avalon
+ * @subpackage Core
+ * @author Jack P.
+ * @copyright (C) Jack P.
  */
 class Error
 {
-    public static function halt($title, $message)
+    public static function halt($title, $message = '')
     {
         @ob_end_clean();
 
@@ -40,7 +43,7 @@ class Error
         }
 
         $body[] = "  {$message}";
-        $body[] = "  <div style=\"margin-top:8px;\"><small>Powered by Avalon " . Kernel::version() . "</small></div>";
+        $body[] = "  <div style=\"margin-top:8px;\"><small>Powered by Avalon</small></div>";
         $body[] = "</blockquote>";
 
         echo implode(PHP_EOL, $body);
