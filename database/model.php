@@ -329,6 +329,14 @@ class Model
                 $class = '\\' . implode('\\', $namespace) . '\\' . $model;
 
                 $has_many['model'] = $class;
+            } else {
+                $model = explode('\\', $var);
+
+                if (count($model) == 1) {
+                    $namespace = explode('\\', get_called_class());
+                    $namespace[count($namespace) -1] = ucfirst($has_many['model']);
+                    $has_many['model'] = implode('\\', $namespace);
+                }
             }
             // Different foreign key?
             if (!isset($has_many['foreign_key'])) {
@@ -358,6 +366,14 @@ class Model
                 $class = '\\' . implode('\\', $namespace) . '\\' . $model;
 
                 $belongs_to['model'] = $class;
+            } else {
+                $model = explode('\\', $var);
+
+                if (count($model) == 1) {
+                    $namespace = explode('\\', get_called_class());
+                    $namespace[count($namespace) -1] = ucfirst($belongs_to['model']);
+                    $belongs_to['model'] = implode('\\', $namespace);
+                }
             }
             // Different foreign key?
             if (!isset($belongs_to['foreign_key'])) {
