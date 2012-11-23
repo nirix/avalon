@@ -21,16 +21,17 @@
 namespace avalon;
 
 /**
- * Avalon's Autoloader
+ * Avalon's Autoloader.
  *
- * @author Jack P.
+ * @since 0.2
  * @package Avalon
  * @subpackage Core
+ * @author Jack P.
+ * @copyright (C) Jack P.
  */
 class Autoloader
 {
-    private static $vendor_path;
-    private static $registered_namespaces = array();
+    private static $vendorLocation;
     private static $classes = array();
 
     /**
@@ -42,37 +43,14 @@ class Autoloader
     }
 
     /**
-     * Registers multiple namespaces.
-     *
-     * @param array $namespaces
-     */
-    public static function register_namespaces($namespaces = array())
-    {
-        foreach ($namespaces as $namespace => $path) {
-            static::register_namespace($namespace, $path);
-        }
-    }
-
-    /**
-     * Registers a namespace.
-     *
-     * @param string $namespace
-     * @param string $path
-     */
-    public static function register_namespace($namespace, $path)
-    {
-        static::$registered_namespaces[$namespace] = $path;
-    }
-
-    /**
      * Alias multiple classes at once.
      *
      * @param array $classes
      */
-    public static function alias_classes($classes)
+    public static function aliasClasses($classes)
     {
         foreach ($classes as $original => $alias) {
-            static::alias_class($original, $alias);
+            static::aliasClass($original, $alias);
         }
     }
 
@@ -82,19 +60,19 @@ class Autoloader
      * @param string $original
      * @param string $alias
      */
-    public static function alias_class($original, $alias)
+    public static function aliasClass($original, $alias)
     {
         static::$classes[$alias] = ltrim($original, '\\');
     }
 
     /**
-     * Sets the vendor directory path.
+     * Sets the vendor location.
      *
-     * @param string $path
+     * @param string $location
      */
-    public static function vendor_path($path)
+    public static function vendorLocation($location)
     {
-        static::$vendor_path = $path;
+        static::$vendorLocation = $location;
     }
 
     /**
@@ -107,30 +85,23 @@ class Autoloader
     public static function load($class)
     {
         $class = ltrim($class, '\\');
-        $namespaces = explode('\\', $class);
-        $vendor_namespace = $namespaces[0];
 
         // Aliased classes
         if (array_key_exists($class, static::$classes)) {
-            if (!class_exists($class)) {
-                static::load(static::$classes[$class]);
+            $file = static::filePath(static::$classes[$class]);
+
+            if (file_exists($file) and !class_exists(static::$classes[$class])) {
+                require $file;
             }
 
             if (class_exists(static::$classes[$class])) {
                 class_alias(static::$classes[$class], $class);
             }
         }
-        // Registered namespace
-        elseif(isset(static::$registered_namespaces[$vendor_namespace])) {
-            $file = static::file_path(str_replace("{$vendor_namespace}\\", '', $class), static::$registered_namespaces[$vendor_namespace]);
-            if (!class_exists($class) and file_exists($file)) {
-                require $file;
-            }
-        }
         // Everything else
         else {
-            $file = static::file_path($class);
-            if (file_exists($file) and !class_exists($class)) {
+            $file = static::filePath($class);
+            if (file_exists($file)) {
                 require $file;
             }
         }
@@ -143,9 +114,9 @@ class Autoloader
      *
      * @return string
      */
-    public static function file_path($class, $vendor_path = null)
+    public static function filePath($class)
     {
-        return (($vendor_path === null) ? static::$vendor_path : $vendor_path) . static::lowercase(str_replace(array('\\', '_'), '/', "/{$class}.php"));
+        return static::$vendorLocation . static::lowercase(str_replace(array('\\', '_'), DIRECTORY_SEPARATOR, "/{$class}.php"));
     }
 
     /**
