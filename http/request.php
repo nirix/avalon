@@ -80,6 +80,27 @@ class Request
     }
 
     /**
+     * Returns the request method if nothing
+     * is passed, otherwise returns true/false
+     * if the passed string matches the method.
+     *
+     * @param string $matches
+     *
+     * @return string
+     */
+    public static function method($matches = false)
+    {
+        // Return the request method
+        if (!$matches) {
+            return static::$method;
+        }
+        // Match the request method
+        else {
+            return static::$method == $matches;
+        }
+    }
+
+    /**
      * Returns the full requested URI.
      *
      * @return string
@@ -118,7 +139,7 @@ class Request
      *
      * @param string $path
      */
-    public static function redirectTo($path)
+    public static function redirectTo($path = '')
     {
         static::redirect(static::base($path));
     }
