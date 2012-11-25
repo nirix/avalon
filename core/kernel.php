@@ -61,10 +61,30 @@ class Kernel
         // Start the app
         static::$app = new Router::$controller;
 
+        // Before filters
+        $filters = array_merge(
+            isset(static::$app->_before['*']) ? static::$app->_before['*'] : array(),
+            isset(static::$app->_before[Router::$method]) ? static::$app->_before[Router::$method] : array()
+        );
+        foreach ($filters as $filter) {
+            static::$app->{$filter}(Router::$method);
+        }
+        unset($filters, $filter);
+
         // Call the method
         if (static::$app->render['action']) {
             $output = call_user_func_array(array(static::$app, 'action_' . Router::$method), Router::$vars);
         }
+
+        // After filters
+        $filters = array_merge(
+            isset(static::$app->_after['*']) ? static::$app->_after['*'] : array(),
+            isset(static::$app->_after[Router::$method]) ? static::$app->_after[Router::$method] : array()
+        );
+        foreach ($filters as $filter) {
+            static::$app->{$filter}(Router::$method);
+        }
+        unset($filters, $filter);
 
         // Check if the action returned content
         if ($output !== null) {
