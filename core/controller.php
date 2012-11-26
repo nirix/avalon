@@ -47,7 +47,7 @@ class Controller
         $called_class = explode('\\', get_called_class());
         unset($called_class[0], $called_class[1]);
 
-        $this->render['view'] = str_replace('\\', '/', implode('/', $called_class) . '/' . Router::$method);
+        $this->_render['view'] = str_replace('\\', '/', implode('/', $called_class) . '/' . Router::$method);
 
         // Check if the route has an extension
         if (Router::$extension !== null) {
