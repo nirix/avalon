@@ -36,7 +36,7 @@ use avalon\output\View;
  */
 class Controller
 {
-    public $render = array(
+    public $_render = array(
         'action' => true,     // Call the routed action, or not
         'view'   => false,    // View to render, set in __construct()
         'layout' => 'default' // Layout to render
@@ -82,15 +82,15 @@ class Controller
 
     public function __shutdown()
     {
-        if ($this->render['view']) {
-            View::render($this->render['view']);
+        if ($this->_render['view']) {
+            View::render($this->_render['view']);
         }
 
         // Are we wrapping the view in a layout?
-        if ($this->render['layout']) {
+        if ($this->_render['layout']) {
             $content = Body::body();
             Body::clear();
-            Body::append(View::render("layouts/{$this->render['layout']}", array('output' => $content)));
+            Body::append(View::render("layouts/{$this->_render['layout']}", array('output' => $content)));
         }
 
         // Set the X-Powered-By header and render the layout with the content

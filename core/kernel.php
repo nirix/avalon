@@ -72,7 +72,7 @@ class Kernel
         unset($filters, $filter);
 
         // Call the method
-        if (static::$app->render['action']) {
+        if (static::$app->_render['action']) {
             $output = call_user_func_array(array(static::$app, 'action_' . Router::$method), Router::$vars);
         }
 
@@ -88,12 +88,14 @@ class Kernel
 
         // Check if the action returned content
         if ($output !== null) {
-            static::$app->render['view'] = false;
+            static::$app->_render['view'] = false;
             Body::append($output);
-        }
-        // Automatically render the view
-        elseif ($output === false) {
 
+            // Get the content, clear the body
+            // and append content to a clean slate.
+            $content = Body::body();
+            Body::clear();
+            Body::append($content);
         }
 
         static::$app->__shutdown();
