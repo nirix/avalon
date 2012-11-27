@@ -45,10 +45,10 @@ class View
     public static function render($file, array $vars = array())
     {
         // Get the view content
-        $content = self::_get_view($file, $vars);
+        $content = static::_get_view($file, $vars);
 
         // Check if we need to flush or append
-        if(ob_get_level() > self::$ob_level + 1) {
+        if(ob_get_level() > static::$ob_level + 1) {
             ob_end_flush();
         }
         // Append it to the output
@@ -120,7 +120,7 @@ class View
      */
     private static function _view_file_path($file)
     {
-        $file = strtolower($file);
+        $file = strtolower(preg_replace('/(?<=[a-z])([A-Z])/', '_' . '\\1', $file));
         $path = static::exists($file);
 
         // Check if the theme has this view
