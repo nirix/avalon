@@ -176,11 +176,12 @@ class View
      * @param string $var The variable name.
      * @param mixed $val The variables value.
      */
-    public static function set($var, $val)
+    public static function set($var, $val = null)
     {
+        // Mass set
         if (is_array($var)) {
-            foreach ($var as $vr => $vl) {
-                self::$vars[$vr] = $vl;
+            foreach ($var as $k => $v) {
+                static::set($k, $v);
             }
         } else {
             self::$vars[$var] = $val;
