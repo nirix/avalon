@@ -33,6 +33,7 @@ class Autoloader
 {
     private static $vendorLocation;
     private static $classes = array();
+    private static $namespaces = array();
 
     /**
      * Registers the class as the autoloader.
@@ -66,6 +67,29 @@ class Autoloader
     }
 
     /**
+     * Register multiple namespaces at once.
+     *
+     * @param array $namespaces
+     */
+    public static function registerNamespaces(array $namespaces)
+    {
+        foreach ($namespaces as $vendor => $location) {
+            static::registerNamespace($vendor, $location);
+        }
+    }
+
+    /**
+     * Registers a namespace location.
+     *
+     * @param string $vendor
+     * @param string $location
+     */
+    public static function registerNamespace($vendor, $location)
+    {
+        static::$namespaces[$vendor] = $location;
+    }
+
+    /**
      * Sets the vendor location.
      *
      * @param string $location
@@ -85,6 +109,8 @@ class Autoloader
     public static function load($class)
     {
         $class = ltrim($class, '\\');
+        $vendor = explode('\\', $class);
+        $vendor = $vendor[0];
 
         // Aliased classes
         if (array_key_exists($class, static::$classes)) {
@@ -97,6 +123,14 @@ class Autoloader
             if (class_exists(static::$classes[$class])) {
                 class_alias(static::$classes[$class], $class);
             }
+        }
+        // Registered namespace
+        elseif (isset(static::$namespaces[$vendor])) {
+            $namespace = explode('\\', $class);
+            unset($namespace[0]);
+            $namespace = implode('\\', $namespace);
+
+            require static::$namespaces[$vendor] . static::filePath($namespace, false);
         }
         // Everything else
         else {
@@ -114,9 +148,9 @@ class Autoloader
      *
      * @return string
      */
-    public static function filePath($class)
+    public static function filePath($class, $prependVendor = true)
     {
-        return static::$vendorLocation . static::lowercase(str_replace(array('\\', '_'), DIRECTORY_SEPARATOR, "/{$class}.php"));
+        return ($prependVendor ? static::$vendorLocation :'') . static::lowercase(str_replace(array('\\', '_'), DIRECTORY_SEPARATOR, "/{$class}.php"));
     }
 
     /**
