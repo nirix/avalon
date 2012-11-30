@@ -44,6 +44,8 @@ class Kernel
      */
     public static function init()
     {
+        session_start();
+
         // Route the request
         Router::route(new Request);
 
