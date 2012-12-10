@@ -238,9 +238,11 @@ class Form
             }
         }
 
-        // Merge default attributes with
-        // the specified attributes.
-        $attributes = array_merge(array('type' => $type, 'name' => $name), $attributes);
+        // Add name and type (if not textarea)
+        $attributes['name'] = $name;
+        if ($type != 'textarea') {
+            $attributes['type'] = $type;
+        }
 
         // Textareas
         if ($type == 'textarea') {
