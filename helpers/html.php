@@ -50,7 +50,7 @@ class HTML
      */
     public static function css_link($path, $media = 'screen')
     {
-        return '<link rel="stylesheet" href="'.$path.'" media="'.$media.'" />'.PHP_EOL;
+        return '<link rel="stylesheet" href="'.str_replace('&', '&amp;', $path).'" media="'.$media.'" />'.PHP_EOL;
     }
 
     /**
@@ -62,7 +62,7 @@ class HTML
      */
     public static function js_inc($path)
     {
-        return '<script src="'.$path.'" type="text/javascript"></script>'.PHP_EOL;
+        return '<script src="'.str_replace('&', '&amp;', $path).'" type="text/javascript"></script>'.PHP_EOL;
     }
 
     /**
@@ -81,7 +81,7 @@ class HTML
         }
 
         $url = Request::base(ltrim($url, '/'));
-        $attributes['href'] = $url;
+        $attributes['href'] = str_replace('&', '&amp;', $url);
         $options = static::build_attributes($attributes);
 
         return "<a {$options}>{$label}</a>";
@@ -98,6 +98,9 @@ class HTML
     {
         $options = array();
         foreach ($attributes as $attr => $val) {
+            if ($attr == 'id' and $val === false) {
+                continue;
+            }
             $options[] = "{$attr}=\"{$val}\"";
         }
         return implode(' ', $options);
