@@ -44,6 +44,7 @@ class Model
     protected static $_filters_before = array(); // Before filters
     protected static $_filters_after = array(); // After filters
     protected static $_connection_name = 'main'; // Name of the connection to use
+    protected static $_escape = array(); // Fields to escape when reading from database
 
     // Information different per table row
     protected $_changed_properties = array(); // Properties that have been changed
@@ -67,6 +68,10 @@ class Model
             foreach (array_keys($data) as $column) {
                 if (!in_array($column, static::$_properties)) {
                     static::$_properties[] = $column;
+                }
+
+                if (in_array($column, static::$_escape)) {
+                    $this->_data[$column] = htmlspecialchars($this->_data[$column]);
                 }
             }
         }
@@ -158,7 +163,7 @@ class Model
             foreach (static::$_properties as $column) {
                 // Check if column is updated, if so, save.
                 if (in_array($column, $this->_changed_properties)) {
-                    $data[$column] = $this->_data[$column];
+                    $data[$column] = (in_array($column, static::$_escape)) ? htmlspecialchars_decode($this->_data[$column]) : $this->_data[$column];
                 }
             }
             unset($data[static::$_primary_key]);
