@@ -222,12 +222,15 @@ class Form
         }
         // Check if its in the _POST array
         elseif (isset($_POST[$name])) {
-            $value = $_POST[$name];
+            $value = htmlspecialchars($_POST[$name]);
         }
         // It's nowhere...
         else {
             $value = '';
         }
+
+        // Make the value "safe"
+        $attributes['value'] = $value;
 
         // Add selected or checked attribute?
         foreach (array('selected', 'checked') as $attr) {
@@ -251,8 +254,7 @@ class Form
         // Everything else
         else {
             // Don't pass the checked attribute if its false.
-            if (isset($attributes['checked']) and !$attributes['checked'])
-            {
+            if (isset($attributes['checked']) and !$attributes['checked']) {
                 unset($attributes['checked']);
             }
             return "<input " . HTML::build_attributes($attributes) . ">";
