@@ -372,7 +372,7 @@ class Model
 
                 $belongs_to['model'] = $class;
             } else {
-                $model = explode('\\', $var);
+                $model = explode('\\', $belongs_to['model']);
 
                 if (count($model) == 1) {
                     $namespace = explode('\\', get_called_class());
