@@ -112,11 +112,12 @@ class Router
     private static function setRoute($route)
     {
         $value = explode('.', $route['value']);
-        $method = explode('/', $value[1]);
+        $method = explode('/', implode('.', array_slice($value, 1)));
+        $vars = isset($method[1]) ? explode(',', $method[1]) : array();
 
         static::$controller = str_replace('::', '\\', '\\'.$value[0]);
         static::$method = $method[0];
         static::$params = $route['params'];
-        static::$vars = (isset($method[1]) and $vars = explode(',', $method[1])) ? $vars : array();
+        static::$vars = $vars;
     }
 }
