@@ -210,8 +210,15 @@ class Model
      */
     public function delete() {
         if ($this->_is_new() === false) {
+            // Before delete filters
+            if (isset(static::$_filters_before['delete']) and is_array(static::$_filters_before['delet'])) {
+                foreach (static::$_filters_before['delete'] as $filter) {
+                    $this->$filter();
+                }
+            }
             return static::db()->delete()->from(static::$_name)->where(static::$_primary_key, $this->_data[static::$_primary_key])->exec();
         }
+        return false;
     }
 
     /**
