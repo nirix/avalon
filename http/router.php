@@ -40,6 +40,7 @@ class Router
     public static $params = array();
     public static $vars = array();
     public static $extension;
+    public static $extensions = array('.json', '.xml', '.atom');
 
     /**
      * Adds a route to be routed.
@@ -80,10 +81,11 @@ class Router
         // The fun begins
         foreach (static::$routes as $route) {
             // Does the route match the request?
-            if (preg_match("#^{$route['route']}?$#", $request->getUri(), $params)) {
+            $pattern = "#^{$route['route']}" . '(?<extension>' . implode('|', static::$extensions) . ")?$#";
+            if (preg_match($pattern, $request->getUri(), $params)) {
                 unset($params[0]);
                 $route['params'] = array_merge($route['params'], $params);
-                $route['value'] = preg_replace("#^{$route['route']}?$#", $route['value'], $request->getUri());
+                $route['value'] = preg_replace($pattern, $route['value'], $request->getUri());
                 return static::setRoute($route);
             }
         }
@@ -119,5 +121,6 @@ class Router
         static::$method = $method[0];
         static::$params = $route['params'];
         static::$vars = $vars;
+        static::$extension = (array_key_exists('extension', $route['params']) ? $route['params']['extension'] : null);
     }
 }
