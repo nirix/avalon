@@ -191,7 +191,7 @@ class Model
                     $data[$column] = $this->_data[$column];
                 }
             }
-            unset($data[static::$_primary_key]);
+            //unset($data[static::$_primary_key]);
 
             FishHook::run('model::save/create', array(get_called_class(), &$data));
 
