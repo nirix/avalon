@@ -229,7 +229,7 @@ class Query
      *
      * @return string
      */
-    private function _assemble()
+    public function _assemble()
     {
         $query = array();
         $query[] = $this->type;
