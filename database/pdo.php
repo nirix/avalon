@@ -71,6 +71,9 @@ class PDO extends Driver
             // Something else...
             else {
                 $dsn = strtolower($config['type']) . ':dbname=' . $config['database'] . ';host=' . $config['host'];
+                if (isset($config['port'])) {
+                    $dsn = "{$dsn};port={$config['port']}";
+                }
             }
 
             $this->connection = new \PDO(
