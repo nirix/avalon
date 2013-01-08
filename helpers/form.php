@@ -144,7 +144,8 @@ class Form
      * Creates a select field.
      *
      * @param string $name
-     * @param array $attributes
+     * @param array  $options
+     * @param array  $attributes
      *
      * @return string
      */
@@ -172,16 +173,61 @@ class Form
             if (!is_numeric($index)) {
                 $select[] = '<optgroup label="' . $index . '">';
                 foreach ($option as $opt) {
-                    $select[] = static::select_option($opt, $value);
+                    $select[] = static::select_option($opt, ($opt['value'] == $value));
                 }
                 $select[] = '</optgroup>';
             } else {
-                $select[] = static::select_option($option, $value);
+                $select[] = static::select_option($option, ($option['value'] == $value));
             }
         }
 
         // Closing tags
         $select[] = '</select>';
+
+        return implode(PHP_EOL, $select);
+    }
+
+    /**
+     * Creates a multi-select field.
+     *
+     * @param string $name
+     * @param array  $options
+     * @param array  $values
+     * @param array  $attributes
+     *
+     * @return string
+     */
+    public static function multiselect($name, $options, $values, $attributes = array()) {
+        // Set attributes
+        $attributes = array_merge(array('class' => 'multiselect', 'name' => $name), $attributes);
+
+        // Set ID if not already set
+        if (!isset($attributes['id'])) {
+            $attributes['id'] = $name;
+        }
+
+        // Opening tag
+        $select = array();
+        $select[] = "<select multiple " . HTML::build_attributes($attributes) . ">";
+
+        // Options
+        foreach ($options as $index => $option) {
+            // Option group
+            if (!is_numeric($index)) {
+                $select[] = '<optgroup label="' . $index . '">';
+                foreach ($option as $opt) {
+                    $select[] = static::select_option($opt, in_array($opt['value'], $values));
+                }
+                $select[] = '</optgroup>';
+            }
+            // Regular option
+            else {
+                $select[] = static::select_option($option, in_array($option['value'], $values));
+            }
+        }
+
+        // Closing tag
+        $select[] = "</select>";
 
         return implode(PHP_EOL, $select);
     }
@@ -193,9 +239,18 @@ class Form
      *
      * @return string
      */
-    private static function select_option($option, $value)
+    private static function select_option($option, $selected)
     {
-        return '<option value="' . $option['value'] . '"' . ($value == $option['value'] ? ' selected="selected"' :'') . '>' . $option['label'] . '</option>';
+        // Set value
+        $attributes = array('value' => $option['value']);
+
+        // Check if selected
+        if ($selected) {
+            $attributes['selected'] = true;
+        }
+
+        // Return option
+        return "<option " . HTML::build_attributes($attributes) . ">{$option['label']}</option>";
     }
 
     /**
