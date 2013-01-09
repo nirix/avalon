@@ -244,13 +244,8 @@ class Form
         // Set value
         $attributes = array('value' => $option['value']);
 
-        // Check if selected
-        if ($selected) {
-            $attributes['selected'] = true;
-        }
-
         // Return option
-        return "<option " . HTML::build_attributes($attributes) . ">{$option['label']}</option>";
+        return "<option " . HTML::build_attributes($attributes) . ($selected ? ' selected' :'') . ">{$option['label']}</option>";
     }
 
     /**
