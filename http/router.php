@@ -121,6 +121,6 @@ class Router
         static::$method = $method[0];
         static::$params = $route['params'];
         static::$vars = $vars;
-        static::$extension = (array_key_exists('extension', $route['params']) ? $route['params']['extension'] : null);
+        static::$extension = (isset($route['params']['extension']) ? $route['params']['extension'] : null);
     }
 }

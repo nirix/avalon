@@ -113,7 +113,7 @@ class Autoloader
         $vendor = $vendor[0];
 
         // Aliased classes
-        if (array_key_exists($class, static::$classes)) {
+        if (isset(static::$classes[$class])) {
             $file = static::filePath(static::$classes[$class]);
 
             if (file_exists($file) and !class_exists(static::$classes[$class])) {
