@@ -68,24 +68,25 @@ class Router
      */
     public static function route(Request $request)
     {
+        $uri = "/" . trim($request->getUri(), '/');
         // Is this the root route?
-        if ($request->getUri() === '/' and isset(static::$routes['root'])) {
+        if ($uri === '/' and isset(static::$routes['root'])) {
             return static::setRoute(static::$routes['root']);
         }
 
         // Do we have an exact match?
-        if (isset(static::$routes[$request->getUri()])) {
-            return static::setRoute(static::$routes[$request->getUri()]);
+        if (isset(static::$routes[$uri])) {
+            return static::setRoute(static::$routes[$uri]);
         }
 
         // The fun begins
         foreach (static::$routes as $route) {
             // Does the route match the request?
             $pattern = "#^{$route['route']}" . '(?<extension>' . implode('|', static::$extensions) . ")?$#";
-            if (preg_match($pattern, $request->getUri(), $params)) {
+            if (preg_match($pattern, $uri, $params)) {
                 unset($params[0]);
                 $route['params'] = array_merge($route['params'], $params);
-                $route['value'] = preg_replace($pattern, $route['value'], $request->getUri());
+                $route['value'] = preg_replace($pattern, $route['value'], $uri);
                 return static::setRoute($route);
             }
         }
@@ -96,7 +97,7 @@ class Router
         }
         // No 404 route, Exception time! FUN :D
         else {
-            throw new Exception("No routes found for '{$request->getUri()}'");
+            throw new Exception("No routes found for '{$uri}'");
         }
     }
 
