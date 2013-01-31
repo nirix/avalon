@@ -111,6 +111,20 @@ class Request
     }
 
     /**
+     * Returns the value of the key from the POST array,
+     * if it's not set, returns null by default.
+     *
+     * @param string $key     Key to get from POST array
+     * @param mixed  $not_set Value to return if not set
+     *
+     * @return mixed
+     */
+    public static function post($key, $not_set = null)
+    {
+        return isset(static::$post[$key]) ? static::$post[$key] : $not_set;
+    }
+
+    /**
      * Gets the URI segment.
      *
      * @param integer $segment Segment index
