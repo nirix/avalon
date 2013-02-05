@@ -120,7 +120,6 @@ class View
      */
     private static function _view_file_path($file)
     {
-        $file = strtolower(preg_replace('/(?<=[a-z])([A-Z])/', '_' . '\\1', $file));
         $path = static::exists($file);
 
         // Check if the theme has this view
@@ -158,7 +157,7 @@ class View
 
         // Loop over and find the view
         foreach ($dirs as $dir) {
-            $path = $dir . $name;
+            $path = strtolower(preg_replace('/(?<=[a-z])([A-Z])/', '_' . '\\1', "{$dir}{$name}"));
             if (file_exists($path . '.phtml')) {
                 return $path . '.phtml';
             } elseif (file_exists($path . '.php')) {
