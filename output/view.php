@@ -45,33 +45,17 @@ class View
     public static function render($file, array $vars = array())
     {
         // Get the view content
-        $content = static::_get_view($file, $vars);
-
-        // Check if we need to flush or append
-        if(ob_get_level() > static::$ob_level + 1) {
-            ob_end_flush();
-        }
-        // Append it to the output
-        else {
-            Body::append($content);
-            @ob_end_clean();
-        }
+        return static::_get_view($file, $vars);
     }
 
     /**
      * Renders and returns the specified file.
      *
-     * @param string $file
-     * @param array $vars Variables to be passed to the view.
-     *
-     * @return string
+     * @deprecated Deprecated since 0.6
      */
     public static function get($file, array $vars = array())
     {
-        // Get the content and clean the buffer
-        $content = self::_get_view($file, $vars, true);
-        ob_end_clean();
-        return $content;
+        return static::render($file, $vars);
     }
 
     /**
@@ -106,9 +90,7 @@ class View
         // Load up the view and get the contents
         ob_start();
         include($_file);
-        $content = ob_get_contents();
-
-        return $content;
+        return ob_get_clean();
     }
 
     /**

@@ -83,13 +83,13 @@ class Controller
     public function __shutdown()
     {
         if ($this->_render['view']) {
-            View::render($this->_render['view']);
+            $content = View::render($this->_render['view']);
+        } else {
+            $content = '';
         }
 
         // Are we wrapping the view in a layout?
         if ($this->_render['layout']) {
-            $content = Body::body();
-            Body::clear();
             Body::append(View::render("layouts/{$this->_render['layout']}", array('output' => $content)));
         }
 
