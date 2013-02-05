@@ -36,7 +36,7 @@ use avalon\output\View;
  */
 class Kernel
 {
-    private static $version = '0.5';
+    private static $version = '0.6';
     private static $app;
 
     /**
