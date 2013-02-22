@@ -42,6 +42,15 @@ class Request
     public static $scheme;
     public static $host;
 
+    /**
+     * Initialize the class to get request
+     * information statically.
+     */
+    public static function init()
+    {
+        return new static;
+    }
+
     public function __construct()
     {
         // Set request scheme
