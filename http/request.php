@@ -31,17 +31,33 @@ namespace avalon\http;
  */
 class Request
 {
+    private static $request_uri;
     private static $uri;
+    private static $base;
     private static $segments = array();
     private static $method;
     private static $requested_with;
     public static $request = array();
     public static $post = array();
+    public static $scheme;
+    public static $host;
 
     public function __construct()
     {
-        // Get the request path
-        static::$uri = ($uri = static::requestPath() and $uri != '') ? $uri : '/';
+        // Set request scheme
+        static::$scheme = static::isSecure() ? 'https' : 'http';
+
+        // Set host
+        static::$host = strtolower(preg_replace('/:\d+$/', '', trim($_SERVER['SERVER_NAME'])));
+
+        // Set base url
+        static::$base = static::baseUrl();
+
+        // Set the request path
+        static::$request_uri = static::requestPath();
+
+        // Set relative uri
+        static::$uri = str_replace(static::$base, '', static::$request_uri);
 
         // Request segments
         static::$segments = explode('/', trim(static::$uri, '/'));
@@ -107,7 +123,7 @@ class Request
      */
     public static function requestUri()
     {
-        return $_SERVER['REQUEST_URI'];
+        return static::$request_uri;
     }
 
     /**
@@ -175,47 +191,65 @@ class Request
      */
     public static function base($path = '')
     {
-        return str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']) . trim($path, '/');
+        return static::$base . '/' . trim($path, '/');
+    }
+
+    /**
+     * Determines if the request is secure.
+     *
+     * @return boolean
+     */
+    public static function isSecure()
+    {
+        if (!isset($_SERV['HTTPS']) or empty($_SERVER['HTTPS'])) {
+            return false;
+        }
+
+        return $_SERVER['HTTPS'] == 'on' or $_SERVER['HTTPS'] == 1;
+    }
+
+    private function baseUrl()
+    {
+        $filename = basename($_SERVER['SCRIPT_FILENAME']);
+
+        if (basename($_SERVER['SCRIPT_NAME']) === $filename) {
+            $baseUrl = $_SERVER['SCRIPT_NAME'];
+        } elseif (basename($_SERVER['PHP_SELF']) === $filename) {
+            $baseUrl = $_SERVER['PHP_SELF'];
+        } elseif (basename($_SERVER['ORIG_SCRIPT_NAME']) === $filename) {
+            $baseUrl = $_SERVER['ORIG_SCRIPT_NAME'];
+        }
+
+        $baseUrl = rtrim(str_replace($filename, '', $baseUrl), '/');
+
+        return $baseUrl;
     }
 
     private function requestPath()
     {
-        // Check if there is a PATH_INFO variable
-        // Note: some servers seem to have trouble with getenv()
-        $path = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : @getenv('PATH_INFO');
-        if (trim($path, '/') != '' && $path != "/index.php") {
-            return $path;
+        $requestPath = '';
+
+        if (isset($_SERVER['HTTP_X_ORIGINAL_URL'])) {
+            $requestPath = $_SERVER['HTTP_X_ORIGINAL_URL'];
+        } elseif (isset($_SERVER['HTTP_X_REWRITE_URL'])) {
+            $requestPath = $_SERVER['HTTP_X_REWRITE_URL'];
+        } elseif (isset($_SERVER['IIS_WasUrlRewritten'])
+                  and $_SERVER['IIS_WasUrlRewritten'] = 1
+                  and isset($_SERVER['UNENCODED_URL'])
+                  and $_SERVER['UNENCODED_URL'] != '')
+        {
+            $requestPath = $_SERVER['UNENCODED_URL'];
+        } elseif (isset($_SERVER['REQUEST_URI'])) {
+            $requestPath = $_SERVER['REQUEST_URI'];
+
+            $schemeAndHost = static::$scheme . '://' . static::$host;
+            if (strpos($requestPath, $schemeAndHost)) {
+                $requestPath = substr($requestPath, strlen($schemeAndHost));
+            }
+        } elseif (isset($_SERVER['ORIG_PATH_INFO'])) {
+            $requestPath = $_SERVER['ORIG_PATH_INFO'];
         }
 
-        // Check if ORIG_PATH_INFO exists
-        $path = str_replace($_SERVER['SCRIPT_NAME'], '', (isset($_SERVER['ORIG_PATH_INFO'])) ? $_SERVER['ORIG_PATH_INFO'] : @getenv('ORIG_PATH_INFO'));
-        if (trim($path, '/') != '' && $path != "/index.php") {
-            return $path;
-        }
-
-        // Check for ?uri=x/y/z
-        if (isset($_REQUEST['url'])) {
-            return $_REQUEST['url'];
-        }
-
-        // Check the _GET variable
-        if (is_array($_GET) && count($_GET) == 1 && trim(key($_GET), '/') != '') {
-            return key($_GET);
-        }
-
-        // Check for QUERY_STRING
-        $path = (isset($_SERVER['QUERY_STRING'])) ? $_SERVER['QUERY_STRING'] : @getenv('QUERY_STRING');
-        if (trim($path, '/') != '') {
-            return $path;
-        }
-
-        // Check for REQUEST_URI
-        $path = str_replace($_SERVER['SCRIPT_NAME'], '', $_SERVER['REQUEST_URI']);
-        if (trim($path, '/') != '' && $path != "/index.php") {
-            return str_replace(str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']), '', $path);
-        }
-
-        // I dont know what else to try, screw it..
-        return '';
+        return $requestPath;
     }
 }
