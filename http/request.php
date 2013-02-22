@@ -259,6 +259,12 @@ class Request
             $requestPath = $_SERVER['ORIG_PATH_INFO'];
         }
 
+        // Remove query string
+        if (strpos($requestPath, '?') !== false) {
+            $requestPath = explode('?', $requestPath);
+            $requestPath = $requestPath[0];
+        }
+
         return $requestPath;
     }
 }
