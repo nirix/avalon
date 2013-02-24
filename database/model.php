@@ -299,7 +299,7 @@ class Model
         $fetched = static::db()->select(static::$_properties)->from(static::$_name)->exec()->fetch_all();
 
         foreach ($fetched as $row) {
-            $rows[] = new static($row);
+            $rows[] = new static($row, false);
             unset($row);
         }
 
