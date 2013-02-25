@@ -37,6 +37,7 @@ class Request
     private static $segments = array();
     private static $method;
     private static $requested_with;
+    public static $query;
     public static $request = array();
     public static $post = array();
     public static $scheme;
@@ -53,6 +54,9 @@ class Request
 
     public function __construct()
     {
+        // Set query string
+        static::$query = (isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : null);
+
         // Set request scheme
         static::$scheme = static::isSecure() ? 'https' : 'http';
 
