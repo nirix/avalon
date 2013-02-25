@@ -69,8 +69,9 @@ class Request
         // Set the request path
         static::$request_uri = static::requestPath();
 
-        // Set relative uri
-        static::$uri = str_replace(static::$base, '', static::$request_uri);
+        // Set relative uri without query string
+        $uri = explode('?', str_replace(static::$base, '', static::$request_uri));
+        static::$uri = $uri[0];
 
         // Request segments
         static::$segments = explode('/', trim(static::$uri, '/'));
@@ -261,12 +262,6 @@ class Request
             }
         } elseif (isset($_SERVER['ORIG_PATH_INFO'])) {
             $requestPath = $_SERVER['ORIG_PATH_INFO'];
-        }
-
-        // Remove query string
-        if (strpos($requestPath, '?') !== false) {
-            $requestPath = explode('?', $requestPath);
-            $requestPath = $requestPath[0];
         }
 
         return $requestPath;
