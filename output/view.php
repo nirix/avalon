@@ -139,7 +139,7 @@ class View
 
         // Loop over and find the view
         foreach ($dirs as $dir) {
-            $path = strtolower(preg_replace('/(?<=[a-z])([A-Z])/', '_' . '\\1', "{$dir}{$name}"));
+            $path = $dir . strtolower(preg_replace('/(?<=[a-z])([A-Z])/', '_' . '\\1', $name));
             if (file_exists($path . '.phtml')) {
                 return $path . '.phtml';
             } elseif (file_exists($path . '.php')) {
