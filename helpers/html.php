@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2012 Jack Polgar
+ * Copyright (C) 2011-2013 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -98,7 +98,7 @@ class HTML
     {
         $options = array();
         foreach ($attributes as $attr => $val) {
-            if ($attr == 'id' and $val === false) {
+            if (in_array($attr, array('id', 'checked', 'disabled')) and $val === false) {
                 continue;
             }
             $options[] = "{$attr}=\"{$val}\"";
