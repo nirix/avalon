@@ -32,7 +32,7 @@ function strshorten($string, $length = 20, $append = '...')
 {
     // Check if it's longer than the length
     if (isset($string[$length-1])) {
-        return trim(substr($string, 0, $length)) . '...';
+        return trim(mb_substr($string, 0, $length)) . '...';
     } else {
         return $string;
     }
