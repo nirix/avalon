@@ -35,7 +35,7 @@ class Body
      *
      * @return string
      */
-    public static function body()
+    public static function content()
     {
         return static::$body;
     }

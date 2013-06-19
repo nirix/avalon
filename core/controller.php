@@ -95,6 +95,6 @@ class Controller
 
         // Set the X-Powered-By header and render the layout with the content
         header("X-Powered-By: Avalon/" . Kernel::version());
-        print(Body::body());
+        print(Body::content());
     }
 }
