@@ -187,7 +187,8 @@ class Model
             // Loop over the properties
             $data = array();
             foreach (static::$_properties as $column) {
-                if (isset($this->_data[$column])) {
+                // Hack to fix http://bugs.traq.io/traq/tickets/358
+                if (!is_array($column) and !is_object($column) and isset($this->_data[$column])) {
                     $data[$column] = $this->_data[$column];
                 }
             }
