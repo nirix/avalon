@@ -95,7 +95,7 @@ class Kernel
 
             // Get the content, clear the body
             // and append content to a clean slate.
-            $content = Body::body();
+            $content = Body::content();
             Body::clear();
             Body::append($content);
         }
