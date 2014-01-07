@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2012 Jack Polgar
+ * Copyright (C) 2011-2014 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -108,6 +108,19 @@ class Time
      */
     public static function ago_in_words($original, $detailed = true)
     {
+        return static::difference_in_words($original, $detailed);
+    }
+
+    /**
+     * Returns time difference in words for the given date.
+     *
+     * @param string $original
+     * @param bool $detailed
+     *
+     * @return string
+     */
+    public static function difference_in_words($original, $detailed = true)
+    {
         // Check what kind of format we're dealing with, timestamp or datetime
         // and convert it to a timestamp if it is in datetime form.
         if (!is_numeric($original)) {
@@ -128,7 +141,11 @@ class Time
         );
 
         // Get the difference
-        $difference = ($now - $original);
+        if ($original < time()) {
+            $difference = ($now - $original);
+        } else {
+            $difference = ($original - $now);
+        }
 
         // Loop around, get the time from
         for ($i = 0, $c = count($chunks); $i < $c; $i++) {
