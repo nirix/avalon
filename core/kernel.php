@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2012 Jack Polgar
+ * Copyright (C) 2011-2014 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -36,7 +36,7 @@ use avalon\output\View;
  */
 class Kernel
 {
-    private static $version = '0.6';
+    private static $version = '0.7';
     private static $app;
 
     /**
@@ -65,8 +65,8 @@ class Kernel
 
         // Before filters
         $filters = array_merge(
-            isset(static::$app->_before['*']) ? static::$app->_before['*'] : array(),
-            isset(static::$app->_before[Router::$method]) ? static::$app->_before[Router::$method] : array()
+            isset(static::$app->before['*']) ? static::$app->before['*'] : array(),
+            isset(static::$app->before[Router::$method]) ? static::$app->before[Router::$method] : array()
         );
         foreach ($filters as $filter) {
             static::$app->{$filter}(Router::$method);
@@ -74,23 +74,28 @@ class Kernel
         unset($filters, $filter);
 
         // Call the method
-        if (static::$app->_render['action']) {
+        if (static::$app->render['action']) {
             $output = call_user_func_array(array(static::$app, 'action_' . Router::$method), Router::$vars);
         }
 
         // After filters
         $filters = array_merge(
-            isset(static::$app->_after['*']) ? static::$app->_after['*'] : array(),
-            isset(static::$app->_after[Router::$method]) ? static::$app->_after[Router::$method] : array()
+            isset(static::$app->after['*']) ? static::$app->after['*'] : array(),
+            isset(static::$app->after[Router::$method]) ? static::$app->after[Router::$method] : array()
         );
         foreach ($filters as $filter) {
             static::$app->{$filter}(Router::$method);
         }
         unset($filters, $filter);
 
-        // Check if the action returned content
-        if (isset($output) and $output !== null) {
-            static::$app->_render['view'] = false;
+        // If an object is returned, use the `response` variable if it's set.
+        if (is_object($output)) {
+            $output = isset($output->response) ? $output->response : null;
+        }
+
+        // Check if we have any content
+        if (static::$app->render['action'] and $output !== null) {
+            static::$app->render['view'] = false;
             Body::append($output);
 
             // Get the content, clear the body

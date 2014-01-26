@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2012 Jack Polgar
+ * Copyright (C) 2011-2014 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -36,61 +36,43 @@ use avalon\output\View;
  */
 class Controller
 {
-    public $_render = array(
+    public $render = array(
         'action' => true,     // Call the routed action, or not
         'view'   => false,    // View to render, set in __construct()
         'layout' => 'default' // Layout to render
     );
+
+    public $before = array();
+    public $after = array();
 
     public function __construct()
     {
         $called_class = explode('\\', get_called_class());
         unset($called_class[0], $called_class[1]);
 
-        $this->_render['view'] = str_replace('\\', '/', implode('/', $called_class) . '/' . Router::$method);
-
-        // Check if the route has an extension
-        if (Router::$extension !== null) {
-            $this->_render['view'] = $this->_render['view'] . Router::$extension;
-
-            // Lets make sure the view for the extension exists
-            if (View::exists($this->_render['view']) === false) {
-                $this->show_404();
-            } else {
-                $this->_render['layout'] = 'plain';
-            }
-        }
-
-        // Allow the views to access the app,
-        // even though its not good practice...
-        View::set('app', $this);
-    }
-
-    /**
-     * Used to display the 404 page.
-     */
-    public function show_404()
-    {
-        // Send the request to the view and
-        // change the view file to error/404.php
-        // and disable the calling of the routed
-        // controller method.
-        View::set('request', Request::requestUri());
-        $this->_render['view'] = 'error/404';
-        $this->_render['action'] = false;
+        $this->render['view'] = str_replace('\\', '/', implode('/', $called_class) . '/' . Router::$method);
     }
 
     public function __shutdown()
     {
-        if ($this->_render['view']) {
-            $content = View::render($this->_render['view']);
-        } else {
-            $content = '';
+        // Don't render the layout for json content
+        if (Router::$extension == 'json') {
+            $this->render['layout'] = false;
+        }
+
+        // Render the view
+        $content = '';
+        if ($this->render['action'] and $this->render['view']) {
+            Body::append(View::render($this->render['view']));
         }
 
         // Are we wrapping the view in a layout?
-        if ($this->_render['layout']) {
-            Body::append(View::render("layouts/{$this->_render['layout']}", array('output' => $content)));
+        if ($this->render['layout']) {
+            $content = Body::content();
+            Body::clear();
+            Body::append(View::render("layouts/{$this->render['layout']}", array('content' => $content)));
+        } else {
+            Body::append($content);
         }
 
         // Set the X-Powered-By header and render the layout with the content
