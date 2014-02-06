@@ -237,8 +237,13 @@ class Query
         if (in_array($this->type, array("SELECT", "SELECT DISTINCT"))) {
             $cols = array();
             foreach ($this->cols as $col => $as) {
+                // Check for `table.*` or `table.column`
+                if (strpos($as, '.')) {
+                    $col = explode('.', $as);
+                    $cols[] = "`{$this->prefix}{$col[0]}`." . ($col[1] == '*' ? '*' : "`{$col[1]}`");
+                }
                 // Check if we're fetching all columns
-                if ($as == '*') {
+                else if ($as == '*') {
                     $cols[] = '*';
                 }
                 // Check if we're fetching a column as an "alias"
