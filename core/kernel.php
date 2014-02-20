@@ -74,6 +74,7 @@ class Kernel
         unset($filters, $filter);
 
         // Call the method
+        $output = null;
         if (static::$app->render['action']) {
             $output = call_user_func_array(array(static::$app, 'action_' . Router::$method), Router::$vars);
         }
