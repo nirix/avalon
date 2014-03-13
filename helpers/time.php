@@ -85,11 +85,11 @@ class Time
         }
 
         // YYYY-MM-DD HH:MM:SS
-        if (preg_match("#(?P<year>\d+)-(?P<month>\d+)-(?P<day>\d+) (?P<hour>\d+):(?P<minute>\d+):(?P<second>\d+)#siU", $original, $match)) {
+        if (preg_match("/(?P<year>\d+)-(?P<month>\d+)-(?P<day>\d+) (?P<hour>\d+):(?P<minute>\d+):(?P<second>\d+)/", $original, $match)) {
             return mktime($match['hour'], $match['minute'], $match['second'], $match['month'], $match['day'], $match['year']);
         }
         // YYYY-MM-DD
-        elseif (preg_match("#(?P<year>\d+)-(?P<month>\d+)-(?P<day>\d+)#siU", $original, $match)) {
+        elseif (preg_match("/(?P<year>\d+)-(?P<month>\d+)-(?P<day>\d+)/", $original, $match)) {
             return mktime(0, 0, 0, $match['month'], $match['day'], $match['year']);
         }
         // Fail
