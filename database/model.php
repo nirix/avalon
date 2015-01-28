@@ -397,7 +397,7 @@ class Model
                 $belongs_to['column'] = $var . '_id';
             }
             $model = $belongs_to['model'];
-            return $this->$var = $model::find($belongs_to['foreign_key'], $this->$belongs_to['column']);
+            return $this->$var = $model::find($belongs_to['foreign_key'], $this->{$belongs_to['column']});
         } else {
             $val = $this->$var;
 
