@@ -104,7 +104,7 @@ class Model
         // And run the after construct filter array...
         if (isset(static::$_filters_after['construct'])) {
             foreach (static::$_filters_after['construct'] as $filter) {
-                $this->$filter();
+                $this->{$filter}();
             }
         }
 
@@ -154,7 +154,7 @@ class Model
             // Before save filters
             if (isset(static::$_filters_before['save']) and is_array(static::$_filters_before['save'])) {
                 foreach (static::$_filters_before['save'] as $filter) {
-                    $this->$filter();
+                    $this->{$filter}();
                 }
             }
 
@@ -180,7 +180,7 @@ class Model
             // Before create filters
             if (isset(static::$_filters_before['create']) and is_array(static::$_filters_before['create'])) {
                 foreach (static::$_filters_before['create'] as $filter) {
-                    $this->$filter();
+                    $this->{$filter}();
                 }
             }
 
@@ -214,7 +214,7 @@ class Model
             // Before delete filters
             if (isset(static::$_filters_before['delete']) and is_array(static::$_filters_before['delet'])) {
                 foreach (static::$_filters_before['delete'] as $filter) {
-                    $this->$filter();
+                    $this->{$filter}();
                 }
             }
             return static::db()->delete()->from(static::$_name)->where(static::$_primary_key, $this->_data[static::$_primary_key])->exec();
@@ -362,7 +362,7 @@ class Model
 
             $model = $has_many['model'];
             $column = $has_many['column'];
-            return $this->$var = $model::select()->where($has_many['foreign_key'], $this->$column);
+            return $this->{$var} = $model::select()->where($has_many['foreign_key'], $this->{$column});
         }
         // Belongs to
         else if (is_array(static::$_belongs_to) and (in_array($var, static::$_belongs_to) or isset(static::$_belongs_to[$var]))) {
@@ -397,9 +397,10 @@ class Model
                 $belongs_to['column'] = $var . '_id';
             }
             $model = $belongs_to['model'];
-            return $this->$var = $model::find($belongs_to['foreign_key'], $this->{$belongs_to['column']});
+
+            return $this->{$var} = $model::find($belongs_to['foreign_key'], $this->{$belongs_to['column']});
         } else {
-            $val = $this->$var;
+            $val = $this->{$var};
 
             // Plugin hook
             FishHook::run('model::__get', array(get_called_class(), $var, $this->_data, &$val));
@@ -417,7 +418,7 @@ class Model
             $this->_data[$var] = $val;
             $this->_set_changed($var);
         } else {
-            $this->$var = $val;
+            $this->{$var} = $val;
         }
     }
 
