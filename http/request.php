@@ -54,19 +54,6 @@ class Request
 
     public function __construct()
     {
-        // Because some hosts are complete
-        // idiotic pieces of shit, let's
-        // strip slashes from input.
-        if (get_magic_quotes_gpc()) {
-            $php_is_the_worst_language_ever_because_of_this = function (&$value) {
-                $value = stripslashes($value);
-            };
-            array_walk_recursive($_GET, $php_is_the_worst_language_ever_because_of_this);
-            array_walk_recursive($_POST, $php_is_the_worst_language_ever_because_of_this);
-            array_walk_recursive($_COOKIE, $php_is_the_worst_language_ever_because_of_this);
-            array_walk_recursive($_REQUEST, $php_is_the_worst_language_ever_because_of_this);
-        }
-
         // Set query string
         static::$query = (isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : null);
 
