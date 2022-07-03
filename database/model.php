@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2012 Jack Polgar
+ * Copyright (C) 2011-2022 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -437,7 +437,7 @@ class Model
         {
             $data = array();
             foreach($fields as $field) {
-                $data[$field] = $this->_data[$field];
+                $data[$field] = isset($this->_data[$field]) ? $this->_data[$field] : null;
             }
             unset($fields, $field);
             return $data;
