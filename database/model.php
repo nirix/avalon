@@ -400,7 +400,7 @@ class Model
 
             return $this->{$var} = $model::find($belongs_to['foreign_key'], $this->{$belongs_to['column']});
         } else {
-            $val = $this->{$var};
+            $val = isset($this->{$var}) ? $this->{$var} : null;
 
             // Plugin hook
             FishHook::run('model::__get', array(get_called_class(), $var, $this->_data, &$val));
