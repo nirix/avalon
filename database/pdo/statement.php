@@ -34,8 +34,6 @@ use avalon\database\PDO;
  */
 class Statement
 {
-    private $connection_name;
-    private $statement;
     private $_model;
 
     /**
@@ -45,11 +43,10 @@ class Statement
      *
      * @return object
      */
-    public function __construct($statement, $connection_name = 'main')
-    {
-        $this->statement = $statement;
-        $this->connection_name = $connection_name;
-        return $this;
+    public function __construct(
+        protected $statement,
+        protected $connectionName = 'main'
+    ) {
     }
 
     /**
@@ -62,18 +59,17 @@ class Statement
     public function _model($model)
     {
         $this->_model = $model;
+
         return $this;
     }
 
     /**
      * Fetches all the rows.
-     *
-     * @return array
      */
-    public function fetch_all()
+    public function fetchAll(): array
     {
         $result = $this->statement->fetchAll(\PDO::FETCH_ASSOC);
-        $rows = array();
+        $rows = [];
 
         if ($this->_model !== null) {
             foreach ($result as $row) {
@@ -125,9 +121,10 @@ class Statement
      *
      * @return object
      */
-    public function bind_param($param, &$value, $type = \PDO::PARAM_STR, $length = 0, $options = array())
+    public function bindParam($param, &$value, $type = \PDO::PARAM_STR, $length = 0, $options = []): static
     {
         $this->statement->bindParam($param, $value, $type, $length, $options);
+
         return $this;
     }
 
@@ -140,9 +137,10 @@ class Statement
      *
      * @return object
      */
-    public function bind_value($param, $value, $type = \PDO::PARAM_STR)
+    public function bindValue($param, $value, $type = \PDO::PARAM_STR): static
     {
         $this->statement->bindValue($param, $value, $type);
+
         return $this;
     }
 
@@ -158,17 +156,35 @@ class Statement
         if ($result) {
             return $this;
         } else {
-            Database::connection($this->connection_name)->halt($this->statement->errorInfo());
+            Database::connection($this->connectionName)->halt($this->statement->errorInfo());
         }
     }
 
     /**
      * Returns the number of rows affected by the last SQL statement.
-     *
-     * @return integer
      */
-    public function row_count()
+    public function rowCount(): int
     {
         return $this->statement->rowCount();
+    }
+
+    public function fetch_all(): array
+    {
+        return $this->fetchAll();
+    }
+
+    public function bind_param($param, &$value, $type = \PDO::PARAM_STR, $length = 0, $options = []): static
+    {
+        return $this->bindParam($param, $value, $type, $length, $options);
+    }
+
+    public function bind_value($param, $value, $type = \PDO::PARAM_STR): static
+    {
+        return $this->bindValue($param, $value, $type);
+    }
+
+    public function row_count(): int
+    {
+        return $this->rowCount();
     }
 }
