@@ -22,6 +22,7 @@ namespace avalon\core;
 
 use avalon\http\Router;
 use avalon\http\Request;
+use avalon\http\Response;
 use avalon\output\Body;
 use avalon\output\View;
 
@@ -50,7 +51,11 @@ class Kernel
         Router::route(new Request);
 
         // Check if the routed controller and method exists
-        if (!class_exists(Router::$controller) or !method_exists(Router::$controller, 'action_' . Router::$method)) {
+        if (
+            !class_exists(Router::$controller) ||
+            (Router::$legacyRoute && !method_exists(Router::$controller, 'action_' . Router::$method)) ||
+            (!Router::$legacyRoute && !method_exists(Router::$controller, Router::$method))
+        ) {
             Router::set404();
         }
     }
@@ -76,7 +81,11 @@ class Kernel
         // Call the method
         $output = null;
         if (static::$app->render['action']) {
-            $output = call_user_func_array(array(static::$app, 'action_' . Router::$method), Router::$vars);
+            if (Router::$legacyRoute) {
+                $output = call_user_func_array(array(static::$app, 'action_' . Router::$method), Router::$vars);
+            } else {
+                $output = [static::$app, Router::$method](...Router::$params);
+            }
         }
 
         // After filters
@@ -89,24 +98,28 @@ class Kernel
         }
         unset($filters, $filter);
 
-        // If an object is returned, use the `response` variable if it's set.
-        if (is_object($output)) {
-            $output = isset($output->response) ? $output->response : null;
+        if ($output instanceof Response) {
+            $output->send();
+        } else {
+            // If an object is returned, use the `response` variable if it's set.
+            if (is_object($output)) {
+                $output = isset($output->response) ? $output->response : null;
+            }
+
+            // Check if we have any content
+            if (static::$app->render['action'] && $output !== null) {
+                static::$app->render['view'] = false;
+                Body::append($output);
+
+                // Get the content, clear the body
+                // and append content to a clean slate.
+                $content = Body::content();
+                Body::clear();
+                Body::append($content);
+            }
+
+            static::$app->__shutdown();
         }
-
-        // Check if we have any content
-        if (static::$app->render['action'] and $output !== null) {
-            static::$app->render['view'] = false;
-            Body::append($output);
-
-            // Get the content, clear the body
-            // and append content to a clean slate.
-            $content = Body::content();
-            Body::clear();
-            Body::append($content);
-        }
-
-        static::$app->__shutdown();
     }
 
     /**
@@ -124,7 +137,8 @@ class Kernel
      *
      * @return string
      */
-    public static function version() {
+    public static function version()
+    {
         return static::$version;
     }
 }
