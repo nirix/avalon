@@ -202,5 +202,7 @@ class Router
         static::$method = $action;
         static::$params = array_merge($route['params'], $params);
         static::$extension = (isset($matches['extension']) ? $matches['extension'] : null);
+
+        unset($reflect, $controller, $action, $parameter, $params, $route, $matches);
     }
 }

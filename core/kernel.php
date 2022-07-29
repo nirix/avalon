@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2014 Jack Polgar
+ * Copyright (C) 2011-2022 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -24,7 +24,6 @@ use avalon\http\Router;
 use avalon\http\Request;
 use avalon\http\Response;
 use avalon\output\Body;
-use avalon\output\View;
 
 /**
  * Avalon's Kernel.

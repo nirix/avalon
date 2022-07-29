@@ -20,6 +20,8 @@
 
 namespace avalon\http;
 
+use avalon\core\Kernel;
+
 class Response
 {
     public const HTTP_OK = 200;
@@ -39,6 +41,7 @@ class Response
     public function send()
     {
         header(sprintf("HTTP/1.1 %d %s", $this->statusCode, static::STATUS_TEXT[$this->statusCode]));
+        header("X-Powered-By: Avalon/" . Kernel::version());
         echo $this->content;
     }
 }
