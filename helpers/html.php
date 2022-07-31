@@ -50,7 +50,7 @@ class HTML
      */
     public static function css_link($path, $media = 'screen')
     {
-        return '<link rel="stylesheet" href="'.str_replace('&', '&amp;', $path).'" media="'.$media.'" />'.PHP_EOL;
+        return '<link rel="stylesheet" href="' . str_replace('&', '&amp;', $path) . '" media="' . $media . '" />' . PHP_EOL;
     }
 
     /**
@@ -62,7 +62,7 @@ class HTML
      */
     public static function js_inc($path)
     {
-        return '<script src="'.str_replace('&', '&amp;', $path).'" type="text/javascript"></script>'.PHP_EOL;
+        return '<script src="' . str_replace('&', '&amp;', $path) . '" type="text/javascript"></script>' . PHP_EOL;
     }
 
     /**
@@ -78,6 +78,16 @@ class HTML
     {
         if ($label === null) {
             $label = $url;
+        }
+
+        if (isset($attributes['icon'])) {
+            $icon = $attributes['icon'];
+            unset($attributes['icon']);
+
+            $labelClass = isset($attributes['sr-only']) ? ' class="visually-hidden"' : '';
+            unset($attributes['sr-only']);
+
+            $label = "<span class=\"{$icon}\"></span><span{$labelClass}>{$label}</span>";
         }
 
         $url = Request::base(ltrim($url, '/'));
