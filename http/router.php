@@ -92,12 +92,21 @@ class Router
         static::register($name, $path, $controller, $params, ['GET']);
     }
 
+    public static function post(
+        string $name,
+        string $path,
+        array $controller,
+        array $params = []
+    ) {
+        static::register($name, $path, $controller, $params, ['POST']);
+    }
+
     public static function register(
         string $name,
         string $path,
         array $controller,
         array $params = [],
-        array $methods = ['GET']
+        array $methods = ['GET', 'POST']
     ) {
         if (isset(static::$routes[$path])) {
             throw new UnexpectedValueException(sprintf('Route "%s" already registered', $path));
