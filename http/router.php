@@ -35,27 +35,60 @@ use UnexpectedValueException;
  */
 class Router
 {
-    private static $routes = array();
+    /**
+     * Registered routes array.
+     *
+     * Indexed by path.
+     */
+    protected static array $routes = [];
 
-    // Routed values
-    public static $controller;
-    public static $method;
-    public static $params = array();
-    public static $vars = array();
-    public static $extension;
-    public static $legacyRoute = false;
-    public static $extensions = array('.json', '.xml', '.atom');
+    /**
+     * Controller class.
+     */
+    public static string $controller;
 
+    /**
+     * Controller method.
+     */
+    public static string $method;
+
+    /**
+     * Method parameters.
+     */
+    public static array $params = [];
+
+    /**
+     * Route path attributes.
+     */
+    public static array $attributes = [];
+
+    /**
+     * Route/path file extension.
+     *
+     * @example `.json`
+     */
+    public static ?string $extension;
+
+    /**
+     * Accepted extensions.
+     */
+    public static array $extensions = ['.json', '.xml', '.atom'];
+
+    /**
+     * @deprecated
+     */
+    public static array $vars = [];
+    public static bool $legacyRoute = false;
+
+    /**
+     * Register a `GET` request.
+     */
     public static function get(
         string $name,
         string $path,
         array $controller,
         array $params = []
     ) {
-        if (isset(static::$routes[$path])) {
-            throw new UnexpectedValueException(sprintf('Route "%s" already registered', $path));
-        }
-
         static::register($name, $path, $controller, $params, ['GET']);
     }
 
@@ -85,6 +118,8 @@ class Router
      * @param string $route  URI to match
      * @param string $value  Controller/method to route to
      * @param array  $params Default params to pass to the method
+     *
+     * @deprecated
      */
     public static function add($route, $value, array $params = array())
     {
@@ -167,6 +202,9 @@ class Router
         return static::setRoute(static::$routes['404']);
     }
 
+    /**
+     * @deprecated
+     */
     private static function setRoute($route)
     {
         if (isset($route['controller'])) {
@@ -195,12 +233,13 @@ class Router
 
         $params = [];
         foreach ($reflect->getParameters() as $parameter) {
-            $params[$parameter->getName()] = $matches[$parameter->getName()] ?? null;
+            $params[$parameter->getName()] = $matches[$parameter->getName()] ?? $route['params'][$parameter];
         }
 
         static::$controller = $controller;
         static::$method = $action;
         static::$params = array_merge($route['params'], $params);
+        static::$attributes = $matches;
         static::$extension = (isset($matches['extension']) ? $matches['extension'] : null);
 
         unset($reflect, $controller, $action, $parameter, $params, $route, $matches);

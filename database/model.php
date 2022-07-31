@@ -57,7 +57,8 @@ class Model
      *
      * @param array $data The row data
      */
-    public function __construct($data = null, $is_new = true) {
+    public function __construct($data = null, $is_new = true)
+    {
         $this->_data = $data;
         $this->_is_new = $is_new;
 
@@ -120,7 +121,8 @@ class Model
      *
      * @return Object
      */
-    public static function find($find, $value = null) {
+    public static function find($find, $value = null)
+    {
         $select = static::db()->select()->from(static::$_name);
         if ($value == null) {
             $select = $select->where(static::$_primary_key, $find)->limit(1)->exec();
@@ -141,7 +143,8 @@ class Model
     /**
      * Creates a new row or saves the changed properties.
      */
-    public function save() {
+    public function save()
+    {
         $primary_key = static::$_primary_key;
 
         // Make sure the data is valid..
@@ -209,7 +212,8 @@ class Model
     /**
      * Deletes the row.
      */
-    public function delete() {
+    public function delete()
+    {
         if ($this->_is_new() === false) {
             // Before delete filters
             if (isset(static::$_filters_before['delete']) and is_array(static::$_filters_before['delet'])) {
@@ -227,7 +231,8 @@ class Model
      *
      * @return bool
      */
-    public function _is_new($is_new = null) {
+    public function _is_new($is_new = null)
+    {
         if ($is_new !== null) {
             $this->_is_new =  $is_new;
         }
@@ -243,7 +248,8 @@ class Model
      * @example $model->set(array('col1'=>'val1', 'col2'=>'val2'));
      *          $model->set('col1', 'val1');
      */
-    public function set($col, $val = null) {
+    public function set($col, $val = null)
+    {
         if (is_array($col)) {
             foreach ($col as $var => $val) {
                 $this->set($var, $val);
@@ -252,8 +258,8 @@ class Model
             $this->_data[$col] = $val;
             $this->_set_changed($col);
 
-            if (!in_array($val, static::$_properties)) {
-                static::$_properties[] = $val;
+            if (!in_array($col, static::$_properties)) {
+                static::$_properties[] = $col;
             }
 
             // Plugin hook
@@ -266,7 +272,8 @@ class Model
      *
      * @param string $property
      */
-    protected function _set_changed($property) {
+    protected function _set_changed($property)
+    {
         if (in_array($property, static::$_properties) and !in_array($property, $this->_changed_properties)) {
             $this->_changed_properties[] = $property;
         }
@@ -279,14 +286,16 @@ class Model
      *
      * @return object
      */
-    public static function select($cols = null) {
+    public static function select($cols = null)
+    {
         return static::db()->select($cols === null ? static::$_properties : $cols)->from(static::$_name)->_model(static::_class());
     }
 
     /**
      * Aliases the database's update() method for the current row.
      */
-    public function update() {
+    public function update()
+    {
         return static::db()->update(static::$_name)->where(static::$_primary_key, $this->data[static::$_primary_key]);
     }
 
@@ -295,7 +304,8 @@ class Model
      *
      * @return array
      */
-    public static function fetch_all() {
+    public static function fetch_all()
+    {
         $rows = array();
         $fetched = static::db()->select(static::$_properties)->from(static::$_name)->exec()->fetch_all();
 
@@ -307,7 +317,8 @@ class Model
         return $rows;
     }
 
-    public function is_valid() {
+    public function is_valid()
+    {
         // Until the validation stuff is done we will return false,
         // to work around this each model will have to create its own
         // is_valid method.
@@ -317,7 +328,8 @@ class Model
     /**
      * Magical function to load the relationships.
      */
-    public function __get($var) {
+    public function __get($var)
+    {
         // Model data
         if (in_array($var, static::$_properties)) {
             $val = isset($this->_data[$var]) ? $this->_data[$var] : '';
@@ -347,7 +359,7 @@ class Model
 
                 if (count($model) == 1) {
                     $namespace = explode('\\', get_called_class());
-                    $namespace[count($namespace) -1] = ucfirst($has_many['model']);
+                    $namespace[count($namespace) - 1] = ucfirst($has_many['model']);
                     $has_many['model'] = implode('\\', $namespace);
                 }
             }
@@ -384,7 +396,7 @@ class Model
 
                 if (count($model) == 1) {
                     $namespace = explode('\\', get_called_class());
-                    $namespace[count($namespace) -1] = ucfirst($belongs_to['model']);
+                    $namespace[count($namespace) - 1] = ucfirst($belongs_to['model']);
                     $belongs_to['model'] = implode('\\', $namespace);
                 }
             }
@@ -412,7 +424,8 @@ class Model
     /**
      * Magical set function to check if the property exists or not.
      */
-    public function __set($var, $val) {
+    public function __set($var, $val)
+    {
         if (in_array($var, static::$_properties)) {
             FishHook::run('model::__set', array(get_called_class(), $var, &$val));
             $this->_data[$var] = $val;
@@ -427,16 +440,16 @@ class Model
      *
      * @return array
      */
-    public function __toArray($fields = null) {
+    public function __toArray($fields = null)
+    {
         // Returns the models data for all fields
         if ($fields == null) {
             return $this->_data;
         }
         // Return only the fields specified
-        else
-        {
+        else {
             $data = array();
-            foreach($fields as $field) {
+            foreach ($fields as $field) {
                 $data[$field] = isset($this->_data[$field]) ? $this->_data[$field] : null;
             }
             unset($fields, $field);
@@ -450,7 +463,8 @@ class Model
      * @param string $field
      * @param string $message
      */
-    public function _add_error($field, $message) {
+    public function _add_error($field, $message)
+    {
         $this->errors[$field] = $message;
     }
 
@@ -466,19 +480,26 @@ class Model
         }
     }
 
+    public static function _getProperties(): array
+    {
+        return static::$_properties;
+    }
+
     /**
      * Returns the real name of this model class, not the top-most parent.
      *
      * @return string
      */
-    public static function _class() {
+    public static function _class()
+    {
         return get_class(new static());
     }
 
     /**
      * Sets the created_at and updated_at fields when saving.
      */
-    private function _timestamps() {
+    private function _timestamps()
+    {
         // Created at field
         if ($this->_is_new() and in_array('created_at', static::$_properties) and !isset($this->_data['created_at'])) {
             $this->_data['created_at'] = "NOW()";
@@ -494,7 +515,8 @@ class Model
      * Converts the created_at, updated_at and published_at properties
      * to local time from gmt time.
      */
-    private function _date_time_convert() {
+    private function _date_time_convert()
+    {
         foreach (array('created_at', 'updated_at', 'published_at') as $var) {
             if (!$this->_is_new() and isset($this->_data[$var])) {
                 $this->_data[$var] = Time::gmt_to_local($this->_data[$var]);
@@ -507,7 +529,8 @@ class Model
      *
      * @return object
      */
-    protected static function db() {
+    protected static function db()
+    {
         return Database::connection(static::$_connection_name);
     }
 }
