@@ -80,33 +80,11 @@ class Router
     public static array $vars = [];
     public static bool $legacyRoute = false;
 
-    /**
-     * Register a `GET` request.
-     */
-    public static function get(
-        string $name,
-        string $path,
-        array $controller,
-        array $params = []
-    ) {
-        static::register($name, $path, $controller, $params, ['GET']);
-    }
-
-    public static function post(
-        string $name,
-        string $path,
-        array $controller,
-        array $params = []
-    ) {
-        static::register($name, $path, $controller, $params, ['POST']);
-    }
-
     public static function register(
         string $name,
         string $path,
         array $controller,
-        array $params = [],
-        array $methods = ['GET', 'POST']
+        array $params = []
     ) {
         if (isset(static::$routes[$path])) {
             throw new UnexpectedValueException(sprintf('Route "%s" already registered', $path));
@@ -116,30 +94,35 @@ class Router
             'name' => $name,
             'route' => $path,
             'controller' => $controller,
-            'params' => $params,
-            'methods' => $methods
+            'params' => $params
         ];
     }
 
     /**
      * Adds a route to be routed.
-     *
-     * @param string $route  URI to match
-     * @param string $value  Controller/method to route to
-     * @param array  $params Default params to pass to the method
-     *
-     * @deprecated
      */
-    public static function add($route, $value, array $params = array())
+    public static function add(string $path, string|array $controller, array $params = [], ?string $name = null)
     {
         // Don't overwrite the route
-        if (!isset(static::$routes[$route])) {
-            static::$routes[$route] = array(
-                'route'  => $route,
-                'value'  => $value,
-                'params' => $params
-            );
+        if (isset(static::$routes[$path])) {
+            return;
         }
+
+        if (is_array($controller)) {
+            static::$routes[$path] = [
+                'name' => $name,
+                'route' => $path,
+                'controller' => $controller,
+                'params' => $params
+            ];
+            return;
+        }
+
+        static::$routes[$path] = [
+            'route'  => $path,
+            'value'  => $controller,
+            'params' => $params
+        ];
     }
 
     /**
@@ -178,9 +161,7 @@ class Router
                 unset($params[0]);
 
                 if (isset($route['controller'])) {
-                    if (in_array(strtoupper($request->method()), $route['methods'])) {
-                        return static::processRoute($route, $params);
-                    }
+                    return static::processRoute($route, $params);
                 } else {
                     $route['params'] = array_merge($route['params'], $params);
                     $route['value'] = preg_replace($pattern, $route['value'], $uri);
