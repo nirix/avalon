@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2012 Jack Polgar
+ * Copyright (C) 2011-2022 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -41,7 +41,7 @@ class Form
         if ($for !== null) {
             $attributes['for'] = $for;
         }
-        return "<label ". HTML::build_attributes($attributes) .">{$text}</label>";
+        return "<label " . HTML::build_attributes($attributes) . ">{$text}</label>";
     }
 
     /**
@@ -55,6 +55,14 @@ class Form
     public static function text($name, $attributes = array())
     {
         return self::input('text', $name, $attributes);
+    }
+
+    /**
+     * Date field.
+     */
+    public static function date($name, $attributes = array()): string
+    {
+        return self::input('date', $name, $attributes);
     }
 
     /**
@@ -197,7 +205,8 @@ class Form
      *
      * @return string
      */
-    public static function multiselect($name, $options, $values, $attributes = array()) {
+    public static function multiselect($name, $options, $values, $attributes = array())
+    {
         // Set attributes
         $attributes = array_merge(array('class' => 'multiselect', 'name' => $name), $attributes);
 
@@ -245,7 +254,7 @@ class Form
         $attributes = array('value' => $option['value']);
 
         // Return option
-        return "<option " . HTML::build_attributes($attributes) . ($selected ? ' selected' :'') . ">{$option['label']}</option>";
+        return "<option " . HTML::build_attributes($attributes) . ($selected ? ' selected' : '') . ">{$option['label']}</option>";
     }
 
     /**
