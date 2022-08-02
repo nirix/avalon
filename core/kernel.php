@@ -99,6 +99,14 @@ class Kernel
 
         if ($output instanceof Response) {
             $output->send();
+        } elseif (is_array($output)) {
+            Body::clear();
+            header('Content-Type: application/json; charset=utf-8');
+            Body::append(json_encode($output));
+
+            static::$app->render['layout'] = false;
+            static::$app->render['view'] = false;
+            static::$app->__shutdown();
         } else {
             // If an object is returned, use the `response` variable if it's set.
             if (is_object($output)) {
