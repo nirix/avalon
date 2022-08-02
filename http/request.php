@@ -155,6 +155,14 @@ class Request
     }
 
     /**
+     * Gets the request body.
+     */
+    public static function body()
+    {
+        return file_get_contents('php://input');
+    }
+
+    /**
      * Gets the URI segment.
      *
      * @param integer $segment Segment index
@@ -247,11 +255,12 @@ class Request
             $requestPath = $_SERVER['HTTP_X_ORIGINAL_URL'];
         } elseif (isset($_SERVER['HTTP_X_REWRITE_URL'])) {
             $requestPath = $_SERVER['HTTP_X_REWRITE_URL'];
-        } elseif (isset($_SERVER['IIS_WasUrlRewritten'])
-                  and $_SERVER['IIS_WasUrlRewritten'] = 1
-                  and isset($_SERVER['UNENCODED_URL'])
-                  and $_SERVER['UNENCODED_URL'] != '')
-        {
+        } elseif (
+            isset($_SERVER['IIS_WasUrlRewritten']) &&
+            $_SERVER['IIS_WasUrlRewritten'] = 1 &&
+            isset($_SERVER['UNENCODED_URL']) &&
+            $_SERVER['UNENCODED_URL'] != ''
+        ) {
             $requestPath = $_SERVER['UNENCODED_URL'];
         } elseif (isset($_SERVER['REQUEST_URI'])) {
             $requestPath = $_SERVER['REQUEST_URI'];
