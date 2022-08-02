@@ -21,6 +21,7 @@
 namespace avalon\database;
 
 use avalon\Database;
+use avalon\database\pdo\Query;
 use avalon\helpers\Time;
 use \FishHook;
 
@@ -286,7 +287,7 @@ class Model
      *
      * @return object
      */
-    public static function select($cols = null)
+    public static function select($cols = null): Query
     {
         return static::db()->select($cols === null ? static::$_properties : $cols)->from(static::$_name)->_model(static::_class());
     }
@@ -529,7 +530,7 @@ class Model
      *
      * @return object
      */
-    protected static function db()
+    protected static function db(): PDO
     {
         return Database::connection(static::$_connection_name);
     }
