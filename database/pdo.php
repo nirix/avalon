@@ -137,7 +137,7 @@ class PDO extends Driver
      *
      * @return object
      */
-    public function select($cols = array('*'))
+    public function select($cols = array('*')): Query
     {
         if (!is_array($cols)) {
             $cols = func_get_args();

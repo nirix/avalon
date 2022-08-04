@@ -149,9 +149,9 @@ class Statement
      *
      * @return object
      */
-    public function exec()
+    public function exec(...$args)
     {
-        $result = $this->statement->execute();
+        $result = $this->statement->execute(...$args);
 
         if ($result) {
             return $this;

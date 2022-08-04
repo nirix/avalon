@@ -91,7 +91,7 @@ class Query
      */
     public function distinct()
     {
-        $this->type = $this->type.' DISTINCT';
+        $this->type = $this->type . ' DISTINCT';
         return $this;
     }
 
@@ -139,13 +139,16 @@ class Query
      *
      * @param string $col Column
      * @param string $dir Direction
-     *
-     * @return object
      */
-    public function order_by($col, $dir = 'ASC')
+    public function orderBy(string $col, string $dir = 'ASC'): static
     {
         $this->order_by = array($col, $dir);
         return $this;
+    }
+
+    public function order_by(string $col, string $dir = 'ASC'): static
+    {
+        return $this->orderBy($col, $dir);
     }
 
     /**
@@ -180,7 +183,7 @@ class Query
         // Check if this is a mass add
         if (is_array($columm)) {
             // Loop though the columns and add them
-            foreach($columm as $where) {
+            foreach ($columm as $where) {
                 $this->where($where[0], $where[1], (isset($where[2]) ? $where[2] : '='));
             }
         }
@@ -217,7 +220,7 @@ class Query
 
         if ($this->type != 'INSERT') {
             foreach ($this->where as $where) {
-                $result->bind_value(':'. $where[0], $where[2]);
+                $result->bind_value(':' . $where[0], $where[2]);
             }
         }
 
@@ -286,13 +289,13 @@ class Query
             }
         }
         // Insert query
-        else if($this->type == "INSERT INTO") {
+        else if ($this->type == "INSERT INTO") {
             $query[] = "`{$this->prefix}{$this->table}`";
 
             $keys = array();
             $values = array();
 
-            foreach($this->data as $key => $value) {
+            foreach ($this->data as $key => $value) {
                 $keys[] = "`{$key}`";
                 $values[] = $this->_process_value($value);
             }
@@ -301,7 +304,7 @@ class Query
             $query[] = 'VALUES(' . implode(', ', $values) . ')';
         }
         // Update query
-        else if($this->type == "UPDATE") {
+        else if ($this->type == "UPDATE") {
             $query[] = "`{$this->prefix}{$this->table}`";
 
             $query[] = "SET";
