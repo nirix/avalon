@@ -18,6 +18,8 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
+use avalon\http\Request;
+
 /**
  * Shortcut to the HTML::link method.
  *
@@ -78,6 +80,10 @@ class HTML
     {
         if ($label === null) {
             $label = $url;
+        }
+
+        if ($url === null) {
+            $url = '/';
         }
 
         if (isset($attributes['icon'])) {

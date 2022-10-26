@@ -203,7 +203,7 @@ class Request
      */
     public static function isAjax()
     {
-        return strtolower(static::$requested_with) == 'xmlhttprequest';
+        return static::$requested_with ? strtolower(static::$requested_with) == 'xmlhttprequest' : null;
     }
 
     /**

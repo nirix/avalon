@@ -31,7 +31,7 @@ namespace avalon\core;
  */
 class Error
 {
-    public static function halt($title, $message = '')
+    public static function halt($title, $message = '', $exception = '')
     {
         @ob_end_clean();
 
@@ -47,6 +47,9 @@ class Error
         $body[] = "</blockquote>";
 
         echo implode(PHP_EOL, $body);
+
+        error_log("{$title} - {$message} - {$exception}");
+
         exit;
     }
 }
