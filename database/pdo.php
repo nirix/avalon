@@ -124,7 +124,7 @@ class PDO extends Driver
      *
      * @return object
      */
-    public function prepare($query, array $options = array())
+    public function prepare($query, array $options = array()): Statement
     {
         $this->last_query = $query;
         return new Statement($this->connection->prepare($query, $options), $this->connection_name);

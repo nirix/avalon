@@ -305,7 +305,7 @@ class Model
      *
      * @return array
      */
-    public static function fetch_all()
+    public static function fetchAll(): array
     {
         $rows = array();
         $fetched = static::db()->select(static::$_properties)->from(static::$_name)->exec()->fetch_all();
@@ -316,6 +316,11 @@ class Model
         }
 
         return $rows;
+    }
+
+    public static function fetch_all(): array
+    {
+        return static::fetchAll();
     }
 
     public function is_valid()

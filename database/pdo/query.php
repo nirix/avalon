@@ -89,7 +89,7 @@ class Query
      *
      * @return object
      */
-    public function distinct()
+    public function distinct(): static
     {
         $this->type = $this->type . ' DISTINCT';
         return $this;
@@ -102,7 +102,7 @@ class Query
      *
      * @return object
      */
-    public function from($table)
+    public function from($table): static
     {
         $this->table = $table;
         return $this;
@@ -115,7 +115,7 @@ class Query
      *
      * @return object
      */
-    public function into($table)
+    public function into($table): static
     {
         $this->table = $table;
         return $this;
@@ -128,7 +128,7 @@ class Query
      *
      * @return object
      */
-    public function set(array $data)
+    public function set(array $data): static
     {
         $this->data = $data;
         return $this;
@@ -178,7 +178,7 @@ class Query
      *
      * @return object
      */
-    public function where($columm, $value = null, $cond = '=')
+    public function where($columm, $value = null, $cond = '='): static
     {
         // Check if this is a mass add
         if (is_array($columm)) {
@@ -203,7 +203,7 @@ class Query
      *
      * @return object
      */
-    public function limit($from, $to = null)
+    public function limit($from, $to = null): static
     {
         $this->limit = implode(',', func_get_args());
         return $this;

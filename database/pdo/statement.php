@@ -160,6 +160,11 @@ class Statement
         }
     }
 
+    public function execute(...$args)
+    {
+        return $this->exec(...$args);
+    }
+
     /**
      * Returns the number of rows affected by the last SQL statement.
      */
