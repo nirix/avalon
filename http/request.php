@@ -42,6 +42,7 @@ class Request
     public static $post = array();
     public static $scheme;
     public static $host;
+    public static $port;
 
     /**
      * Initialize the class to get request
@@ -62,6 +63,7 @@ class Request
 
         // Set host
         static::$host = strtolower(preg_replace('/:\d+$/', '', trim($_SERVER['SERVER_NAME'])));
+        static::$port = $_SERVER['SERVER_PORT'];
 
         // Set base url
         static::$base = static::baseUrl();
