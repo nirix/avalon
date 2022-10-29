@@ -20,35 +20,20 @@
 
 namespace avalon\http;
 
-use avalon\core\Kernel;
-
 /**
  * @since 0.7
  */
-class Response
+class RedirectResponse extends Response
 {
-    public const HTTP_OK = 200;
-    public const HTTP_NOT_FOUND = 404;
-    public const HTTP_MOVED_PERMANENTLY = 301;
-    public const HTTP_FOUND = 302;
-
-    public const STATUS_TEXT = [
-        Response::HTTP_OK => 'OK',
-        Response::HTTP_NOT_FOUND => 'Not Found',
-        Response::HTTP_MOVED_PERMANENTLY => 'Moved Permanently',
-        Response::HTTP_FOUND => 'Found',
-    ];
-
     public function __construct(
-        protected string $content,
-        protected int $statusCode = Response::HTTP_OK
+        protected string $url,
+        protected int $statusCode = Response::HTTP_FOUND
     ) {
     }
 
     public function send()
     {
-        header(sprintf("HTTP/1.1 %d %s", $this->statusCode, static::STATUS_TEXT[$this->statusCode]));
-        header("X-Powered-By: Avalon/" . Kernel::version());
-        echo $this->content;
+        header(\sprintf('Location: %s', $this->url), true, $this->statusCode);
+        exit;
     }
 }
