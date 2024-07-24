@@ -45,6 +45,8 @@ class Query
     private $custom_sql = array();
     private $set;
     private $_model;
+    private $prefix;
+    private $data;
 
     /**
      * PDO Query builder constructor.

@@ -52,6 +52,7 @@ class Model
     protected $_data = array();
     protected $_is_new = true; // Used to determine if this is a new row or not.
     protected $errors = array();
+    protected $_other = [];
 
     /**
      * Used to build to assign the row data to the class as variables.
@@ -345,6 +346,9 @@ class Model
 
             return $val;
         }
+        elseif (in_array($var, $this->_other)) {
+            return $this->_other[$var];
+        }
         // Has many
         elseif (is_array(static::$_has_many) and (in_array($var, static::$_has_many) or isset(static::$_has_many[$var]))) {
             $has_many = array();
@@ -437,7 +441,7 @@ class Model
             $this->_data[$var] = $val;
             $this->_set_changed($var);
         } else {
-            $this->{$var} = $val;
+            $this->_other[$var] = $val;
         }
     }
 
