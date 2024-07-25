@@ -157,7 +157,7 @@ class Model
         // Save
         if ($this->_is_new() === false) {
             // Before save filters
-            if (isset(static::$_filters_before['save']) and is_array(static::$_filters_before['save'])) {
+            if (isset(static::$_filters_before['save']) && is_array(static::$_filters_before['save'])) {
                 foreach (static::$_filters_before['save'] as $filter) {
                     $this->{$filter}();
                 }
@@ -171,19 +171,19 @@ class Model
                     $data[$column] = (in_array($column, static::$_escape)) ? htmlspecialchars_decode($this->_data[$column]) : $this->_data[$column];
                 }
             }
-            unset($data[static::$_primary_key]);
 
             FishHook::run('model::save/save', array(get_called_class(), &$data));
 
             // Save the row..
             static::db()->update(static::$_name)->set($data)->where(static::$_primary_key, $this->_data[static::$_primary_key])->exec();
+            unset($data[static::$_primary_key]);
 
             return true;
         }
         // Create
         else {
             // Before create filters
-            if (isset(static::$_filters_before['create']) and is_array(static::$_filters_before['create'])) {
+            if (isset(static::$_filters_before['create']) && is_array(static::$_filters_before['create'])) {
                 foreach (static::$_filters_before['create'] as $filter) {
                     $this->{$filter}();
                 }
@@ -193,7 +193,7 @@ class Model
             $data = array();
             foreach (static::$_properties as $column) {
                 // Hack to fix http://bugs.traq.io/traq/tickets/358
-                if (!is_array($column) and !is_object($column) and isset($this->_data[$column])) {
+                if (!is_array($column) && !is_object($column) && isset($this->_data[$column])) {
                     $data[$column] = $this->_data[$column];
                 }
             }
@@ -276,7 +276,7 @@ class Model
      */
     protected function _set_changed($property)
     {
-        if (in_array($property, static::$_properties) and !in_array($property, $this->_changed_properties)) {
+        if (in_array($property, static::$_properties) && !in_array($property, $this->_changed_properties)) {
             $this->_changed_properties[] = $property;
         }
     }
@@ -337,17 +337,17 @@ class Model
      */
     public function __get($var)
     {
+        if (isset($this->_other[$var])) {
+            return $this->_other[$var];
+        }
         // Model data
-        if (in_array($var, static::$_properties)) {
+        elseif (in_array($var, static::$_properties)) {
             $val = isset($this->_data[$var]) ? $this->_data[$var] : '';
 
             // Plugin hook
             FishHook::run('model::__get', array(get_called_class(), $var, $this->_data, &$val));
 
             return $val;
-        }
-        elseif (in_array($var, $this->_other)) {
-            return $this->_other[$var];
         }
         // Has many
         elseif (is_array(static::$_has_many) and (in_array($var, static::$_has_many) or isset(static::$_has_many[$var]))) {
@@ -384,10 +384,13 @@ class Model
 
             $model = $has_many['model'];
             $column = $has_many['column'];
-            return $this->{$var} = $model::select()->where($has_many['foreign_key'], $this->{$column});
+            $obj = $model::select()->where($has_many['foreign_key'], $this->{$column});
+
+            $this->_other[$var] = $obj;
+            return $this->_other[$var];
         }
         // Belongs to
-        else if (is_array(static::$_belongs_to) and (in_array($var, static::$_belongs_to) or isset(static::$_belongs_to[$var]))) {
+        elseif (is_array(static::$_belongs_to) and (in_array($var, static::$_belongs_to) or isset(static::$_belongs_to[$var]))) {
             $belongs_to = array();
             if (isset(static::$_belongs_to[$var])) {
                 $belongs_to = static::$_belongs_to[$var];
@@ -418,9 +421,12 @@ class Model
             if (!isset($belongs_to['column'])) {
                 $belongs_to['column'] = $var . '_id';
             }
-            $model = $belongs_to['model'];
 
-            return $this->{$var} = $model::find($belongs_to['foreign_key'], $this->{$belongs_to['column']});
+            $model = $belongs_to['model'];
+            $obj = $model::find($belongs_to['foreign_key'], $this->{$belongs_to['column']});
+
+            $this->_other[$var] = $obj;
+            return $this->_other[$var];
         } else {
             $val = isset($this->{$var}) ? $this->{$var} : null;
 
@@ -436,7 +442,12 @@ class Model
      */
     public function __set($var, $val)
     {
-        if (in_array($var, static::$_properties)) {
+        $isHasMany = isset(static::$_has_many[$var]) || (is_array(static::$_has_many) && in_array($var, static::$_has_many));
+        $isBelongsTo = isset(static::$_belongs_to[$var]) || (is_array(static::$_belongs_to) && in_array($var, static::$_belongs_to));
+
+        if ($isHasMany || $isBelongsTo) {
+            $this->_other[$var] = $val;
+        } elseif (in_array($var, static::$_properties)) {
             FishHook::run('model::__set', array(get_called_class(), $var, &$val));
             $this->_data[$var] = $val;
             $this->_set_changed($var);
