@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2012 Jack Polgar
+ * Copyright (C) 2011-2024 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -18,7 +18,9 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace avalon;
+namespace Avalon;
+
+use Exception;
 
 /**
  * Database class.
@@ -39,7 +41,7 @@ class Database
      */
     public static function init($db)
     {
-        require SYSPATH . '/database/model.php';
+        require SYSPATH . '/Database/Model.php';
 
         // Define the DB_PREFIX constant
         define("DB_PREFIX", isset($db['prefix']) ? $db['prefix'] : '');

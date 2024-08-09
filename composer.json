@@ -1,0 +1,17 @@
+{
+    "name": "avalon/framework",
+    "description": "The Avalon framework",
+    "type": "library",
+    "license": "LGPL-3.0",
+    "autoload": {
+        "psr-4": {
+            "Avalon\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Nirix"
+        }
+    ],
+    "require": {}
+}

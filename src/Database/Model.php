@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2022 Jack Polgar
+ * Copyright (C) 2011-2024 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -18,11 +18,11 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace avalon\database;
+namespace Avalon\Database;
 
-use avalon\Database;
-use avalon\database\pdo\Query;
-use avalon\helpers\Time;
+use Avalon\Database;
+use Avalon\Database\PDO\Query;
+use Avalon\Helpers\Time;
 use \FishHook;
 
 /**

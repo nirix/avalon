@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2012 Jack Polgar
+ * Copyright (C) 2011-2024 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -18,43 +18,22 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace avalon\output;
+namespace Avalon\Http;
 
 /**
- * Content output class.
- *
- * @author Jack P.
- * @package Avalon
+ * @since 0.7
  */
-class Body
+class RedirectResponse extends Response
 {
-    private static $body = '';
-
-    /**
-     * Returns the contents of the body.
-     *
-     * @return string
-     */
-    public static function content()
-    {
-        return static::$body;
+    public function __construct(
+        protected string $url,
+        protected int $statusCode = Response::HTTP_FOUND
+    ) {
     }
 
-    /**
-     * Appends the content to the body.
-     *
-     * @param string $content
-     */
-    public static function append($content)
+    public function send()
     {
-        static::$body .= $content;
-    }
-
-    /**
-     * Clears the body.
-     */
-    public static function clear()
-    {
-        static::$body = '';
+        header(\sprintf('Location: %s', $this->url), true, $this->statusCode);
+        exit;
     }
 }

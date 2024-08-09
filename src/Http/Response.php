@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2022 Jack Polgar
+ * Copyright (C) 2011-2024 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -18,9 +18,9 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace avalon\http;
+namespace Avalon\Http;
 
-use avalon\core\Kernel;
+use Avalon\Core\Kernel;
 
 /**
  * @since 0.7

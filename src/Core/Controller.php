@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2014 Jack Polgar
+ * Copyright (C) 2011-2024 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -18,12 +18,12 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace avalon\core;
+namespace Avalon\Core;
 
-use avalon\http\Request;
-use avalon\http\Router;
-use avalon\output\Body;
-use avalon\output\View;
+use Avalon\Http\Request;
+use Avalon\Http\Router;
+use Avalon\Output\Body;
+use Avalon\Output\View;
 
 /**
  * Controller

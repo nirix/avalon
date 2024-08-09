@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2012 Jack Polgar
+ * Copyright (C) 2011-2024 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -18,10 +18,10 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace avalon\database\pdo;
+namespace Avalon\Database\PDO;
 
-use avalon\Database;
-use avalon\database\PDO;
+use Avalon\Database;
+use Avalon\Database\PDO;
 
 /**
  * PDO Database wrapper statement class
