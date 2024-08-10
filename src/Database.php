@@ -41,7 +41,7 @@ class Database
      */
     public static function init($db)
     {
-        require SYSPATH . '/Database/Model.php';
+        require SYSPATH . '/src/Database/Model.php';
 
         // Define the DB_PREFIX constant
         define("DB_PREFIX", isset($db['prefix']) ? $db['prefix'] : '');
@@ -68,11 +68,11 @@ class Database
         }
 
         // Prepend 'DB_' to the driver name
-        $class_name = "\\avalon\\database\\{$config['driver']}";
+        $class_name = "\\Avalon\\Database\\{$config['driver']}";
 
         // Load the driver class
         if (!class_exists($class_name)) {
-            require SYSPATH . '/database/' . strtolower($config['driver']) . '.php';
+            require SYSPATH . '/src/Database/' . strtoupper($config['driver']) . '.php';
         }
 
         // Create the connection and mark it as initiated.
