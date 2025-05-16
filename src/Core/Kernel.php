@@ -36,7 +36,7 @@ use Avalon\Output\Body;
  */
 class Kernel
 {
-    private static $version = '0.8';
+    private static $version = '1.0-alpha';
     private static $app;
 
     /**
