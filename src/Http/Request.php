@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2024 Jack Polgar
+ * Copyright (C) 2011-2025 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -43,6 +43,7 @@ class Request
     public static $scheme;
     public static $host;
     public static $port;
+    public static $subdomain;
 
     /**
      * Initialize the class to get request
@@ -89,6 +90,11 @@ class Request
 
         // _POST
         static::$post = $_POST;
+
+        // Subdomain
+        $host = preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? '');
+        $parts = explode('.', $host);
+        static::$subdomain = count($parts) > 2 ? $parts[0] : null;
     }
 
     /**
