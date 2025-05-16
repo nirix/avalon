@@ -18,9 +18,9 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Avalon\Core;
+namespace Avalon\Http;
 
-use Avalon\Http\Request;
+use Avalon\Core\Kernel;
 use Avalon\Http\Router;
 use Avalon\Output\Body;
 use Avalon\Output\View;
@@ -30,7 +30,7 @@ use Avalon\Output\View;
  *
  * @since 0.3
  * @package Avalon
- * @subpackage Core
+ * @subpackage Http
  * @author Jack P.
  * @copyright (C) Jack P.
  */
