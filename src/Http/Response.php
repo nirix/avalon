@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2024 Jack Polgar
+ * Copyright (C) 2011-2025 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -17,6 +17,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
+
+declare(strict_types=1);
 
 namespace Avalon\Http;
 
