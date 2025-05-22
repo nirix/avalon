@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2024 Jack Polgar
+ * Copyright (C) 2011-2025 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -18,6 +18,8 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
+declare(strict_types=1);
+
 namespace Avalon;
 
 use Exception;
@@ -31,21 +33,15 @@ use Exception;
  */
 class Database
 {
-    private static $connections = array();
-    private static $initiated = array();
+    protected static $connections = [];
 
     /**
      * Connects to the database.
      *
      * @return object
      */
-    public static function init($db)
+    public static function init(array $db)
     {
-        require SYSPATH . '/src/Database/Model.php';
-
-        // Define the DB_PREFIX constant
-        define("DB_PREFIX", isset($db['prefix']) ? $db['prefix'] : '');
-
         static::factory($db, 'main');
 
         return static::$connections['main'];
@@ -60,24 +56,16 @@ class Database
      *
      * @return object
      */
-    public static function factory(array $config, $name)
+    public static function factory(array $config, string $name = 'default')
     {
         // Make sure the connection name is available
         if (isset(static::$connections[$name])) {
             throw new Exception("Database connection name '{$name}' already initiated");
         }
 
-        // Prepend 'DB_' to the driver name
-        $class_name = "\\Avalon\\Database\\{$config['driver']}";
-
-        // Load the driver class
-        if (!class_exists($class_name)) {
-            require SYSPATH . '/src/Database/' . strtoupper($config['driver']) . '.php';
-        }
-
         // Create the connection and mark it as initiated.
-        static::$connections[$name] = new $class_name($config, $name);
-        static::$initiated[$name] = true;
+        $className = $config['class'] ?? '\PDO';
+        static::$connections[$name] = new $className(...$config['params']);
 
         return static::$connections[$name];
     }
@@ -103,6 +91,6 @@ class Database
      */
     public static function initiated($name = 'main')
     {
-        return isset(static::$initiated[$name]) ? static::$initiated[$name] : false;
+        return isset(static::$connections[$name]);
     }
 }

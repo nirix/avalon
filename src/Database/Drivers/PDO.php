@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2025 Jack Polgar
+ * Copyright (C) 2011-2024 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -18,10 +18,12 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
+declare(strict_types=1);
+
 namespace Avalon\Database\Drivers;
 
-use Avalon\Database\Drivers\PDO\PDOStatement;
-use PDO as BasePDO;
+use Avalon\Database\Drivers\PDO\Statement;
+use PDO as GlobalPDO;
 
 /**
  * PDO Database wrapper
@@ -32,13 +34,13 @@ use PDO as BasePDO;
  * @author Jack P. <nrx@nirix.net>
  * @copyright Copyright (c) Jack P.
  */
-class PDO extends BasePDO
+class PDO extends GlobalPDO
 {
     public function __construct(...$args)
     {
         parent::__construct(...$args);
 
-        $this->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-        $this->setAttribute(PDO::ATTR_STATEMENT_CLASS, [PDOStatement::class]);
+        $this->setAttribute(static::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+        $this->setAttribute(static::ATTR_STATEMENT_CLASS, [Statement::class]);
     }
 }

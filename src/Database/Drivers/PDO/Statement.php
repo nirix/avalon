@@ -18,12 +18,14 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
+declare(strict_types=1);
+
 namespace Avalon\Database\Drivers\PDO;
 
-use PDOStatement as BasePDOStatement;
-use \PDO;
+use PDO;
+use PDOStatement;
 
-class PDOStatement extends BasePDOStatement
+class Statement extends PDOStatement
 {
     protected string $modelClass;
 
@@ -34,6 +36,7 @@ class PDOStatement extends BasePDOStatement
         return $this;
     }
 
+    #[\Override]
     public function fetchAll(int $mode = PDO::FETCH_DEFAULT, mixed ...$args): array
     {
         if ($this->modelClass) {
@@ -45,6 +48,7 @@ class PDOStatement extends BasePDOStatement
         return parent::fetchAll($mode, ...$args);
     }
 
+    #[\Override]
     public function fetch(int $mode = PDO::FETCH_DEFAULT, mixed ...$args): mixed
     {
         $data = parent::fetch($mode, ...$args);
