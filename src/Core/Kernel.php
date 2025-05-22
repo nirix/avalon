@@ -20,6 +20,7 @@
 
 namespace Avalon\Core;
 
+use Avalon\Http\Controller;
 use Avalon\Http\Router;
 use Avalon\Http\Request;
 use Avalon\Http\Response;
@@ -36,8 +37,8 @@ use Avalon\Output\Body;
  */
 class Kernel
 {
-    private static $version = '1.0-alpha';
-    private static $app;
+    private static string $version = '1.0-alpha';
+    private static Controller $app;
 
     /**
      * Initializes the the kernel and routes the request.
@@ -47,7 +48,7 @@ class Kernel
         session_start();
 
         // Route the request
-        Router::route(new Request);
+        Router::handle(new Request);
 
         // Check if the routed controller and method exists
         if (
@@ -83,7 +84,20 @@ class Kernel
             if (Router::$legacyRoute) {
                 $output = call_user_func_array(array(static::$app, 'action_' . Router::$method), Router::$vars);
             } else {
-                $output = [static::$app, Router::$method](...Router::$params);
+                $callback = [static::$app, Router::$method];
+                if (!empty(Router::$middleware)) {
+                    $output = null;
+
+                    foreach (Router::$middleware as $mw) {
+                        if ($output === null) {
+                            $output = $mw->execute();
+                        }
+                    }
+
+                    $output ??= $callback(...Router::$params);
+                } else {
+                    $output = $callback(...Router::$params);
+                }
             }
         }
 
