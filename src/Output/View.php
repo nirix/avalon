@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2024 Jack Polgar
+ * Copyright (C) 2011-2025 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -18,10 +18,11 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
+declare(strict_types=1);
+
 namespace Avalon\Output;
 
-use Avalon\Core\Load;
-use Avalon\Core\Error;
+use Exception;
 
 /**
  * View class.
@@ -31,151 +32,148 @@ use Avalon\Core\Error;
  */
 class View
 {
-    private static $ob_level;
-    public static $theme;
-    public static $inherit_from;
-    private static $vars = array();
+    /**
+     * Current view.
+     */
+    protected static string $current;
 
     /**
-     * Renders the specified file.
-     *
-     * @param string $file
-     * @param array $vars Variables to be passed to the view.
+     * Global variables for all views.
      */
-    public static function render($file, array $vars = array())
-    {
-        // Get the view content
-        return static::_get_view($file, $vars);
-    }
+    protected static array $globals = [];
 
     /**
-     * Renders and returns the specified file.
-     *
-     * @deprecated Deprecated since 0.6
+     * Directories to search for views in.
      */
-    public static function get($file, array $vars = array())
-    {
-        return static::render($file, $vars);
-    }
+    protected static array $directories = [];
 
     /**
-     * Private function to handle the rendering of files.
-     *
-     * @param string $file
-     * @param array $vars Variables to be passed to the view.
-     *
-     * @return string
+     * Parent views that other views have extended from.
      */
-    private static function _get_view($_file, array $vars = array())
-    {
-        // Get the file name/path
-        $_file = self::_view_file_path($_file);
-
-        // Make sure the ob_level is set
-        if (self::$ob_level === null) {
-            self::$ob_level = ob_get_level();
-        }
-
-        // Make the set variables accessible
-        foreach (self::$vars as $_var => $_val) {
-            $$_var = $_val;
-        }
-
-        // Make the vars for this view accessible
-        if (count($vars)) {
-            foreach($vars as $_var => $_val)
-                $$_var = $_val;
-        }
-
-        // Load up the view and get the contents
-        ob_start();
-        include($_file);
-        return ob_get_clean();
-    }
+    protected static array $parents = [];
 
     /**
-     * Determines the path of the view file.
-     *
-     * @param string $file File name.
-     *
-     * @return string
+     * View sections stack.
      */
-    private static function _view_file_path($file)
+    protected static array $sectionStack = [];
+
+    /**
+     * Rendered view sections.
+     */
+    protected static array $sections = [];
+
+    /**
+     * Search directories for the specified file.
+     *
+     * @param string $name File name
+     *
+     * @return string|false
+     */
+    public static function find(string $name): string|false
     {
-        $path = static::exists($file);
+        foreach (static::$directories as $directory) {
+            $path = $directory . '/' . $name;
 
-        // Check if the theme has this view
-        if (!$path) {
-            Error::halt("View Error", "Unable to load view '{$file}'", 'HALT');
-        }
-
-        unset($file);
-        return $path;
-    }
-
-    public static function exists($name)
-    {
-        $dirs = array();
-
-        // Add the theme path, if a theme is set
-        if (static::$theme !== null) {
-            $dirs[] = APPPATH . '/views/' . static::$theme . '/';
-        }
-
-        // Registered search paths
-        foreach (Load::$search_paths as $path) {
-            if (is_dir($path . '/views')) {
-                $dirs[] = $path . '/views/';
+            if (file_exists($path)) {
+                return $path;
             }
         }
 
-        // Add the inheritance path, if there is one
-        if (static::$inherit_from !== null) {
-            $dirs[] = static::$inherit_from . '/';
-        }
-
-        // Add the regular path
-        $dirs[] = APPPATH . '/views/';
-
-        // Loop over and find the view
-        foreach ($dirs as $dir) {
-            $path = $dir . strtolower(preg_replace('/(?<=[a-z])([A-Z])/', '_' . '\\1', $name));
-            if (file_exists($path . '.phtml')) {
-                return $path . '.phtml';
-            } elseif (file_exists($path . '.php')) {
-                return $path . '.php';
-            }
-        }
-
-        // Damn it Jim, I'm a doctor not a view path.
         return false;
     }
 
     /**
-     * Sends the variable to the view.
+     * Renders the view with the given variables.
      *
-     * @param string $var The variable name.
-     * @param mixed $val The variables value.
+     * @param string $name View name.
+     * @param array  $data Variables for the view.
+     *
+     * @return string
      */
-    public static function set($var, $val = null)
+    public static function render(string $name, array $data = []): string
     {
-        // Mass set
-        if (is_array($var)) {
-            foreach ($var as $k => $v) {
-                static::set($k, $v);
-            }
-        } else {
-            self::$vars[$var] = $val;
+        $path = static::find($name);
+
+        if (!$path) {
+            throw new Exception(sprintf('Unable to find view "%s" in directories [%s]', $name, join(', ', static::$directories)));
         }
+
+        static::$current = $name;
+        static::$parents[$name] = null;
+
+        $content = static::sandboxView($path, $data);
+
+        if (static::$parents[$name]) {
+            $content = static::render(static::$parents[$name], [...$data, 'content' => $content]);
+        }
+
+        return $content;
+    }
+
+    protected static function sandboxView(string $_viewPath, array $data = []): string|false
+    {
+        $data = static::$globals + $data;
+        extract($data, \EXTR_SKIP);
+
+        ob_start();
+        require $_viewPath;
+
+        return ob_get_clean();
     }
 
     /**
-     * Returns the variables array.
+     * Add directory to search for views in.
      *
-     * @return array
+     * @param string $directory Directory path.
      */
-    public static function vars()
+    public static function addDirectory(string $directory): void
     {
-        return self::$vars;
+        static::$directories[] = $directory;
+    }
+
+    /**
+     * Set global variable or variables for every view.
+     *
+     * @param string|array $name  String for single variable or array of variables by name => value.
+     * @param mixed|null   $value Value of variable or null if mass setting by first parameter.
+     */
+    public static function set(string|array $name, mixed $value = null): void
+    {
+        if (is_array($name)) {
+            foreach ($name as $name => $value) {
+                static::$globals[$name] = $value;
+            }
+
+            return;
+        }
+
+        static::$globals[$name] = $value;
+    }
+
+    public static function extends(string $name): void
+    {
+        static::$parents[static::$current] = $name;
+    }
+
+    public static function startSection(string $name): void
+    {
+        static::$sectionStack[] = $name;
+        ob_start();
+    }
+
+    public static function endSection(): void
+    {
+        $section = array_pop(static::$sectionStack);
+        static::$sections[$section] = ob_get_clean();
+    }
+
+    public static function hasSection(string $name): bool
+    {
+        return isset(static::$sections[$name]);
+    }
+
+    public static function getSection(string $name, string $fallback = ''): string
+    {
+        return static::$sections[$name] ?? $fallback;
     }
 }

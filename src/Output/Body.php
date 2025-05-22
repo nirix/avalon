@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2024 Jack Polgar
+ * Copyright (C) 2011-2025 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -18,6 +18,8 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
+declare(strict_types=1);
+
 namespace Avalon\Output;
 
 /**
@@ -26,6 +28,10 @@ namespace Avalon\Output;
  * @author Jack P.
  * @package Avalon
  */
+#[\Deprecated(
+    'Return a Response from the controller instead',
+    '1.0'
+)]
 class Body
 {
     private static $body = '';
