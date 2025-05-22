@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2024 Jack Polgar
+ * Copyright (C) 2011-2025 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -17,6 +17,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
+
+declare(strict_types=1);
 
 namespace Avalon\Http;
 
@@ -36,13 +38,20 @@ use Avalon\Output\View;
  */
 class Controller
 {
+    /**
+     * @var array{action: bool, view: string|bool, layout: 'default.phtml'} $render
+     */
+    #[\Deprecated('Return a Response from the controller intead', '1.0')]
     public $render = array(
         'action' => true,     // Call the routed action, or not
         'view'   => false,    // View to render, set in __construct()
-        'layout' => 'default' // Layout to render
+        'layout' => 'default.phtml' // Layout to render
     );
 
+    #[\Deprecated('Use middleware instead', '1.0')]
     public $before = array();
+
+    #[\Deprecated('Use middleware instead', '1.0')]
     public $after = array();
 
     public function __construct()
@@ -53,6 +62,21 @@ class Controller
         $this->render['view'] = str_replace('\\', '/', implode('/', $called_class) . '/' . Router::$method);
     }
 
+    /**
+     * Set global variable or variables for every view.
+     *
+     * @param string|array $name  String for single variable or array of variables by name => value.
+     * @param mixed|null   $value Value of variable or null if mass setting by first parameter.
+     */
+    public function set(string|array $name, mixed $value = null): void
+    {
+        View::set($name, $value);
+    }
+
+    #[\Deprecated(
+        message: "Return a Response from the controller instead",
+        since: "1.0",
+    )]
     public function __shutdown()
     {
         // Don't render the layout for json content
