@@ -18,6 +18,8 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
+declare(strict_types=1);
+
 namespace Avalon\Http;
 
 /**
@@ -130,7 +132,7 @@ class Request
     {
         // Return the request method
         if (!$matches) {
-            return static::$method;
+            return strtoupper(static::$method);
         }
         // Match the request method
         else {
