@@ -112,7 +112,7 @@ class View
 
     protected static function sandboxView(string $_viewPath, array $data = []): string|false
     {
-        $data = static::$globals + $data;
+        $data = array_replace(static::$globals, $data);
         extract($data, \EXTR_SKIP);
 
         ob_start();
