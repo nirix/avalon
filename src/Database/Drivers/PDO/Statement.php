@@ -22,6 +22,7 @@ declare(strict_types=1);
 
 namespace Avalon\Database\Drivers\PDO;
 
+use Avalon\Database;
 use PDO;
 use PDOStatement;
 
@@ -40,9 +41,10 @@ class Statement extends PDOStatement
     public function fetchAll(int $mode = PDO::FETCH_DEFAULT, mixed ...$args): array
     {
         if ($this->modelClass) {
-            $this->setFetchMode($mode|\PDO::FETCH_FUNC, function ($row) use ($args) {
-                return new $this->modelClass($row, false);
-            });
+            return array_map(
+                fn ($row) => new $this->modelClass($row, false),
+                parent::fetchAll(PDO::FETCH_ASSOC)
+            );
         }
 
         return parent::fetchAll($mode, ...$args);
@@ -58,5 +60,12 @@ class Statement extends PDOStatement
         }
 
         return $data;
+    }
+
+    #[\Override]
+    public function execute(array|null $params = null): bool
+    {
+        Database::$queryCount++;
+        return parent::execute($params);
     }
 }

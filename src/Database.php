@@ -35,6 +35,8 @@ class Database
 {
     protected static $connections = [];
 
+    public static $queryCount = 0;
+
     /**
      * Connects to the database.
      *
