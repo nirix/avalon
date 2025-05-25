@@ -25,6 +25,7 @@ namespace Avalon\Database;
 use Avalon\Database;
 use Avalon\Database\Drivers\PDO\Statement;
 use InvalidArgumentException;
+use PDO;
 
 /**
  * Database Model class
@@ -45,6 +46,8 @@ class Model
     // Instance information
     protected $data = [];
     protected $isNew = true;
+
+    protected $errors = [];
 
     public function __construct(array $data = [], $isNew = true)
     {
@@ -79,9 +82,61 @@ class Model
         return array_keys($this->data);
     }
 
+    public function delete(): void
+    {
+        $query = static::prepare(sprintf('DELETE FROM %s WHERE %s = :value', static::$table, static::$primaryKey));
+        $query->bindValue('value', $this->data[static::$primaryKey]);
+        $query->execute();
+    }
+
+    public function getErrors(): array
+    {
+        return $this->errors;
+    }
+
+    public function hasError(string $property): bool
+    {
+        return isset($this->errors[$property]);
+    }
+
+    public function getError(string $property): string
+    {
+        return $this->errors[$property];
+    }
+
+    public static function findBy(string $property, mixed $value): static|false
+    {
+        $query = static::prepareSelect("WHERE {$property} = :value LIMIT 1");
+        $query->bindColumn('property', $property);
+        $query->bindValue('value', $value);
+        $query->execute();
+
+        return $query->fetch() ?? false;
+    }
+
+    public static function __callStatic($name, $arguments)
+    {
+        if (str_starts_with($name, 'getBy')) {
+            $property = strtolower(
+                preg_replace('/(?<!^)[A-Z]/', '_$0', substr($name, 5))
+            );
+
+            $value = $arguments[0] ?? null;
+
+            return static::findBy($property, $value);
+        }
+
+        throw new InvalidArgumentException(sprintf('No static method with name "%s" exists on class %s', $name, static::class));
+    }
+
     public static function prepareSelect(string $query, array $options = []): Statement
     {
         return static::db()->prepare(sprintf('SELECT * FROM %s %s', static::$table, $query), $options)->withModel(static::class);
+    }
+
+    public static function prepare(string $query, array $options = []): Statement
+    {
+        return static::db()->prepare($query, $options)->withModel(static::class);
     }
 
     /**
@@ -89,7 +144,7 @@ class Model
      *
      * @return object
      */
-    protected static function db()
+    protected static function db(): PDO
     {
         return Database::connection(static::$connection);
     }
