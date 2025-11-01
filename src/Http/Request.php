@@ -159,7 +159,7 @@ class Request
     }
 
     /**
-     * Returns the value of the key from the POST array,
+     * Returns the value of the key from the request or POST array,
      * if it's not set, returns null by default.
      *
      * @param string $key      Key to get from POST array
@@ -167,8 +167,11 @@ class Request
      *
      * @return mixed
      */
-    public static function get($key, $fallback = null) {
-        return isset(static::$post[$key]) ? static::$post[$key] : $fallback;
+    public static function get($key, $fallback = null)
+    {
+        $data = array_merge(static::$request, static::$post);
+
+        return isset($data[$key]) ? $data[$key] : $fallback;
     }
 
     /**
