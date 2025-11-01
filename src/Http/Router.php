@@ -223,7 +223,8 @@ class Router
 
         $params = [];
         foreach ($reflect->getParameters() as $parameter) {
-            $params[$parameter->getName()] = $matches[$parameter->getName()] ?? $route['params'][$parameter];
+            $paramName = $parameter->getName();
+            $params[$paramName] = $matches[$paramName] ?? $route['params'][$paramName] ?? $parameter->getDefaultValue() ?? null;
         }
 
         static::$controller = $controller;
