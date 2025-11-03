@@ -45,9 +45,8 @@ class Statement
      */
     public function __construct(
         protected $statement,
-        protected $connectionName = 'main'
-    ) {
-    }
+        protected string $connectionName = 'main'
+    ) {}
 
     /**
      * Sets the model for the rows to use.
@@ -68,18 +67,16 @@ class Statement
      */
     public function fetchAll(): array
     {
+        if ($this->_model === null) {
+            return $this->statement->fetchAll();
+        }
+
         $result = $this->statement->fetchAll(\PDO::FETCH_ASSOC);
         $rows = [];
 
-        if ($this->_model !== null) {
-            foreach ($result as $row) {
-                $model = $this->_model;
-                $rows[] = new $model($row, false);
-            }
-        } else {
-            foreach ($result as $row) {
-                $rows[] = $row;
-            }
+        foreach ($result as $row) {
+            $model = $this->_model;
+            $rows[] = new $model($row, false);
         }
 
         return $rows;
@@ -191,5 +188,14 @@ class Statement
     public function row_count(): int
     {
         return $this->rowCount();
+    }
+
+    public function setFetchMode($mode, $className = null, $ctorArgs = []): static
+    {
+        if ($mode === \PDO::FETCH_CLASS && $className !== null) {
+            $this->statement->setFetchMode($mode, $className, $ctorArgs);
+        }
+
+        return $this;
     }
 }
