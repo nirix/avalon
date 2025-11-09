@@ -32,9 +32,8 @@ use Avalon\Core\Error;
 class View
 {
     private static $ob_level;
-    public static $theme;
-    public static $inherit_from;
-    private static $vars = array();
+    public static array $searchPaths = [];
+    private static array $vars = [];
 
     /**
      * Renders the specified file.
@@ -83,8 +82,9 @@ class View
 
         // Make the vars for this view accessible
         if (count($vars)) {
-            foreach($vars as $_var => $_val)
+            foreach ($vars as $_var => $_val) {
                 $$_var = $_val;
+            }
         }
 
         // Load up the view and get the contents
@@ -113,37 +113,27 @@ class View
         return $path;
     }
 
-    public static function exists($name)
+    public static function exists($name): string|false
     {
-        $dirs = array();
+        $dirs = self::$searchPaths;
 
-        // Add the theme path, if a theme is set
-        if (static::$theme !== null) {
-            $dirs[] = APPPATH . '/views/' . static::$theme . '/';
-        }
-
-        // Registered search paths
+        // Legacy search paths
         foreach (Load::$search_paths as $path) {
             if (is_dir($path . '/views')) {
                 $dirs[] = $path . '/views/';
             }
         }
 
-        // Add the inheritance path, if there is one
-        if (static::$inherit_from !== null) {
-            $dirs[] = static::$inherit_from . '/';
-        }
-
-        // Add the regular path
-        $dirs[] = APPPATH . '/views/';
-
         // Loop over and find the view
         foreach ($dirs as $dir) {
-            $path = $dir . strtolower(preg_replace('/(?<=[a-z])([A-Z])/', '_' . '\\1', $name));
+            $path = rtrim($dir, '/') . '/' . strtolower(preg_replace('/(?<=[a-z])([A-Z])/', '_' . '\\1', $name));
+
             if (file_exists($path . '.phtml')) {
                 return $path . '.phtml';
             } elseif (file_exists($path . '.php')) {
                 return $path . '.php';
+            } elseif (file_exists($path)) {
+                return $path;
             }
         }
 
