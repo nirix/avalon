@@ -31,24 +31,52 @@ class Response
     public const HTTP_NOT_FOUND = 404;
     public const HTTP_MOVED_PERMANENTLY = 301;
     public const HTTP_FOUND = 302;
+    public const HTTP_UNPROCESSABLE_ENTITY = 422;
 
     public const STATUS_TEXT = [
         Response::HTTP_OK => 'OK',
         Response::HTTP_NOT_FOUND => 'Not Found',
         Response::HTTP_MOVED_PERMANENTLY => 'Moved Permanently',
         Response::HTTP_FOUND => 'Found',
+        Response::HTTP_UNPROCESSABLE_ENTITY => 'Unprocessable Entity',
     ];
 
     public function __construct(
         protected string $content,
-        protected int $statusCode = Response::HTTP_OK
-    ) {
+        protected int $statusCode = Response::HTTP_OK,
+        protected array $headers = []
+    ) {}
+
+    public function setStatusCode(int $statusCode)
+    {
+        $this->statusCode = $statusCode;
+    }
+
+    public function setHeaders(array $headers)
+    {
+        $this->headers = $headers;
+    }
+
+    public function addHeader(string $name, string $value)
+    {
+        $this->headers[$name] = $value;
+    }
+
+    public function removeHeader(string $name)
+    {
+        unset($this->headers[$name]);
     }
 
     public function send()
     {
         header(sprintf("HTTP/1.1 %d %s", $this->statusCode, static::STATUS_TEXT[$this->statusCode]));
+
+        foreach ($this->headers as $name => $value) {
+            header(sprintf("%s: %s", $name, $value));
+        }
+
         header("X-Powered-By: Avalon/" . Kernel::version());
+
         echo $this->content;
     }
 }
