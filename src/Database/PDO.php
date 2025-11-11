@@ -83,6 +83,8 @@ class PDO extends Driver
                 isset($config['options']) ? $config['options'] : array()
             );
 
+            $this->connection->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
+
             unset($dsn);
         } catch (\PDOException $e) {
             $this->halt($e->getMessage());

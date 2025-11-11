@@ -308,8 +308,8 @@ class Model
      */
     public static function fetchAll(): array
     {
-        $rows = array();
-        $fetched = static::db()->select(static::$_properties)->from(static::$_name)->exec()->fetch_all();
+        $rows = [];
+        $fetched = static::db()->select(static::$_properties)->from(static::$_name)->exec()->fetchAll();
 
         foreach ($fetched as $row) {
             $rows[] = new static($row, false);
