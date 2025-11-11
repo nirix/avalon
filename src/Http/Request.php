@@ -79,7 +79,7 @@ class Request
         static::$segments = explode('/', trim(static::$uri, '/'));
 
         // Set the request method
-        static::$method = strtolower($_SERVER['REQUEST_METHOD']);
+        static::$method = strtoupper($_SERVER['REQUEST_METHOD']);
 
         // Requested with
         static::$requested_with = @$_SERVER['HTTP_X_REQUESTED_WITH'];
@@ -170,7 +170,6 @@ class Request
     public static function get($key, $fallback = null)
     {
         $data = array_merge(static::$request, static::$post);
-
         return isset($data[$key]) ? $data[$key] : $fallback;
     }
 
