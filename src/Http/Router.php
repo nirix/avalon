@@ -74,6 +74,8 @@ class Router
      */
     public static array $extensions = ['.json', '.xml', '.atom'];
 
+    protected static array $namedRoutes = [];
+
     /**
      * @deprecated
      */
@@ -96,6 +98,8 @@ class Router
             'controller' => $controller,
             'params' => $params
         ];
+
+        static::$namedRoutes[$name] = $path;
     }
 
     /**
@@ -234,5 +238,10 @@ class Router
         static::$extension = (isset($matches['extension']) ? $matches['extension'] : null);
 
         unset($reflect, $controller, $action, $parameter, $params, $route, $matches);
+    }
+
+    public static function getPath(string $name): string
+    {
+        return static::$namedRoutes[$name];
     }
 }
