@@ -118,6 +118,15 @@ class PDO extends Driver
         return $rows;
     }
 
+    public function exec(string $query)
+    {
+        $this->query_count++;
+        $this->last_query = $query;
+
+        $rows = $this->connection->exec($query);
+        return $rows;
+    }
+
     /**
      * Prepares a statement for execution and returns a statement object.
      *
