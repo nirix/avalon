@@ -456,6 +456,11 @@ class Model
         }
     }
 
+    public function toArray(?array $fields = null): array
+    {
+        return $this->__toArray($fields);
+    }
+
     /**
      * Returns the models data as an array.
      *
