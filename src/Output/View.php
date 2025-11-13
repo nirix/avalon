@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2024 Jack Polgar
+ * Copyright (C) 2011-2025 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -18,10 +18,11 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
+declare(strict_types=1);
+
 namespace Avalon\Output;
 
-use Avalon\Core\Load;
-use Avalon\Core\Error;
+use Exception;
 
 /**
  * View class.
@@ -31,30 +32,79 @@ use Avalon\Core\Error;
  */
 class View
 {
-    private static $ob_level;
     public static array $searchPaths = [];
-    private static array $vars = [];
+    private static array $globalVars = [];
+    protected static string $current;
+    protected static array $parents = [];
+    protected static array $sections = [];
+    protected static array $sectionStack = [];
 
     /**
      * Renders the specified file.
      *
      * @param string $file
      * @param array $vars Variables to be passed to the view.
+     *
+     * @return string
+     *
+     * @throws Exception
      */
-    public static function render($file, array $vars = array())
+    public static function render($file, array $vars = []): string
     {
+        $path = static::find($file);
+
+        if ($path === false) {
+            throw new Exception(sprintf('Unable to find view "%s" in directories [%s]', $file, join(', ', static::$searchPaths)));
+        }
+
+        static::$current = $path;
+        static::$parents[$path] = null;
+
         // Get the view content
-        return static::_get_view($file, $vars);
+        $content = static::sandboxView($path, $vars);
+
+        if (static::$parents[$path] !== null) {
+            $content = static::render(
+                static::$parents[$path],
+                [
+                    ...$vars,
+                    'content' => $content
+                ]
+            );
+        }
+
+        return $content;
     }
 
-    /**
-     * Renders and returns the specified file.
-     *
-     * @deprecated Deprecated since 0.6
-     */
-    public static function get($file, array $vars = array())
+    public static function find(string $file): string|false
     {
-        return static::render($file, $vars);
+        foreach (static::$searchPaths as $path) {
+            $path = rtrim($path, '/') . '/' . $file;
+
+            // Check for .phtml, .php and the name itself
+            if (file_exists($path)) {
+                return $path;
+            } elseif (file_exists($path . '.phtml')) {
+                return $path . '.phtml';
+            } elseif (file_exists($path . '.php')) {
+                return $path . '.php';
+            }
+
+            // Legacy support for camelCase to snake_case
+            $path = strtolower(preg_replace('/(?<=[a-z])([A-Z])/', '_' . '\\1', $path));
+            if (file_exists($path)) {
+                Logger::warning(sprintf('Automatically converting camelCase to snake_case for view file is deprecated.', $path));
+                return $path;
+            } elseif (file_exists($path . '.phtml')) {
+                Logger::warning(sprintf('Automatically converting camelCase to snake_case for view file is deprecated.', $path));
+                return $path . '.phtml';
+            } elseif (file_exists($path . '.php')) {
+                Logger::warning(sprintf('Automatically converting camelCase to snake_case for view file is deprecated.', $path));
+                return $path . '.php';
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -65,80 +115,15 @@ class View
      *
      * @return string
      */
-    private static function _get_view($_file, array $vars = array())
+    protected static function sandboxView(string $path, array $vars = []): string
     {
-        // Get the file name/path
-        $_file = self::_view_file_path($_file);
+        $vars = array_merge(self::$globalVars, $vars);
+        extract($vars, EXTR_SKIP);
 
-        // Make sure the ob_level is set
-        if (self::$ob_level === null) {
-            self::$ob_level = ob_get_level();
-        }
-
-        // Make the set variables accessible
-        foreach (self::$vars as $_var => $_val) {
-            $$_var = $_val;
-        }
-
-        // Make the vars for this view accessible
-        if (count($vars)) {
-            foreach ($vars as $_var => $_val) {
-                $$_var = $_val;
-            }
-        }
-
-        // Load up the view and get the contents
         ob_start();
-        include($_file);
+        require $path;
+
         return ob_get_clean();
-    }
-
-    /**
-     * Determines the path of the view file.
-     *
-     * @param string $file File name.
-     *
-     * @return string
-     */
-    private static function _view_file_path($file)
-    {
-        $path = static::exists($file);
-
-        // Check if the theme has this view
-        if (!$path) {
-            Error::halt("View Error", "Unable to load view '{$file}'", 'HALT');
-        }
-
-        unset($file);
-        return $path;
-    }
-
-    public static function exists($name): string|false
-    {
-        $dirs = self::$searchPaths;
-
-        // Legacy search paths
-        foreach (Load::$search_paths as $path) {
-            if (is_dir($path . '/views')) {
-                $dirs[] = $path . '/views/';
-            }
-        }
-
-        // Loop over and find the view
-        foreach ($dirs as $dir) {
-            $path = rtrim($dir, '/') . '/' . strtolower(preg_replace('/(?<=[a-z])([A-Z])/', '_' . '\\1', $name));
-
-            if (file_exists($path . '.phtml')) {
-                return $path . '.phtml';
-            } elseif (file_exists($path . '.php')) {
-                return $path . '.php';
-            } elseif (file_exists($path)) {
-                return $path;
-            }
-        }
-
-        // Damn it Jim, I'm a doctor not a view path.
-        return false;
     }
 
     /**
@@ -155,7 +140,7 @@ class View
                 static::set($k, $v);
             }
         } else {
-            self::$vars[$var] = $val;
+            self::$globalVars[$var] = $val;
         }
     }
 
@@ -166,6 +151,38 @@ class View
      */
     public static function vars()
     {
-        return self::$vars;
+        return self::$globalVars;
+    }
+
+    public static function extend(string $file): void
+    {
+        static::$parents[static::$current] = $file;
+    }
+
+    public static function startSection(string $name, ?string $content = null): void
+    {
+        if ($content !== null) {
+            static::$sections[$name] = $content;
+            return;
+        }
+
+        static::$sectionStack[] = $name;
+        ob_start();
+    }
+
+    public static function endSection(): void
+    {
+        $section = array_pop(static::$sectionStack);
+        static::$sections[$section] = ob_get_clean();
+    }
+
+    public static function hasSection(string $name): bool
+    {
+        return isset(static::$sections[$name]);
+    }
+
+    public static function getSection(string $name, string $fallback = ''): string
+    {
+        return static::$sections[$name] ?? $fallback;
     }
 }
