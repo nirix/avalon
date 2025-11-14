@@ -132,7 +132,7 @@ class View
      * @param string $var The variable name.
      * @param mixed $val The variables value.
      */
-    public static function set($var, $val = null)
+    public static function set(string|array $var, mixed $val = null): void
     {
         // Mass set
         if (is_array($var)) {
