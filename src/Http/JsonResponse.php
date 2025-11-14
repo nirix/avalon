@@ -23,7 +23,7 @@ namespace Avalon\Http;
 use Avalon\Core\Kernel;
 
 /**
- * @since 1.0
+ * @since 0.8
  */
 class JsonResponse extends Response
 {
