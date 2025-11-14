@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2024 Jack Polgar
+ * Copyright (C) 2011-2025 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -20,7 +20,10 @@
 
 namespace Avalon\Http;
 
-use \Exception;
+use Avalon\Http\Middleware\MiddlewareInterface;
+use Exception;
+use ReflectionAttribute;
+use ReflectionClass;
 use ReflectionMethod;
 use UnexpectedValueException;
 
@@ -68,6 +71,11 @@ class Router
      * @example `.json`
      */
     public static ?string $extension;
+
+    /**
+     * @var array<MiddlewareInterface>
+     */
+    public static array $middleware = [];
 
     /**
      * Accepted extensions.
@@ -236,6 +244,7 @@ class Router
         static::$params = array_merge($route['params'], $params);
         static::$attributes = $matches;
         static::$extension = (isset($matches['extension']) ? $matches['extension'] : null);
+        static::$middleware = static::getMiddleware($controller, $action);
 
         unset($reflect, $controller, $action, $parameter, $params, $route, $matches);
     }
@@ -243,5 +252,38 @@ class Router
     public static function getPath(string $name): string
     {
         return static::$namedRoutes[$name];
+    }
+
+    private static function getMiddleware(string $class, string $method): array
+    {
+        $middlewares = [];
+
+        $reflectionClass = new ReflectionClass($class);
+
+        $methodReflection = $reflectionClass->getMethod($method);
+        $methodAttributes = $methodReflection->getAttributes(MiddlewareInterface::class, ReflectionAttribute::IS_INSTANCEOF);
+
+        // Get middleware for the method
+        $methodMiddlewares = [];
+        foreach ($methodAttributes as $attribute) {
+            $methodMiddlewares[] = $attribute;
+        }
+
+        $middlewares = [...$methodMiddlewares, ...$middlewares];
+        // Loop over the class and its parents until we have all the middlewares
+        while ($reflectionClass) {
+            $attributes = $reflectionClass->getAttributes(MiddlewareInterface::class, ReflectionAttribute::IS_INSTANCEOF);
+
+            $classMiddlewares = [];
+            foreach ($attributes as $attribute) {
+                $classMiddlewares[] = $attribute;
+            }
+
+            $middlewares = [...$classMiddlewares, ...$middlewares];
+
+            $reflectionClass = $reflectionClass->getParentClass();
+        }
+
+        return $middlewares;
     }
 }

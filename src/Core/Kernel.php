@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2024 Jack Polgar
+ * Copyright (C) 2011-2025 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -24,6 +24,8 @@ use Avalon\Http\Router;
 use Avalon\Http\Request;
 use Avalon\Http\Response;
 use Avalon\Output\Body;
+use Exception;
+use ReflectionAttribute;
 
 /**
  * Avalon's Kernel.
@@ -37,7 +39,7 @@ use Avalon\Output\Body;
 class Kernel
 {
     private static $version = '0.9';
-    private static $app;
+    private static Controller $app;
 
     /**
      * Initializes the the kernel and routes the request.
@@ -60,42 +62,61 @@ class Kernel
     }
 
     /**
+     * Runs the before or after filters.
+     */
+    private static function runFilters(string $type): void
+    {
+        $filters = array_merge(
+            isset(static::$app->{$type}['*']) ? static::$app->{$type}['*'] : [],
+            isset(static::$app->{$type}[Router::$method]) ? static::$app->{$type}[Router::$method] : []
+        );
+        foreach ($filters as $filter) {
+            static::$app->{$filter}(Router::$method);
+        }
+        unset($filters, $filter);
+    }
+
+    /**
      * Executes the routed request.
      */
-    public static function run()
+    public static function run(): void
     {
-        // Start the app
-        static::$app = new Router::$controller;
+        $pipeline = static::buildPipeline(Router::$middleware, function () {
+            // Start the app
+            static::$app = new Router::$controller;
 
-        // Before filters
-        $filters = array_merge(
-            isset(static::$app->before['*']) ? static::$app->before['*'] : array(),
-            isset(static::$app->before[Router::$method]) ? static::$app->before[Router::$method] : array()
-        );
-        foreach ($filters as $filter) {
-            static::$app->{$filter}(Router::$method);
-        }
-        unset($filters, $filter);
+            // Before filters
+            static::runFilters('before');
 
-        // Call the method
-        $output = null;
-        if (static::$app->render['action']) {
-            if (Router::$legacyRoute) {
-                $output = call_user_func_array(array(static::$app, 'action_' . Router::$method), Router::$vars);
-            } else {
-                $output = [static::$app, Router::$method](...Router::$params);
+            // Call the method
+            $output = null;
+            if (static::$app->render['action']) {
+                if (Router::$legacyRoute) {
+                    $output = call_user_func_array(array(static::$app, 'action_' . Router::$method), Router::$vars);
+                } else {
+                    $output = [static::$app, Router::$method](...Router::$params);
+                }
             }
-        }
 
-        // After filters
-        $filters = array_merge(
-            isset(static::$app->after['*']) ? static::$app->after['*'] : array(),
-            isset(static::$app->after[Router::$method]) ? static::$app->after[Router::$method] : array()
-        );
-        foreach ($filters as $filter) {
-            static::$app->{$filter}(Router::$method);
+            // After filters
+            static::runFilters('after');
+
+            return $output;
+        });
+
+        try {
+            $output = $pipeline();
+        } catch (Exception $e) {
+            throw new Exception(sprintf(
+                "Error during request, unable to execute controller %s::%s, middleware stack: [%s], error: %s in %s on line %d",
+                Router::$controller,
+                Router::$method,
+                implode(', ', array_map(fn(ReflectionAttribute $attribute) => $attribute->getName(), Router::$middleware)),
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ));
         }
-        unset($filters, $filter);
 
         if ($output instanceof Response) {
             $output->send();
@@ -127,6 +148,23 @@ class Kernel
 
             static::$app->__shutdown();
         }
+    }
+
+    /**
+     * Builds the middleware pipeline.
+     */
+    protected static function buildPipeline(array $middleware, callable $finalHandler): callable
+    {
+        return array_reduce(
+            array_reverse($middleware),
+            function (callable $next, ReflectionAttribute $currentMiddleware) {
+                return function () use ($currentMiddleware, $next) {
+                    $middleware = $currentMiddleware->newInstance();
+                    return $middleware->run($next);
+                };
+            },
+            $finalHandler
+        );
     }
 
     /**

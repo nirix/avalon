@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2024 Jack Polgar
+ * Copyright (C) 2011-2025 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -34,12 +34,13 @@ class Request
     private static $request_uri;
     private static $uri;
     private static $base;
-    private static $segments = array();
+    private static array $segments = [];
     private static $method;
     private static $requested_with;
     public static $query;
-    public static $request = array();
-    public static $post = array();
+    public static array $request = [];
+    public static array $post = [];
+    public static array $attributes = [];
     public static $scheme;
     public static $host;
     public static $port;
@@ -169,8 +170,13 @@ class Request
      */
     public static function get($key, $fallback = null)
     {
-        $data = array_merge(static::$request, static::$post);
+        $data = array_merge(static::$request, static::$post, static::$attributes);
         return isset($data[$key]) ? $data[$key] : $fallback;
+    }
+
+    public static function set(string $key, mixed $value): void
+    {
+        static::$attributes[$key] = $value;
     }
 
     /**

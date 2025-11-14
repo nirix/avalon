@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2024 Jack Polgar
+ * Copyright (C) 2011-2025 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -20,7 +20,6 @@
 
 namespace Avalon\Core;
 
-use Avalon\Http\Request;
 use Avalon\Http\Router;
 use Avalon\Output\Body;
 use Avalon\Output\View;
@@ -36,13 +35,23 @@ use Avalon\Output\View;
  */
 class Controller
 {
+    /**
+     * @deprecated 0.9
+     */
     public $render = array(
         'action' => true,     // Call the routed action, or not
         'view'   => false,    // View to render, set in __construct()
         'layout' => 'default' // Layout to render
     );
 
+    /**
+     * @deprecated 0.9
+     */
     public $before = array();
+
+    /**
+     * @deprecated 0.9
+     */
     public $after = array();
 
     public function __construct()
@@ -53,6 +62,9 @@ class Controller
         $this->render['view'] = str_replace('\\', '/', implode('/', $called_class) . '/' . Router::$method);
     }
 
+    /**
+     * @deprecated 0.9
+     */
     public function __shutdown()
     {
         // Don't render the layout for json content
