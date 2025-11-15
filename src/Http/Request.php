@@ -174,6 +174,11 @@ class Request
         return isset($data[$key]) ? $data[$key] : $fallback;
     }
 
+    public static function getAttribute(string $key, mixed $fallback = null): mixed
+    {
+        return isset(static::$attributes[$key]) ? static::$attributes[$key] : $fallback;
+    }
+
     public static function set(string $key, mixed $value): void
     {
         static::$attributes[$key] = $value;
