@@ -121,20 +121,11 @@ class Request
      * is passed, otherwise returns true/false
      * if the passed string matches the method.
      *
-     * @param string $matches
-     *
      * @return string
      */
-    public static function method($matches = false)
+    public static function method()
     {
-        // Return the request method
-        if (!$matches) {
-            return static::$method;
-        }
-        // Match the request method
-        else {
-            return static::$method == $matches;
-        }
+        return static::$method;
     }
 
     /**
@@ -155,16 +146,14 @@ class Request
      * @param mixed  $not_set Value to return if not set
      *
      * @return mixed
-     *
-     * @deprecated use Request::get()
      */
-    public static function post($key, $not_set = null)
+    public static function post(string $key, mixed $fallback = null): mixed
     {
-        return isset(static::$post[$key]) ? static::$post[$key] : $not_set;
+        return isset(static::$post[$key]) ? static::$post[$key] : $fallback;
     }
 
     /**
-     * Returns the value of the key from the request or POST array,
+     * Returns the value of the key from the request, POST array,
      * if it's not set, returns null by default.
      *
      * @param string $key      Key to get from POST array
@@ -174,15 +163,31 @@ class Request
      */
     public static function get($key, $fallback = null)
     {
-        $data = array_merge(static::$request, static::$post, static::$attributes);
+        $data = array_merge(static::$request, static::$post);
         return isset($data[$key]) ? $data[$key] : $fallback;
     }
 
-    public static function getAttribute(string $key, mixed $fallback = null): mixed
+    /**
+     * Returns the value of the key from the attributes array, if it's not set, returns null by default.
+     *
+     * @param string $key
+     * @param mixed $fallback
+     *
+     * @return mixed
+     */
+    public static function attribute(string $key, mixed $fallback = null): mixed
     {
         return isset(static::$attributes[$key]) ? static::$attributes[$key] : $fallback;
     }
 
+    /**
+     * Sets an attribute.
+     *
+     * @param string $key
+     * @param mixed $value
+     *
+     * @return void
+     */
     public static function set(string $key, mixed $value): void
     {
         static::$attributes[$key] = $value;

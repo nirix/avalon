@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2024 Jack Polgar
+ * Copyright (C) 2011-2025 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -20,8 +20,6 @@
 
 namespace Avalon\Http;
 
-use Avalon\Core\Kernel;
-
 /**
  * @since 0.8
  */
@@ -37,7 +35,7 @@ class JsonResponse extends Response
     }
 
     #[\Override]
-    public function send()
+    public function send(): void
     {
         header("Content-Type: application/json; charset=utf-8");
 

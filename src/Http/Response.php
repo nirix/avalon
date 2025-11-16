@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2024 Jack Polgar
+ * Copyright (C) 2011-2025 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -25,7 +25,7 @@ use Avalon\Core\Kernel;
 /**
  * @since 0.7
  */
-class Response
+class Response implements ResponseInterface
 {
     public const HTTP_OK = 200;
     public const HTTP_NOT_FOUND = 404;
@@ -95,7 +95,7 @@ class Response
         unset($this->headers[$name]);
     }
 
-    public function send()
+    public function send(): void
     {
         header(sprintf("HTTP/1.1 %d %s", $this->statusCode, static::STATUS_TEXT[$this->statusCode]));
 

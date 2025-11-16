@@ -18,28 +18,14 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
-declare(strict_types=1);
-
-namespace Avalon\Http\Middleware;
-
-use Avalon\Http\ResponseInterface;
+namespace Avalon\Http;
 
 /**
- * Middleware interface.
- *
- * @example
- * #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
- * class ExampleMiddleware implements MiddlewareInterface
- * {
- *     public function run(callable $next): ResponseInterface
- *     {
- *         return $next();
- *     }
- * }
+ * Response interface.
  *
  * @since 0.9
  */
-interface MiddlewareInterface
+interface ResponseInterface
 {
-    public function run(callable $next): ResponseInterface;
+    public function send(): void;
 }
