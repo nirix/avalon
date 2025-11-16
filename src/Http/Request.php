@@ -44,6 +44,7 @@ class Request
     public static $scheme;
     public static $host;
     public static $port;
+    public static array $headers = [];
 
     /**
      * Initialize the class to get request
@@ -90,6 +91,9 @@ class Request
 
         // _POST
         static::$post = $_POST;
+
+        // Headers
+        static::$headers = static::getHeaders();;
     }
 
     /**
@@ -304,5 +308,23 @@ class Request
         }
 
         return $requestPath;
+    }
+
+    public static function header(string $key, ?string $fallback = null)
+    {
+        return static::$headers[strtoupper($key)] ?? $fallback;
+    }
+
+    private static function getHeaders()
+    {
+        // Convert the headers from $_SERVER['HTTP_*']to an array
+        $headers = [];
+        foreach ($_SERVER as $key => $value) {
+            if (strpos($key, 'HTTP_') === 0) {
+                $headers[str_replace('HTTP_', '', $key)] = $value;
+            }
+        }
+
+        return $headers;
     }
 }
