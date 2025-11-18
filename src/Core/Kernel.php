@@ -104,19 +104,7 @@ class Kernel
             return $output;
         });
 
-        try {
-            $output = $pipeline();
-        } catch (Exception $e) {
-            throw new Exception(sprintf(
-                "Error during request, unable to execute controller %s::%s, middleware stack: [%s], error: %s in %s on line %d",
-                Router::$controller,
-                Router::$method,
-                implode(', ', array_map(fn(ReflectionAttribute $attribute) => $attribute->getName(), Router::$middleware)),
-                $e->getMessage(),
-                $e->getFile(),
-                $e->getLine()
-            ));
-        }
+        $output = $pipeline();
 
         if ($output instanceof Response) {
             $output->send();
