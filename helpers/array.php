@@ -62,8 +62,8 @@ function array_merge_recursive2(&$first, &$second)
     $merged = $first;
 
     foreach ($second as $key => &$value) {
-        if (is_array($value) && isset($merged [$key]) && is_array($merged[$key])) {
-            $merged[$key] = array_merge_recursive2($merged [$key], $value);
+        if (is_array($value) && isset($merged[$key]) && is_array($merged[$key])) {
+            $merged[$key] = array_merge_recursive2($merged[$key], $value);
         } else {
             $merged[$key] = $value;
         }
@@ -75,37 +75,45 @@ function array_merge_recursive2(&$first, &$second)
 /**
  * Converts the given data to an array.
  *
- * @param mixed $data
+ * Recursively converts objects and nested arrays to plain arrays.
+ * Objects with a __toArray() method will use that for conversion.
  *
- * @return array
+ * @param mixed $data Data to convert
+ *
+ * @return mixed Array if data is object/array, otherwise returns data unchanged
  */
 function to_array($data)
 {
-    // Is it an object with a __toArray() method?
-    if (is_object($data) and method_exists($data, '__toArray')) {
-        // Hell yeah, we don't need to do anything.
+    // Handle objects with custom __toArray() method
+    if (is_object($data) && method_exists($data, '__toArray')) {
         return $data->__toArray();
+    } elseif (is_object($data) && method_exists($data, 'toArray')) {
+        return $data->toArray();
     }
-    // Just an object, take its variables!
-    elseif (is_object($data)) {
-        // Create an array
-        $array = array();
 
-        // Loop over the classes variables
-        foreach (get_class_vars($data) as $var => $val) {
-            // And steal them! MY PRECIOUS!
-            $array[$var] = $val;
+    // Handle regular objects - convert to array of properties
+    if (is_object($data)) {
+        $array = [];
+
+        // Get all instance properties (public, protected, private)
+        foreach (get_object_vars($data) as $property => $value) {
+            $array[$property] = to_array($value);
         }
 
-        // And return the array.
         return $array;
     }
-    // Array containing other things?
-    elseif (is_array($data)) {
-        foreach ($data as $k => $v) {
-            $data[$k] = to_array($v);
+
+    // Handle arrays - recursively convert nested values
+    if (is_array($data)) {
+        $result = [];
+
+        foreach ($data as $key => $value) {
+            $result[$key] = to_array($value);
         }
+
+        return $result;
     }
 
+    // Return scalar values unchanged
     return $data;
 }

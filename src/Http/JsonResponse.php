@@ -18,28 +18,27 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
-declare(strict_types=1);
-
 namespace Avalon\Http;
 
-use Avalon\Core\Kernel;
-
 /**
- * @since 1.0
+ * @since 0.8
  */
 class JsonResponse extends Response
 {
+    protected string $content;
+
     public function __construct(
-        protected $jsonContent,
+        array $content,
         protected int $statusCode = Response::HTTP_OK
     ) {
+        parent::__construct(json_encode($content), $statusCode);
     }
 
-    public function send()
+    #[\Override]
+    public function send(): void
     {
-        header(sprintf("HTTP/1.1 %d %s", $this->statusCode, static::STATUS_TEXT[$this->statusCode]));
-        header("X-Powered-By: Avalon/" . Kernel::version());
-        header("Content-Type: application/json", true);
-        echo json_encode($this->jsonContent);
+        header("Content-Type: application/json; charset=utf-8");
+
+        parent::send();
     }
 }

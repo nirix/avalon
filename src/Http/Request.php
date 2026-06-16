@@ -36,15 +36,17 @@ class Request
     private static $request_uri;
     private static $uri;
     private static $base;
-    private static $segments = array();
+    private static array $segments = [];
     private static $method;
     private static $requested_with;
     public static $query;
-    public static $request = array();
-    public static $post = array();
+    public static array $request = [];
+    public static array $post = [];
+    public static array $attributes = [];
     public static $scheme;
     public static $host;
     public static $port;
+    public static array $headers = [];
     public static $subdomain;
 
     /**
@@ -82,7 +84,7 @@ class Request
         static::$segments = explode('/', trim(static::$uri, '/'));
 
         // Set the request method
-        static::$method = strtolower($_SERVER['REQUEST_METHOD']);
+        static::$method = strtoupper($_SERVER['REQUEST_METHOD']);
 
         // Requested with
         static::$requested_with = @$_SERVER['HTTP_X_REQUESTED_WITH'];
@@ -92,6 +94,9 @@ class Request
 
         // _POST
         static::$post = $_POST;
+
+        // Headers
+        static::$headers = static::getHeaders();;
 
         // Subdomain
         $host = preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? '');
@@ -124,20 +129,11 @@ class Request
      * is passed, otherwise returns true/false
      * if the passed string matches the method.
      *
-     * @param string $matches
-     *
      * @return string
      */
-    public static function method($matches = false)
+    public static function method()
     {
-        // Return the request method
-        if (!$matches) {
-            return strtoupper(static::$method);
-        }
-        // Match the request method
-        else {
-            return static::$method == $matches;
-        }
+        return static::$method;
     }
 
     /**
@@ -158,16 +154,14 @@ class Request
      * @param mixed  $not_set Value to return if not set
      *
      * @return mixed
-     *
-     * @deprecated use Request::get()
      */
-    public static function post($key, $not_set = null)
+    public static function post(string $key, mixed $fallback = null): mixed
     {
-        return isset(static::$post[$key]) ? static::$post[$key] : $not_set;
+        return isset(static::$post[$key]) ? static::$post[$key] : $fallback;
     }
 
     /**
-     * Returns the value of the key from the POST array,
+     * Returns the value of the key from the request, POST array,
      * if it's not set, returns null by default.
      *
      * @param string $key      Key to get from POST array
@@ -175,8 +169,36 @@ class Request
      *
      * @return mixed
      */
-    public static function get($key, $fallback = null) {
-        return isset(static::$post[$key]) ? static::$post[$key] : $fallback;
+    public static function get($key, $fallback = null)
+    {
+        $data = array_merge(static::$request, static::$post);
+        return isset($data[$key]) ? $data[$key] : $fallback;
+    }
+
+    /**
+     * Returns the value of the key from the attributes array, if it's not set, returns null by default.
+     *
+     * @param string $key
+     * @param mixed $fallback
+     *
+     * @return mixed
+     */
+    public static function attribute(string $key, mixed $fallback = null): mixed
+    {
+        return isset(static::$attributes[$key]) ? static::$attributes[$key] : $fallback;
+    }
+
+    /**
+     * Sets an attribute.
+     *
+     * @param string $key
+     * @param mixed $value
+     *
+     * @return void
+     */
+    public static function set(string $key, mixed $value): void
+    {
+        static::$attributes[$key] = $value;
     }
 
     /**
@@ -299,5 +321,23 @@ class Request
         }
 
         return $requestPath;
+    }
+
+    public static function header(string $key, ?string $fallback = null)
+    {
+        return static::$headers[strtoupper($key)] ?? $fallback;
+    }
+
+    private static function getHeaders()
+    {
+        // Convert the headers from $_SERVER['HTTP_*']to an array
+        $headers = [];
+        foreach ($_SERVER as $key => $value) {
+            if (strpos($key, 'HTTP_') === 0) {
+                $headers[str_replace('HTTP_', '', $key)] = $value;
+            }
+        }
+
+        return $headers;
     }
 }

@@ -22,7 +22,6 @@ declare(strict_types=1);
 
 namespace Avalon\Http;
 
-use Avalon\Core\Kernel;
 use Avalon\Http\Router;
 use Avalon\Output\Body;
 use Avalon\Output\View;
@@ -39,19 +38,22 @@ use Avalon\Output\View;
 class Controller
 {
     /**
-     * @var array{action: bool, view: string|bool, layout: 'default.phtml'} $render
+     * @deprecated 0.9
      */
-    #[\Deprecated('Return a Response from the controller intead', '1.0')]
     public $render = array(
         'action' => true,     // Call the routed action, or not
         'view'   => false,    // View to render, set in __construct()
         'layout' => 'default.phtml' // Layout to render
     );
 
-    #[\Deprecated('Use middleware instead', '1.0')]
+    /**
+     * @deprecated 0.9
+     */
     public $before = array();
 
-    #[\Deprecated('Use middleware instead', '1.0')]
+    /**
+     * @deprecated 0.9
+     */
     public $after = array();
 
     public function __construct()

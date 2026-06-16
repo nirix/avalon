@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error</title>
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+                Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f4f4f5;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+        }
+
+        main {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 2.5rem 3rem;
+            text-align: center;
+            max-width: 550px;
+            box-sizing: border-box;
+            margin: 1rem;
+        }
+
+        h1 {
+            font-size: 2.25rem;
+            font-weight: 600;
+            color: #E74C3C;
+            margin: 0 0 0.75rem 0;
+            text-shadow: none;
+        }
+
+        p {
+            font-size: 1.125rem;
+            font-weight: 400;
+            color: #444;
+            margin: 0;
+            text-shadow: none;
+        }
+
+        footer {
+            width: 100%;
+            padding: 1.5rem;
+            box-sizing: border-box;
+            text-align: center;
+            font-size: 0.875rem;
+            color: #aaa;
+            text-shadow: none;
+            position: absolute;
+            bottom: 0;
+        }
+
+        a,
+        a:visited {
+            color: #aaa;
+            transition: color 0.2s ease-in-out;
+        }
+
+        a:hover {
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h1><?= $title ?></h1>
+        <p><?= $message ?></p>
+    </main>
+    <footer>
+        Powered by <a href="https://github.com/nirix/avalon" target="_blank">Avalon</a> &copy; <?= date('Y') ?>
+    </footer>
+</body>
+
+</html>

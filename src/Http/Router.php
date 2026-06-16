@@ -23,7 +23,8 @@ declare(strict_types=1);
 namespace Avalon\Http;
 
 use Avalon\Http\Middleware\MiddlewareInterface;
-use \Exception;
+use Exception;
+use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionMethod;
 use UnexpectedValueException;
@@ -82,11 +83,16 @@ class Router
     public static ?string $extension;
 
     /**
+     * @var array<MiddlewareInterface>
+     */
+    public static array $middleware = [];
+
+    /**
      * Accepted extensions.
      */
     public static array $extensions = ['.json', '.xml', '.atom'];
 
-    public static array $middleware;
+    protected static array $namedRoutes = [];
 
     /**
      * @deprecated
@@ -105,7 +111,7 @@ class Router
             throw new UnexpectedValueException(sprintf('Route "%s" already registered', $name));
         }
 
-        $methods = array_map(fn ($method) => strtoupper($method), $methods);
+        $methods = array_map(fn($method) => strtoupper($method), $methods);
 
         static::$routes[$name] = [
             'name' => $name,
@@ -114,6 +120,8 @@ class Router
             'params' => $params,
             'methods' => $methods,
         ];
+
+        static::$namedRoutes[$name] = $path;
 
         foreach ($methods as $method) {
             static::$routesByMethod[$method][$path] = $name;
@@ -171,18 +179,8 @@ class Router
 
         $params = [];
         foreach ($reflect->getParameters() as $parameter) {
-            $params[$parameter->getName()] = $matches[$parameter->getName()] ?? $route['params'][$parameter];
-        }
-
-        // Get middleware attributes from the controller and method
-        $middleware = [];
-        $controllerReflection = new ReflectionClass($controller);
-        $attributes = $controllerReflection->getAttributes() + $reflect->getAttributes();
-
-        foreach ($attributes as $attribute) {
-            if (is_subclass_of($attribute->getName(), MiddlewareInterface::class)) {
-                $middleware[] = $attribute->newInstance();
-            }
+            $paramName = $parameter->getName();
+            $params[$paramName] = $matches[$paramName] ?? $route['params'][$paramName] ?? $parameter->getDefaultValue() ?? null;
         }
 
         static::$controller = $controller;
@@ -190,8 +188,84 @@ class Router
         static::$params = array_merge($route['params'], $params);
         static::$attributes = $matches;
         static::$extension = (isset($matches['extension']) ? $matches['extension'] : null);
-        static::$middleware = $middleware;
+        static::$middleware = static::getMiddleware($controller, $action);
 
-        unset($reflect, $controller, $action, $parameter, $params, $route, $matches, $middleware, $controllerReflection, $attributes);
+        unset($reflect, $controller, $action, $parameter, $params, $route, $matches, $attributes);
+    }
+
+    public static function getPath(string $name): string
+    {
+        return static::$namedRoutes[$name];
+    }
+
+    private static function getMiddleware(string $class, string $method): array
+    {
+        $middlewares = [];
+
+        $reflectionClass = new ReflectionClass($class);
+
+        $methodReflection = $reflectionClass->getMethod($method);
+        $methodAttributes = $methodReflection->getAttributes(MiddlewareInterface::class, ReflectionAttribute::IS_INSTANCEOF);
+
+        // Get middleware for the method
+        $methodMiddlewares = [];
+        foreach ($methodAttributes as $attribute) {
+            $methodMiddlewares[] = $attribute;
+        }
+
+        $middlewares = [...$methodMiddlewares, ...$middlewares];
+        // Loop over the class and its parents until we have all the middlewares
+        while ($reflectionClass) {
+            $attributes = $reflectionClass->getAttributes(MiddlewareInterface::class, ReflectionAttribute::IS_INSTANCEOF);
+
+            $classMiddlewares = [];
+            foreach ($attributes as $attribute) {
+                $classMiddlewares[] = $attribute;
+            }
+
+            $middlewares = [...$classMiddlewares, ...$middlewares];
+
+            $reflectionClass = $reflectionClass->getParentClass();
+        }
+
+        return $middlewares;
+    }
+
+    public static function getPath(string $name): string
+    {
+        return static::$namedRoutes[$name];
+    }
+
+    private static function getMiddleware(string $class, string $method): array
+    {
+        $middlewares = [];
+
+        $reflectionClass = new ReflectionClass($class);
+
+        $methodReflection = $reflectionClass->getMethod($method);
+        $methodAttributes = $methodReflection->getAttributes(MiddlewareInterface::class, ReflectionAttribute::IS_INSTANCEOF);
+
+        // Get middleware for the method
+        $methodMiddlewares = [];
+        foreach ($methodAttributes as $attribute) {
+            $methodMiddlewares[] = $attribute;
+        }
+
+        $middlewares = [...$methodMiddlewares, ...$middlewares];
+        // Loop over the class and its parents until we have all the middlewares
+        while ($reflectionClass) {
+            $attributes = $reflectionClass->getAttributes(MiddlewareInterface::class, ReflectionAttribute::IS_INSTANCEOF);
+
+            $classMiddlewares = [];
+            foreach ($attributes as $attribute) {
+                $classMiddlewares[] = $attribute;
+            }
+
+            $middlewares = [...$classMiddlewares, ...$middlewares];
+
+            $reflectionClass = $reflectionClass->getParentClass();
+        }
+
+        return $middlewares;
     }
 }

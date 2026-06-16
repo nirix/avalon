@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2024 Jack Polgar
+ * Copyright (C) 2011-2025 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -28,10 +28,9 @@ class RedirectResponse extends Response
     public function __construct(
         protected string $url,
         protected int $statusCode = Response::HTTP_FOUND
-    ) {
-    }
+    ) {}
 
-    public function send()
+    public function send(): void
     {
         header(\sprintf('Location: %s', $this->url), true, $this->statusCode);
         exit;
