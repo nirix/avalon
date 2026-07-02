@@ -56,6 +56,11 @@ class Router
     ];
 
     /**
+     * Current route name.
+     */
+    public static string $routeName;
+
+    /**
      * Controller class.
      */
     public static string $controller;
@@ -183,6 +188,7 @@ class Router
             $params[$paramName] = $matches[$paramName] ?? $route['params'][$paramName] ?? $parameter->getDefaultValue() ?? null;
         }
 
+        static::$routeName = $route['name'];
         static::$controller = $controller;
         static::$method = $action;
         static::$params = array_merge($route['params'], $params);
@@ -191,44 +197,6 @@ class Router
         static::$middleware = static::getMiddleware($controller, $action);
 
         unset($reflect, $controller, $action, $parameter, $params, $route, $matches, $attributes);
-    }
-
-    public static function getPath(string $name): string
-    {
-        return static::$namedRoutes[$name];
-    }
-
-    private static function getMiddleware(string $class, string $method): array
-    {
-        $middlewares = [];
-
-        $reflectionClass = new ReflectionClass($class);
-
-        $methodReflection = $reflectionClass->getMethod($method);
-        $methodAttributes = $methodReflection->getAttributes(MiddlewareInterface::class, ReflectionAttribute::IS_INSTANCEOF);
-
-        // Get middleware for the method
-        $methodMiddlewares = [];
-        foreach ($methodAttributes as $attribute) {
-            $methodMiddlewares[] = $attribute;
-        }
-
-        $middlewares = [...$methodMiddlewares, ...$middlewares];
-        // Loop over the class and its parents until we have all the middlewares
-        while ($reflectionClass) {
-            $attributes = $reflectionClass->getAttributes(MiddlewareInterface::class, ReflectionAttribute::IS_INSTANCEOF);
-
-            $classMiddlewares = [];
-            foreach ($attributes as $attribute) {
-                $classMiddlewares[] = $attribute;
-            }
-
-            $middlewares = [...$classMiddlewares, ...$middlewares];
-
-            $reflectionClass = $reflectionClass->getParentClass();
-        }
-
-        return $middlewares;
     }
 
     public static function getPath(string $name): string
