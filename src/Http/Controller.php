@@ -22,8 +22,6 @@ declare(strict_types=1);
 
 namespace Avalon\Http;
 
-use Avalon\Http\Router;
-use Avalon\Output\Body;
 use Avalon\Output\View;
 
 /**
@@ -37,32 +35,7 @@ use Avalon\Output\View;
  */
 class Controller
 {
-    /**
-     * @deprecated 0.9
-     */
-    public $render = array(
-        'action' => true,     // Call the routed action, or not
-        'view'   => false,    // View to render, set in __construct()
-        'layout' => 'default.phtml' // Layout to render
-    );
-
-    /**
-     * @deprecated 0.9
-     */
-    public $before = array();
-
-    /**
-     * @deprecated 0.9
-     */
-    public $after = array();
-
-    public function __construct()
-    {
-        $called_class = explode('\\', get_called_class());
-        unset($called_class[0], $called_class[1]);
-
-        $this->render['view'] = str_replace('\\', '/', implode('/', $called_class) . '/' . Router::$method);
-    }
+    public function __construct() {}
 
     /**
      * Set global variable or variables for every view.
@@ -73,36 +46,5 @@ class Controller
     public function set(string|array $name, mixed $value = null): void
     {
         View::set($name, $value);
-    }
-
-    #[\Deprecated(
-        message: "Return a Response from the controller instead",
-        since: "1.0",
-    )]
-    public function __shutdown()
-    {
-        // Don't render the layout for json content
-        if (Router::$extension == 'json') {
-            $this->render['layout'] = false;
-        }
-
-        // Render the view
-        $content = '';
-        if ($this->render['view']) {
-            Body::append(View::render($this->render['view']));
-        }
-
-        // Are we wrapping the view in a layout?
-        if ($this->render['layout']) {
-            $content = Body::content();
-            Body::clear();
-            Body::append(View::render("layouts/{$this->render['layout']}", array('content' => $content)));
-        } else {
-            Body::append($content);
-        }
-
-        // Set the X-Powered-By header and render the layout with the content
-        header("X-Powered-By: Avalon/" . Kernel::version());
-        print(Body::content());
     }
 }

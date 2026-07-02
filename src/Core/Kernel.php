@@ -18,13 +18,15 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
+declare(strict_types=1);
+
 namespace Avalon\Core;
 
 use Avalon\Http\Controller;
+use Avalon\Http\JsonResponse;
 use Avalon\Http\Router;
 use Avalon\Http\Request;
 use Avalon\Http\Response;
-use Avalon\Output\Body;
 use Exception;
 use ReflectionAttribute;
 
@@ -39,7 +41,7 @@ use ReflectionAttribute;
  */
 class Kernel
 {
-    private static string $version = '1.0-alpha';
+    private static string $version = '1.0.0.alpha.0';
     private static Controller $app;
 
     /**
@@ -55,26 +57,10 @@ class Kernel
         // Check if the routed controller and method exists
         if (
             !class_exists(Router::$controller) ||
-            (Router::$legacyRoute && !method_exists(Router::$controller, 'action_' . Router::$method)) ||
-            (!Router::$legacyRoute && !method_exists(Router::$controller, Router::$method))
+            !method_exists(Router::$controller, Router::$method)
         ) {
             Router::set404();
         }
-    }
-
-    /**
-     * Runs the before or after filters.
-     */
-    private static function runFilters(string $type): void
-    {
-        $filters = array_merge(
-            isset(static::$app->{$type}['*']) ? static::$app->{$type}['*'] : [],
-            isset(static::$app->{$type}[Router::$method]) ? static::$app->{$type}[Router::$method] : []
-        );
-        foreach ($filters as $filter) {
-            static::$app->{$filter}(Router::$method);
-        }
-        unset($filters, $filter);
     }
 
     /**
@@ -86,21 +72,9 @@ class Kernel
             // Start the app
             static::$app = new Router::$controller;
 
-            // Before filters
-            static::runFilters('before');
-
             // Call the method
             $output = null;
-            if (static::$app->render['action']) {
-                if (Router::$legacyRoute) {
-                    $output = call_user_func_array(array(static::$app, 'action_' . Router::$method), Router::$vars);
-                } else {
-                    $output = [static::$app, Router::$method](...Router::$params);
-                }
-            }
-
-            // After filters
-            static::runFilters('after');
+            $output = [static::$app, Router::$method](...Router::$params);
 
             return $output;
         });
@@ -110,32 +84,13 @@ class Kernel
         if ($output instanceof Response) {
             $output->send();
         } elseif (is_array($output)) {
-            Body::clear();
-            header('Content-Type: application/json; charset=utf-8');
-            Body::append(json_encode($output));
-
-            static::$app->render['layout'] = false;
-            static::$app->render['view'] = false;
-            static::$app->__shutdown();
+            (new JsonResponse($output))->send();
         } else {
-            // If an object is returned, use the `response` variable if it's set.
-            if (is_object($output)) {
-                $output = isset($output->response) ? $output->response : null;
+            try {
+                (new Response($output))->send();
+            } catch (Exception $e) {
+                (new Response('An error occurred processing the request.'))->setStatusCode(500)->send();
             }
-
-            // Check if we have any content
-            if (static::$app->render['action'] && $output !== null) {
-                static::$app->render['view'] = false;
-                Body::append($output);
-
-                // Get the content, clear the body
-                // and append content to a clean slate.
-                $content = Body::content();
-                Body::clear();
-                Body::append($content);
-            }
-
-            static::$app->__shutdown();
         }
     }
 
