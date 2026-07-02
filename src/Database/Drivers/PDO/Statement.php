@@ -28,7 +28,7 @@ use PDOStatement;
 
 class Statement extends PDOStatement
 {
-    protected string $modelClass;
+    protected ?string $modelClass = null;
 
     public function withModel(string $class): static
     {
@@ -42,7 +42,7 @@ class Statement extends PDOStatement
     {
         if ($this->modelClass) {
             return array_map(
-                fn ($row) => new $this->modelClass($row, false),
+                fn($row) => new $this->modelClass($row, false),
                 parent::fetchAll(PDO::FETCH_ASSOC)
             );
         }

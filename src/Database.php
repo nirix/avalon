@@ -66,7 +66,7 @@ class Database
         }
 
         // Create the connection and mark it as initiated.
-        $className = $config['class'] ?? '\PDO';
+        $className = $config['class'] ?? 'Avalon\Database\Drivers\PDO';
         static::$connections[$name] = new $className(...$config['params']);
 
         return static::$connections[$name];
@@ -79,7 +79,7 @@ class Database
      *
      * @return object
      */
-    public static function connection($name = 'main')
+    public static function connection($name = 'default')
     {
         return isset(static::$connections[$name]) ? static::$connections[$name] : false;
     }
@@ -91,7 +91,7 @@ class Database
      *
      * @return bool
      */
-    public static function initiated($name = 'main')
+    public static function initiated($name = 'default')
     {
         return isset(static::$connections[$name]);
     }
