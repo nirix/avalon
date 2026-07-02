@@ -22,7 +22,24 @@ declare(strict_types=1);
 
 namespace Avalon\Http\Middleware;
 
+use Avalon\Http\ResponseInterface;
+
+/**
+ * Middleware interface.
+ *
+ * @example
+ * #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
+ * class ExampleMiddleware implements MiddlewareInterface
+ * {
+ *     public function run(callable $next): ResponseInterface
+ *     {
+ *         return $next();
+ *     }
+ * }
+ *
+ * @since 0.9
+ */
 interface MiddlewareInterface
 {
-    public function execute();
+    public function run(callable $next): ResponseInterface;
 }
