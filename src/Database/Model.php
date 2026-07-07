@@ -24,6 +24,7 @@ namespace Avalon\Database;
 
 use Avalon\Database;
 use Avalon\Database\Drivers\PDO\Statement;
+use Avalon\Database\Traits\Validation;
 use InvalidArgumentException;
 use PDO;
 
@@ -38,6 +39,8 @@ use PDO;
  */
 class Model
 {
+    use Validation;
+
     // Static information
     protected static $table; // Table name
     protected static $primaryKey = 'id'; // Primary key
@@ -46,8 +49,6 @@ class Model
     // Instance information
     protected $data = [];
     protected $isNew = true;
-
-    protected $errors = [];
 
     public function __construct(array $data = [], $isNew = true)
     {
