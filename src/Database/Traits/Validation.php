@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2025 Jack Polgar
+ * Copyright (C) 2011-2026 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -27,7 +27,7 @@ namespace Avalon\Database\Traits;
  */
 trait Validation
 {
-    protected $errors = [];
+    protected ?array $errors = null;
 
     public function setErrors(array $errors): void
     {
@@ -36,11 +36,63 @@ trait Validation
 
     public function getErrors(): array
     {
-        return $this->errors;
+        return $this->errors ?? [];
     }
 
     public function isValid(): bool
     {
-        return empty($this->errors);
+        return $this->errors === null ? $this->validate() : empty($this->errors);
+    }
+
+    public function hasError(string $property): bool
+    {
+        return isset($this->errors[$property]);
+    }
+
+    public function validate(): bool
+    {
+        $errors = [];
+
+        foreach (static::$properties as $property => $options) {
+            if ($options['type'] === 'email' && !filter_var($this->data[$property], FILTER_VALIDATE_EMAIL)) {
+                $errors[$property] = 'errors.not_valid_email';
+            } elseif ($options['type'] === 'password') {
+                if ($this->data[$property] !== $this->data["{$property}_confirmation"]) {
+                    $errors['password'] = 'errors.passwords_do_not_match';
+                    continue;
+                }
+
+                $hasUppercase = preg_match('/[A-Z]/', $this->data[$property]);
+                $hasLowercase = preg_match('/[a-z]/', $this->data[$property]);
+                $hasDigit     = preg_match('/[0-9]/', $this->data[$property]);
+                $hasSpecial   = preg_match('/[^a-zA-Z0-9]/', $this->data[$property]);
+
+                if (!$hasUppercase || !$hasLowercase || !$hasDigit || !$hasSpecial) {
+                    $errors[$property] = 'errors.password_not_strong_enough';
+                }
+
+                unset($this->data["{$property}_confirmation"]);
+            }
+
+            if (isset($options['length']) && $options['length'] && strlen($this->data[$property]) < $options['length']) {
+                $errors[$property] = ['errors.must_be_at_least_x_characters_long', $options['length']];
+            }
+
+            if (isset($options['required']) && $options['required'] && !$this->data[$property]) {
+                $errors[$property] = 'errors.required';
+            }
+
+            if (isset($options['unique']) && $options['unique']) {
+                $existing = static::findBy($property, $this->data[$property]);
+
+                if ($existing) {
+                    $errors[$property] = 'errors.already_in_use';
+                }
+            }
+        }
+
+        $this->errors = $errors;
+
+        return count($errors) === 0;
     }
 }
