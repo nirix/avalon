@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2025 Jack Polgar
+ * Copyright (C) 2011-2026 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -25,6 +25,7 @@ namespace Avalon\Database;
 use Avalon\Database;
 use Avalon\Database\Drivers\PDO\Statement;
 use Avalon\Database\Traits\Validation;
+use Avalon\Database\Traits\MariaDB\CRUD;
 use InvalidArgumentException;
 use PDO;
 
@@ -40,11 +41,15 @@ use PDO;
 class Model
 {
     use Validation;
+    use CRUD;
 
     // Static information
     protected static $table; // Table name
     protected static $primaryKey = 'id'; // Primary key
     protected static $connection = 'default'; // Name of the connection to use
+
+    // Properties for the model
+    protected static $properties = [];
 
     // Instance information
     protected $data = [];
@@ -83,36 +88,13 @@ class Model
         return array_keys($this->data);
     }
 
-    public function delete(): void
+    public function save(): bool
     {
-        $query = static::prepare(sprintf('DELETE FROM %s WHERE %s = :value', static::$table, static::$primaryKey));
-        $query->bindValue('value', $this->data[static::$primaryKey]);
-        $query->execute();
-    }
+        if ($this->isNew) {
+            return $this->insert();
+        }
 
-    public function getErrors(): array
-    {
-        return $this->errors;
-    }
-
-    public function hasError(string $property): bool
-    {
-        return isset($this->errors[$property]);
-    }
-
-    public function getError(string $property): string
-    {
-        return $this->errors[$property];
-    }
-
-    public static function findBy(string $property, mixed $value): static|false
-    {
-        $query = static::prepareSelect("WHERE {$property} = :value LIMIT 1");
-        $query->bindColumn('property', $property);
-        $query->bindValue('value', $value);
-        $query->execute();
-
-        return $query->fetch() ?? false;
+        return $this->update();
     }
 
     public static function __callStatic($name, $arguments)
@@ -128,11 +110,6 @@ class Model
         }
 
         throw new InvalidArgumentException(sprintf('No static method with name "%s" exists on class %s', $name, static::class));
-    }
-
-    public static function prepareSelect(string $query, array $options = []): Statement
-    {
-        return static::db()->prepare(sprintf('SELECT * FROM %s %s', static::$table, $query), $options)->withModel(static::class);
     }
 
     public static function prepare(string $query, array $options = []): Statement
