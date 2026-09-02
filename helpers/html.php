@@ -86,6 +86,8 @@ class HTML
             $url = '/';
         }
 
+        $label = htmlspecialchars(htmlspecialchars_decode((string) $label, ENT_QUOTES), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+
         if (isset($attributes['icon'])) {
             $icon = $attributes['icon'];
             unset($attributes['icon']);
@@ -97,7 +99,7 @@ class HTML
         }
 
         $url = Request::base(ltrim($url, '/'));
-        $attributes['href'] = str_replace('&', '&amp;', $url);
+        $attributes['href'] = $url;
         $options = static::build_attributes($attributes);
 
         return "<a {$options}>{$label}</a>";
@@ -117,7 +119,7 @@ class HTML
             if (in_array($attr, array('id', 'checked', 'disabled')) and $val === false) {
                 continue;
             }
-            $options[] = "{$attr}=\"{$val}\"";
+            $options[] = $attr . '="' . htmlspecialchars((string) $val, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '"';
         }
         return implode(' ', $options);
     }

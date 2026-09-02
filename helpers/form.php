@@ -96,7 +96,7 @@ class Form
      *
      * @param string $text
      * @param string $name
-     * @param string $attributes
+     * @param array $attributes
      *
      * @return string
      */
@@ -254,7 +254,9 @@ class Form
         $attributes = array('value' => $option['value']);
 
         // Return option
-        return "<option " . HTML::build_attributes($attributes) . ($selected ? ' selected' : '') . ">{$option['label']}</option>";
+        $label = htmlspecialchars(htmlspecialchars_decode((string) $option['label'], ENT_QUOTES), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+
+        return "<option " . HTML::build_attributes($attributes) . ($selected ? ' selected' : '') . ">{$label}</option>";
     }
 
     /**
@@ -281,14 +283,14 @@ class Form
         }
         // Check if its in the _POST array
         elseif (isset($_POST[$name])) {
-            $value = htmlspecialchars($_POST[$name]);
+            $value = $_POST[$name];
         }
         // It's nowhere...
         else {
             $value = '';
         }
 
-        // Make the value "safe"
+        $value = htmlspecialchars_decode((string) $value, ENT_QUOTES);
         $attributes['value'] = $value;
 
         // Add selected or checked attribute?
@@ -308,7 +310,7 @@ class Form
 
         // Textareas
         if ($type == 'textarea') {
-            return "<textarea " . HTML::build_attributes($attributes) . ">{$value}</textarea>";
+            return "<textarea " . HTML::build_attributes($attributes) . ">" . htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . "</textarea>";
         }
         // Everything else
         else {
