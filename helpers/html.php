@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2013 Jack Polgar
+ * Copyright (C) 2011-2026 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -117,8 +117,33 @@ class HTML
             if (in_array($attr, array('id', 'checked', 'disabled')) and $val === false) {
                 continue;
             }
-            $options[] = "{$attr}=\"{$val}\"";
+
+            // Attribute names come from code, never output a name that isn't one
+            if (!preg_match('/^[a-zA-Z_:][-a-zA-Z0-9_:.]*$/', (string) $attr)) {
+                continue;
+            }
+
+            $options[] = $attr . '="' . static::escape($val) . '"';
         }
         return implode(' ', $options);
+    }
+
+    /**
+     * Escapes a value for HTML text or a quoted attribute.
+     *
+     * Existing entities are left alone (`double_encode` is off) as a lot of model
+     * data is already escaped when it's read, this stops it being escaped twice.
+     *
+     * @param mixed $value
+     *
+     * @return string
+     */
+    public static function escape($value)
+    {
+        if (is_array($value)) {
+            $value = implode(',', array_map('strval', $value));
+        }
+
+        return htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8', false);
     }
 }

@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2022 Jack Polgar
+ * Copyright (C) 2011-2026 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -41,7 +41,7 @@ class Form
         if ($for !== null) {
             $attributes['for'] = $for;
         }
-        return "<label " . HTML::build_attributes($attributes) . ">{$text}</label>";
+        return "<label " . HTML::build_attributes($attributes) . ">" . HTML::escape($text) . "</label>";
     }
 
     /**
@@ -179,7 +179,7 @@ class Form
         // Options
         foreach ($options as $index => $option) {
             if (!is_numeric($index)) {
-                $select[] = '<optgroup label="' . $index . '">';
+                $select[] = '<optgroup label="' . HTML::escape($index) . '">';
                 foreach ($option as $opt) {
                     $select[] = static::select_option($opt, ($opt['value'] == $value));
                 }
@@ -223,7 +223,7 @@ class Form
         foreach ($options as $index => $option) {
             // Option group
             if (!is_numeric($index)) {
-                $select[] = '<optgroup label="' . $index . '">';
+                $select[] = '<optgroup label="' . HTML::escape($index) . '">';
                 foreach ($option as $opt) {
                     $select[] = static::select_option($opt, in_array($opt['value'], $values));
                 }
@@ -254,7 +254,7 @@ class Form
         $attributes = array('value' => $option['value']);
 
         // Return option
-        return "<option " . HTML::build_attributes($attributes) . ($selected ? ' selected' : '') . ">{$option['label']}</option>";
+        return "<option " . HTML::build_attributes($attributes) . ($selected ? ' selected' : '') . ">" . HTML::escape($option['label']) . "</option>";
     }
 
     /**
@@ -281,7 +281,7 @@ class Form
         }
         // Check if its in the _POST array
         elseif (isset($_POST[$name])) {
-            $value = htmlspecialchars($_POST[$name]);
+            $value = is_array($_POST[$name]) ? '' : HTML::escape($_POST[$name]);
         }
         // It's nowhere...
         else {
@@ -308,7 +308,9 @@ class Form
 
         // Textareas
         if ($type == 'textarea') {
-            return "<textarea " . HTML::build_attributes($attributes) . ">{$value}</textarea>";
+            unset($attributes['value']);
+
+            return "<textarea " . HTML::build_attributes($attributes) . ">" . HTML::escape($value) . "</textarea>";
         }
         // Everything else
         else {
