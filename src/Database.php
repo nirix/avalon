@@ -21,6 +21,7 @@
 namespace Avalon;
 
 use Exception;
+use Avalon\Database\PDO;
 
 /**
  * Database class.
@@ -41,7 +42,7 @@ class Database
      */
     public static function init($db)
     {
-        require SYSPATH . '/src/Database/Model.php';
+        require_once SYSPATH . '/src/Database/Model.php';
 
         // Define the DB_PREFIX constant
         define("DB_PREFIX", isset($db['prefix']) ? $db['prefix'] : '');

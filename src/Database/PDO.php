@@ -163,7 +163,7 @@ class PDO extends Driver
      *
      * @return object
      */
-    public function update($table)
+    public function update($table): Query
     {
         return new Query("UPDATE", $table, $this->connection_name);
     }
@@ -173,7 +173,7 @@ class PDO extends Driver
      *
      * @return object
      */
-    public function delete()
+    public function delete(): Query
     {
         return new Query("DELETE", null, $this->connection_name);
     }
@@ -185,7 +185,7 @@ class PDO extends Driver
      *
      * @return object
      */
-    public function insert(array $data)
+    public function insert(array $data): Query
     {
         return new Query("INSERT INTO", $data, $this->connection_name);
     }

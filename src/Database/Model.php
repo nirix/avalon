@@ -555,7 +555,7 @@ class Model
      *
      * @return object
      */
-    protected static function db(): PDO
+    protected static function db(): PDO|false
     {
         return Database::connection(static::$_connection_name);
     }
