@@ -70,7 +70,6 @@ class Query
 
         $this->type = $type;
         $this->prefix = $this->_conn()->prefix;
-        return $this;
     }
 
     /**
@@ -191,7 +190,14 @@ class Query
         }
         // Just one, add it.
         else {
-            $this->where[] = array($columm, $cond, $value === null ? 'NULL' : $value);
+            static::assertIdentifier($columm);
+
+            $cond = strtoupper(trim($cond));
+            if (!in_array($cond, static::ALLOWED_OPERATORS, true)) {
+                throw new \InvalidArgumentException("Invalid where operator '{$cond}'");
+            }
+
+            $this->where[] = array($columm, $cond, $value);
         }
 
         return $this;
@@ -220,13 +226,79 @@ class Query
     {
         $result = $this->_conn()->prepare($this->_assemble());
 
-        if ($this->type != 'INSERT') {
-            foreach ($this->where as $where) {
-                $result->bind_value(':' . $where[0], $where[2]);
+        // Where values, placeholders match buildWhereQuery()
+        foreach ($this->where as $i => $where) {
+            // IS NULL / IS NOT NULL have no placeholder
+            if ($where[2] === null && in_array($where[1], ['=', '!=', '<>'], true)) {
+                continue;
             }
+
+            static::bindValue($result, ":w{$i}", $where[2]);
+        }
+
+        // Handle data for INSERT INTO and UPDATE queries, placeholders match
+        // buildInsertQuery() and buildUpdateQuery()
+        if (in_array($this->type, ['INSERT INTO', 'UPDATE'])) {
+            $this->bindValues($result, $this->data);
         }
 
         return $result->_model($this->_model)->exec();
+    }
+
+    /**
+     * Binds values to the statement.
+     *
+     * @param \PDOStatement $statement
+     * @param array $values
+     *
+     * @return void
+     */
+    public function bindValues($statement, array $values): void
+    {
+        $i = 0;
+        foreach ($values as $value) {
+            static::bindValue($statement, ":v{$i}", $value);
+            $i++;
+        }
+    }
+
+    /**
+     * Operators accepted by where().
+     */
+    private const ALLOWED_OPERATORS = ['=', '!=', '<>', '<', '>', '<=', '>=', 'LIKE', 'NOT LIKE'];
+
+    /**
+     * Asserts that the name is a valid identifier.
+     *
+     * @param mixed $name
+     *
+     * @return void
+     */
+    private static function assertIdentifier(mixed $name): void
+    {
+        if (!is_string($name) || !preg_match('/^[A-Za-z0-9_]+$/', $name)) {
+            throw new \InvalidArgumentException('Invalid column name');
+        }
+    }
+
+    /**
+     * Binds a value, translating null to SQL NULL and the exact string "NOW()".
+     *
+     * @param \PDOStatement $statement
+     * @param string $param
+     * @param mixed $value
+     *
+     * @return void
+     */
+    private static function bindValue($statement, string $param, mixed $value): void
+    {
+        if ($value === null) {
+            $statement->bindValue($param, null, \PDO::PARAM_NULL);
+        } elseif ($value === 'NOW()') {
+            $statement->bindValue($param, gmdate('Y-m-d H:i:s'));
+        } else {
+            $statement->bindValue($param, $value);
+        }
     }
 
     /**
@@ -236,7 +308,7 @@ class Query
      */
     public function _assemble()
     {
-        $query = array();
+        $query = [];
         $query[] = $this->type;
 
         if (in_array($this->type, array("SELECT", "SELECT DISTINCT"))) {
@@ -268,7 +340,7 @@ class Query
             $query[] = "FROM `{$this->prefix}{$this->table}`";
 
             // Where
-            $query = array_merge($query, $this->_build_where());
+            $query = array_merge($query, $this->buildWhereQuery());
 
             // Group by
             if (count($this->group_by) > 0) {
@@ -293,38 +365,26 @@ class Query
         // Insert query
         else if ($this->type == "INSERT INTO") {
             $query[] = "`{$this->prefix}{$this->table}`";
-
-            $keys = array();
-            $values = array();
-
-            foreach ($this->data as $key => $value) {
-                $keys[] = "`{$key}`";
-                $values[] = $this->_process_value($value);
-            }
-
-            $query[] = '(' . implode(', ', $keys) . ')';
-            $query[] = 'VALUES(' . implode(', ', $values) . ')';
+            $query[] = $this->buildInsertQuery();
         }
         // Update query
         else if ($this->type == "UPDATE") {
             $query[] = "`{$this->prefix}{$this->table}`";
-
-            $query[] = "SET";
-            $set = array();
-            foreach ($this->data as $column => $value) {
-                $value = $this->_process_value($value);
-                $set[] = "`{$column}` = {$value}";
-            }
-            $query[] = implode(', ', $set);
+            $query[] = $this->buildUpdateQuery();
 
             // Where
-            $query = array_merge($query, $this->_build_where());
+            $query = array_merge($query, $this->buildWhereQuery());
         }
 
         return implode(" ", $query);
     }
 
-    private function _build_where()
+    /**
+     * Builds the where query.
+     *
+     * @return string
+     */
+    private function buildWhereQuery()
     {
         $query = array();
 
@@ -332,8 +392,12 @@ class Query
         if (count($this->where)) {
             $where = array();
 
-            foreach ($this->where as $param) {
-                $where[] = "`{$param[0]}` {$param[1]} :{$param[0]}";
+            foreach ($this->where as $i => $param) {
+                if ($param[2] === null && in_array($param[1], ['=', '!=', '<>'], true)) {
+                    $where[] = "`{$param[0]}` IS " . ($param[1] === '=' ? '' : 'NOT ') . 'NULL';
+                } else {
+                    $where[] = "`{$param[0]}` {$param[1]} :w{$i}";
+                }
             }
 
             $query[] = "WHERE " . implode(' AND ', $where);
@@ -344,19 +408,39 @@ class Query
     }
 
     /**
-     * Processes the value.
+     * Builds the insert query.
      *
-     * @return mixed
+     * @return string
      */
-    private function _process_value($value)
+    private function buildInsertQuery()
     {
-        if ($value === "NOW()") {
-            return $this->_conn()->quote(gmdate("Y-m-d H:i:s"));
-        } elseif ($value === "NULL") {
-            return 'NULL';
-        } else {
-            return $this->_conn()->quote($value);
+        $columns = [];
+        $placeholders = [];
+
+        foreach (array_keys($this->data) as $i => $column) {
+            static::assertIdentifier($column);
+            $columns[] = "`{$column}`";
+            $placeholders[] = ":v{$i}";
         }
+
+        return '(' . implode(', ', $columns) . ') VALUES(' . implode(', ', $placeholders) . ')';
+    }
+
+    /**
+     * Builds the update query.
+     *
+     * @return string
+     */
+    private function buildUpdateQuery()
+    {
+        $set = [];
+
+        foreach (array_keys($this->data) as $i => $column) {
+            static::assertIdentifier($column);
+            $set[] = "`{$column}` = :v{$i}";
+        }
+
+        return 'SET ' . implode(', ', $set);
     }
 
     /**
