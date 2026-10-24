@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2025 Jack Polgar
+ * Copyright (C) 2011-2026 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -49,7 +49,7 @@ class Kernel
         session_start();
 
         // Route the request
-        Router::route(new Request);
+        Router::handle(new Request);
 
         // Check if the routed controller and method exists
         if (
@@ -63,6 +63,8 @@ class Kernel
 
     /**
      * Runs the before or after filters.
+     *
+     * @deprecated 0.9
      */
     private static function runFilters(string $type): void
     {
