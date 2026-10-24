@@ -1,7 +1,7 @@
 <?php
 /*!
  * Avalon
- * Copyright (C) 2011-2025 Jack Polgar
+ * Copyright (C) 2011-2026 Jack Polgar
  *
  * This file is part of Avalon.
  *
@@ -81,7 +81,7 @@ class Request
         static::$segments = explode('/', trim(static::$uri, '/'));
 
         // Set the request method
-        static::$method = strtoupper($_SERVER['REQUEST_METHOD']);
+        static::$method = strtoupper($_POST['_method'] ?? $_SERVER['REQUEST_METHOD']);
 
         // Requested with
         static::$requested_with = @$_SERVER['HTTP_X_REQUESTED_WITH'];
