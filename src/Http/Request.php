@@ -92,10 +92,12 @@ class Request
         // _POST
         static::$post = $_POST;
 
-        // PHP only fills $_POST for POST requests, so read PUT/PATCH from the body.
         $verb = strtoupper($_SERVER['REQUEST_METHOD'] ?? '');
-        if (in_array($verb, ['POST', 'PUT', 'PATCH'], true)) {
-            static::$post = static::parseBody(static::body() ?: '');
+        if (in_array($verb, ['POST', 'PUT', 'PATCH', 'DELETE'], true)) {
+            $parsed = static::parseBody();
+            if ($parsed !== null) {
+                static::$post = $parsed;
+            }
         }
 
         // Headers
@@ -208,27 +210,29 @@ class Request
     }
 
     /**
-     * Parses a PUT/PATCH body into the same shape as $_POST.
+     * Parses a JSON body, or a form body PHP did not parse, into the same shape as $_POST.
+     * Returns null for browser form posts so the existing $_POST value is kept.
      *
-     * @param string $raw
-     *
-     * @return array
+     * @return array|null
      */
-    private static function parseBody(string $raw): array
+    private static function parseBody(): ?array
     {
         $contentType = strtolower(trim(explode(';', $_SERVER['CONTENT_TYPE'] ?? '', 2)[0]));
 
         if ($contentType === 'application/json') {
-            $decoded = json_decode($raw, true);
+            $decoded = json_decode(static::body() ?: '', true);
+
             return is_array($decoded) ? $decoded : [];
         }
 
-        if ($contentType === 'application/x-www-form-urlencoded') {
-            parse_str($raw, $parsed);
+        // PHP only parses application/x-www-form-urlencoded for POST.
+        if ($contentType === 'application/x-www-form-urlencoded' && strtoupper($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+            parse_str(static::body() ?: '', $parsed);
+
             return $parsed;
         }
 
-        return [];
+        return null;
     }
 
     /**
