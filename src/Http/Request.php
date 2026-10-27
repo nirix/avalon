@@ -92,6 +92,12 @@ class Request
         // _POST
         static::$post = $_POST;
 
+        // PHP only fills $_POST for POST requests, so read PUT/PATCH from the body.
+        $verb = strtoupper($_SERVER['REQUEST_METHOD'] ?? '');
+        if (in_array($verb, ['POST', 'PUT', 'PATCH'], true)) {
+            static::$post = static::parseBody(static::body() ?: '');
+        }
+
         // Headers
         static::$headers = static::getHeaders();;
     }
@@ -199,6 +205,30 @@ class Request
     public static function body()
     {
         return file_get_contents('php://input');
+    }
+
+    /**
+     * Parses a PUT/PATCH body into the same shape as $_POST.
+     *
+     * @param string $raw
+     *
+     * @return array
+     */
+    private static function parseBody(string $raw): array
+    {
+        $contentType = strtolower(trim(explode(';', $_SERVER['CONTENT_TYPE'] ?? '', 2)[0]));
+
+        if ($contentType === 'application/json') {
+            $decoded = json_decode($raw, true);
+            return is_array($decoded) ? $decoded : [];
+        }
+
+        if ($contentType === 'application/x-www-form-urlencoded') {
+            parse_str($raw, $parsed);
+            return $parsed;
+        }
+
+        return [];
     }
 
     /**
